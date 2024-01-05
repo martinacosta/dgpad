@@ -19,6 +19,11 @@ function DeleteAll(_canvas) {
         canvas.getConstruction().deleteAll();
         //        canvas.macrosManager.clearTools();
         canvas.textManager.clear();
+		inpsnames=Object.getOwnPropertyNames( canvas['TURTLE_INPUTS']);
+		for (var i = 0;  i < inpsnames.length; i++) {
+            canvas['TURTLE_INPUTS'][inpsnames[i]].remove();
+        }
+        canvas['TURTLE_INPUTS'] = [];
         canvas.getDocObject().style.visibility = "visible";
         canvas.paint();
     }

@@ -63,8 +63,10 @@ function MagnifierPanel(_canvas) {
     me.magnifierPaint = function(coords) {
         ctx.beginPath();
         ctx.clearRect(0, 0, _w, _h);
+		if (coords==undefined)
+			console.log("hola");
         if ((coords) && (!isNaN(coords.x)) && (!isNaN(coords.y)))
-            if ((coords) && (!isNaN(coords.x)) && (!isNaN(coords.y)))
+            // if ((coords) && (!isNaN(coords.x)) && (!isNaN(coords.y)))
                 ctx.drawImage(_canvas.getDocObject(),
                     coords.x - cW/2, coords.y - cW/2, cW, cW, 0, 0, _w, _h);
     };

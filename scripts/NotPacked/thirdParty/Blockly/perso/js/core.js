@@ -311,13 +311,17 @@ Blockly.JavaScript['procedures_defreturn'] = function(block) {
         var reg = new RegExp("(^\\s*)(" + myvars[i] + ")(\\s*=\\s*)", "m");
         branch = branch.replace(reg, "$1 var $2$3");
     }
-
-
-    var code = 'function ' + funcName + '(' + args.join(',') + ') {\n' + branch + returnValue + '}';
+    var code = '';
+    if (block.getFieldValue('ASYNC') === "TRUE") {
+        code += 'async ';
+    }
+    code = code + 'function ' + funcName + '(' + args.join(',') + ') {\n' + branch + returnValue + '}';
     code = Blockly.JavaScript.scrub_(block, code);
     Blockly.JavaScript.definitions_[funcName] = code;
     return null;
 };
+
+
 
 // Defining a procedure without a return value uses the same generator as
 // a procedure with a return value.
@@ -332,12 +336,89 @@ Blockly.JavaScript['number_prompt'] = function(block) {
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
 };
 
+Blockly.JavaScript['text_prompt'] = function(block) {
+    var msg = Blockly.JavaScript.valueToCode(block, 'TEXT',
+        Blockly.JavaScript.ORDER_NONE) || '\'\'';
+    var code = 'window.prompt(' + msg + ')';
+    
+    return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+};
+
 Blockly.JavaScript['text_alert'] = function(block) {
     var msg = Blockly.JavaScript.valueToCode(block, 'TEXT',
         Blockly.JavaScript.ORDER_NONE) || '\'\'';
     var code = "ALERT('<b>'+" + msg + "+'</b>');\n";
     // code = 'parseFloat($L.number2(' + code + '))';
     return code;
+};
+
+Blockly.JavaScript['text_confirm'] = function(block) {
+    var msg = Blockly.JavaScript.valueToCode(block, 'TEXT',
+        Blockly.JavaScript.ORDER_NONE) || '\'\'';
+    var code = "await CONFIRM("+msg+")";
+    // var code = 'console.log("nuevo".split("e"))';
+    //code = 'parseFloat($L.number2(' + code + '))';
+    return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+};
+
+Blockly.JavaScript['async_function'] = function(block) {
+    // Define a procedure with a return value.
+    var funcName = Blockly.JavaScript.variableDB_.getName(
+        block.getFieldValue('NAME'), Blockly.Procedures.NAME_TYPE);
+
+    var branch = Blockly.JavaScript.statementToCode(block, 'STACK');
+
+    if (Blockly.JavaScript.STATEMENT_PREFIX) {
+        branch = Blockly.JavaScript.prefixLines(
+            Blockly.JavaScript.STATEMENT_PREFIX.replace(/%1/g,
+                '\'' + block.id + '\''), Blockly.JavaScript.INDENT) + branch;
+    }
+    if (Blockly.JavaScript.INFINITE_LOOP_TRAP) {
+        branch = Blockly.JavaScript.INFINITE_LOOP_TRAP.replace(/%1/g,
+            '\'' + block.id + '\'') + branch;
+    }
+    var returnValue = Blockly.JavaScript.valueToCode(block, 'RETURN',
+        Blockly.JavaScript.ORDER_NONE) || '';
+    if (returnValue) {
+        returnValue = '  return ' + returnValue + ';\n';
+    }
+    var args = [];
+    for (var x = 0; x < block.arguments_.length; x++) {
+        args.push(Blockly.JavaScript.variableDB_.getName(block.arguments_[x],
+            Blockly.Variables.NAME_TYPE));
+        var re = new RegExp("blockly_var_" + args[x] + "([^\\w]+)", "g");
+        branch = branch.replace(re, "blockly_local_" + args[x] + "$1");
+        if (returnValue) returnValue = returnValue.replace(re, "blockly_local_" + args[x] + "$1");
+        args[x] = "blockly_local_" + args[x];
+    }
+
+    // Recherche dans le corps de la fonction de toutes les variables
+    // susceptibles d'être locale. Une première affectation "myvar = 2"
+    // sera ainsi remplacée par "var myvar = 2" :
+    var rg = new RegExp("(^\\s*)(blockly_var_\\w+)(\\s*=\\s*)", "gm");
+    var m;
+    var myvars = [];
+    while ((m = rg.exec(branch)) !== null) {
+        if ((re) && (m.index === re.lastIndex)) {
+            re.lastIndex++;
+        }
+        if (myvars.indexOf(m[2]) === -1) {
+            myvars.push(m[2]);
+        }
+    }
+    for (var i = 0; i < myvars.length; i++) {
+        var reg = new RegExp("(^\\s*)(" + myvars[i] + ")(\\s*=\\s*)", "m");
+        branch = branch.replace(reg, "$1 var $2$3");
+    }
+
+
+    var code = 'async function ' + funcName + '(' + args.join(',') + ') {\n' + branch + returnValue + '}';
+    code = Blockly.JavaScript.scrub_(block, code);
+
+    console.log(code);
+
+    Blockly.JavaScript.definitions_[funcName] = code;
+    return null;
 };
 
 Blockly.JavaScript['lists_repeat'] = function(block) {

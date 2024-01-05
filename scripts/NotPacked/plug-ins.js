@@ -1,6 +1,67 @@
 $macros = {};
 
 
+$macros[$L.macros.slope]={
+	name:$L.macros.slope,
+	parameters:["line"],
+	exec:
+	function(r1){
+E1=Expression("E1",$L.macros.slope_message+Find(r1).getName()+"= ","","","r1.getDY()/r1.getDX()*(-1)","-6.75","6.5625");	
+STL(E1,"c:#343577;s:7;f:24;p:2;cL:200;cPT:YzojNzgwMDEzO3M6MTA7ZjozMA==");
+return [E1];
+}};
+
+
+
+$macros[$L.macros.distance]={
+	name:$L.macros.distance,
+	parameters:["point","point"],
+	exec:
+	function(P2,P1){
+blk_turtle_exp_P1=Expression("blk_turtle_exp_P1","","","","var bl_iadfiehdc=function(){\nTURTLE_INIT(\"P1\",P1);\nif (Math.times((d((P1),(P2))),(pixel())) < 30) {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P1),(P2)),2)));\n  TURTLE_ROTATE_PT((P2));\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_MV(20,true);\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P1),(P2))),100)),100)));\n} else {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P1),(P2)),2)));\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P1),(P2))),100)),100)));\n  TURTLE_JOIN_PT((P1));\n  TURTLE_ROTATE_PT((P2));\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_UP(false);\n  TURTLE_MV(15,true);\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV((Math.quotient((d((P1),(P2))),3)),false);\n  TURTLE_UP(true);\n  TURTLE_MV((Math.quotient((d((P1),(P2))),3)),false);\n  TURTLE_UP(false);\n  TURTLE_MV((Math.quotient((d((P1),(P2))),3)),false);\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV(15,true);\n}\nreturn TURTLE_RESULT()\n};\nbl_iadfiehdc()","-13.958333333333334","6.770833333333333");
+blk_turtle_list_P1=List("blk_turtle_list_P1",blk_turtle_exp_P1);
+STL(blk_turtle_list_P1,"c:#0000b2;s:0;f:30;p:0;nmi:true;sg:1");
+return [blk_turtle_list_P1];
+}};
+
+$macros[$L.macros.distanceLine]={
+	name:$L.macros.distanceLine,
+	parameters:["line","point"],
+	exec:
+	function(r1,P3){
+P1=DefinitionPoint("P1",r1,0);
+P2=DefinitionPoint("P2",r1,1);
+r2=Perpendicular("r2",r1,P3);
+P4=OrderedIntersection("P4",r1,r2,0);
+blk_turtle_exp_P1=Expression("blk_turtle_exp_P1","","","","var bl_iadfiehdc=function(){\nTURTLE_INIT(\"P1\",P3);\nif (Math.times((d((P3),(P4))),(pixel())) < 30) {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P3),(P4)),2)));\n  TURTLE_ROTATE_PT((P4));\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_MV(20,true);\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P3),(P4))),100)),100)));\n} else {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P3),(P4)),2)));\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P3),(P4))),100)),100)));\n  TURTLE_JOIN_PT((P3));\n  TURTLE_ROTATE_PT((P4));\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_UP(false);\n  TURTLE_MV(15,true);\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV((Math.quotient((d((P3),(P4))),3)),false);\n  TURTLE_UP(true);\n  TURTLE_MV((Math.quotient((d((P3),(P4))),3)),false);\n  TURTLE_UP(false);\n  TURTLE_MV((Math.quotient((d((P3),(P4))),3)),false);\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV(15,true);\n}\nreturn TURTLE_RESULT()\n};\nbl_iadfiehdc()","-13.958333333333334","6.770833333333333");
+blk_turtle_list_P1=List("blk_turtle_list_P1",blk_turtle_exp_P1);
+STL(P1,"c:#0000b2;s:6;f:30");
+STL(P2,"c:#0000b2;s:6;f:30");
+STL(blk_turtle_list_P1,"c:#0000b2;s:0;f:30;p:0;nmi:true;sg:1");
+return [blk_turtle_list_P1];
+}};
+
+$macros[$L.macros.RegPolCenter]={
+	name:$L.macros.RegPolCenter,
+	parameters:["point","point","expression"],
+	exec:
+	function(P1,P2,E1){
+blk_turtle_exp_P2=Expression("blk_turtle_exp_P2","","","","var bl_bfcgdjbeb=function(){\nTURTLE_INIT(\"P2\",P2);\nTURTLE_ROTATE_PT((P1));\n  TURTLE_POINTS_WIDTH(6);\nTURTLE_TURN(-(Math.minus(90,Math.quotient(180,(E1)))));\nfor (var blockly_var_count = 1 ; blockly_var_count <= (E1) ; blockly_var_count++){\n  TURTLE_MV((Math.times(Math.times((d((P1),(P2))),Math.cos(Math.minus(90,Math.quotient(180,(E1))))),2)),false);\n  TURTLE_TURN((Math.minus(180,Math.minus(180,Math.quotient(360,(E1))))));\n};\nBLK_STL(\"blk_turtle_list_P2\",\"setNoMouseInside\",[0]);\nreturn TURTLE_RESULT()\n};\nbl_bfcgdjbeb()","-13.958333333333334","6.770833333333333");
+blk_turtle_list_P2=List("blk_turtle_list_P2",blk_turtle_exp_P2);
+STL(blk_turtle_list_P2,"c:#0000b2;s:0.8;f:30;sg:0.5");
+return [blk_turtle_list_P2];
+}};
+
+$macros[$L.macros.RegPolSide]={
+	name:$L.macros.RegPolSide,
+	parameters:["point","point","expression"],
+	exec:
+	function(P2,P1,E1){
+blk_turtle_exp_P2=Expression("blk_turtle_exp_P2","","","","var bl_dbeihcghc=function(){\nTURTLE_INIT(\"P2\",P2);\nTURTLE_ROTATE_PT((P1));\n  TURTLE_POINTS_WIDTH(6);\nfor (var blockly_var_count = 1 ; blockly_var_count <= (E1) ; blockly_var_count++){\n  TURTLE_MV((d((P1),(P2))),false);\n  TURTLE_TURN((Math.minus(180,Math.minus(180,Math.quotient(360,(E1))))));\n};\nBLK_STL(\"blk_turtle_list_P2\",\"setNoMouseInside\",[0]);\nreturn TURTLE_RESULT()\n};\nbl_dbeihcghc()","-13.958333333333334","6.770833333333333");
+blk_turtle_list_P2=List("blk_turtle_list_P2",blk_turtle_exp_P2);
+STL(blk_turtle_list_P2,"c:#0000b2;s:0.8;f:30;sg:0.5");
+return [blk_turtle_list_P2];
+}};
 
 $macros[$L.macros.repere] = {
     name: $L.macros.repere,
@@ -173,7 +234,7 @@ $macros[$L.macros.pt3Dwithdialog] = {
     parameters: [],
     exec: function(O) {
         Set3D(true);
-        var tab = prompt("Coordonn\u00e9es 3D s\u00e9par\u00e9es par des virgules", "1,0,0");
+        var tab = prompt($L.macros_pt3Dwithdialog_message, "1,0,0");
         P1 = Point("P1", "[" + tab + "]", "0");
         STL(P1, "c:#0000b2;s:6;f:30");
         SetCoordsStyle("centerZoom:true");
@@ -435,7 +496,7 @@ $macros[$L.macros.rotationD] = {
     name: $L.macros.rotationD,
     parameters: ["point", "point"],
     exec: function(O, M) {
-        var a = Input("Entrer l'angle en degr\u00e9s :");
+        var a = Input($L.macro_rotationDialog_message);
         P1 = Point("P1", "O+((M-O)*(cos(" + a + ")+i*sin(" + a + ")))", "0");
         STL(P1, "c:#0000b2;s:6;f:30");
         return [P1];
@@ -457,7 +518,7 @@ $macros[$L.macros.dilationdlog] = {
     name: $L.macros.dilationdlog,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
-        var r = prompt("Rapport de l'homoth\u00e9tie :", "2");
+        var r = prompt($L.macro_dilation_message, "2");
         P3 = Point("P3", "P1+" + r + "*(P2-P1)", "0");
         STL(P3, "c:#0000b2;s:6;f:30");
         return [P3];
@@ -488,11 +549,24 @@ $macros[$L.macros.testalign] = {
     name: $L.macros.testalign,
     parameters: ["point", "point", "point"],
     exec: function(A, M, B) {
-        E1 = Expression("E1", "", "", "", "var txt=\"Les points \"+A.getName()+\", \"+M.getName()+\" et \"+B.getName()+\" \";(abs(y((M-A)/(M-B)))<0.000000000001)?txt+\" sont align\u00e9s\":txt+\" ne sont pas align\u00e9s\"", "-7.8", "8.6875");
+        E1 = Expression("E1", "", "", "", "var txt=$L.macros.testalign_text1+\" \"+A.getName()+\", \"+M.getName()+\" \"+$L.macros.testalign_text2+\" \"+B.getName()+\" \";(abs(y((M-A)/(M-B)))<0.000000000001)? txt.concat($L.macros.testalign_text3)+\"\": txt.concat($L.macros.testalign_text4)", "-7.8", "8.6875");
         STL(E1, "c:#246376;s:7;f:24;p:4;cL:200;cPT:YzojNzgwMDEzO3M6MTA7ZjozMA==");
         return [E1];
     }
 };
+
+$macros[$L.macros.testparal]={
+	name:$L.macros.testparal,
+	parameters:["line","line","point"],
+	exec:
+	function(r3,r1,P6){
+Find(P6).setShape(1);
+blk_turtle_exp_P6=Expression("blk_turtle_exp_P6","","","","var bl_ccdbgehid=function(){\nTURTLE_INIT(\"P5\",P5);\nif ((r3.getCode()) == TURTLE_TEXT('segment')) {\n  blockly_var_article = TURTLE_TEXT($L.macros.testparal_segment);\n  blockly_var_adjective = TURTLE_TEXT($L.macros.testparal_adjectivem);\n}\nif ((r3.getCode()) == TURTLE_TEXT('line')) {\n  blockly_var_article = TURTLE_TEXT($L.macros.testparal_line);\n  blockly_var_adjective = TURTLE_TEXT($L.macros.testparal_adjectivef);\n}\nif ((r3.getCode()) == TURTLE_TEXT('ray')) {\n  blockly_var_article = TURTLE_TEXT($L.macros.testparal_ray);\n  blockly_var_adjective = TURTLE_TEXT($L.macros.testparal_adjectivef);\n}\nif ((r1.getCode()) == TURTLE_TEXT('segment')) {\n  blockly_var_article2 = TURTLE_TEXT($L.macros.testparal_segment);\n}\nif ((r1.getCode()) == TURTLE_TEXT('line')) {\n  blockly_var_article2 = TURTLE_TEXT($L.macros.testparal_line);\n}\nif ((r1.getCode()) == TURTLE_TEXT('ray')) {\n  blockly_var_article2 = TURTLE_TEXT($L.macros.testparal_ray);\n}\nif (Math.abs(Math.minus((r3.getNDX()),(r1.getNDX()))) <= 0.0001 && Math.abs(Math.minus((r3.getNDY()),(r1.getNDY()))) <= 0.0001) {\n  TURTLE_PRINT(([blockly_var_article,(r3.getName()),TURTLE_TEXT(' es '),blockly_var_adjective,blockly_var_article2,(r1.getName())].join('')));\n} else {\n  TURTLE_PRINT(([blockly_var_article,(r3.getName()),TURTLE_TEXT(' no es '),blockly_var_adjective,blockly_var_article2,(r1.getName())].join('')));\n}\nreturn TURTLE_RESULT()\n};\nbl_ccdbgehid()","-14.21875","6.421875");
+blk_turtle_list_P6=List("blk_turtle_list_P5",blk_turtle_exp_P6);
+STL(blk_turtle_list_P6,"c:#0000b2;s:0;f:30;p:0;nmi:true;sg:1");
+return [blk_turtle_list_P6];
+}};
+
 
 
 $macros[$L.macros.conic5pts] = {

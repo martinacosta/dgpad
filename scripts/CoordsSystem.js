@@ -4,14 +4,14 @@ function CoordsSystem(_C) {
     var P = Cn.prefs; // Properties
     var OX = null;
     var OY = null;
-    var Unit = 40; // x and y Axis units, in pixels
+    var Unit = Cn.getBounds().width /30; // x and y Axis units, in pixels
     var x0 = Cn.getBounds().width / 2; // x origin coord, in canvas coord system
     var y0 = Cn.getBounds().height / 2; // y origin coord, in canvas coord system
     var lockOx = false; // Dit si l'axe Ox doit être fixe (ne peut pas se déplacer verticalement) ou non
     var lockOy = false;
     var onlypos = false; // Pour dessiner seulement les parties positives
     var centerZoom = false;
-    // Curieusement, sur webkit le lineTo du context n'accepte pas de paramètre x ou y 
+    // Curieusement, sur webkit le lineTo du context n'accepte pas de paramètre x ou y
     // supérieur à 2147483583. La valeur ci-dessous est la moitié de ce nombre :
     var maxInt = 1073741791;
 
@@ -76,9 +76,8 @@ function CoordsSystem(_C) {
     };
 
 
-
-    me.translate = function(_xt, _yt, _no_clear_track) {
-        if (!_no_clear_track) Cn.getTrackManager().clear();
+    me.translate = function(_xt, _yt) {
+        Cn.getTrackManager().clear();
         _yt = (me.islockOx()) ? 0 : _yt;
         _xt = (me.islockOy()) ? 0 : _xt;
         var V = Cn.elements();
@@ -173,7 +172,7 @@ function CoordsSystem(_C) {
         x0 = _x;
         y0 = _y;
         Unit = _u;
-        Cn.setOriginalDims(_w, _h);
+		Cn.setOriginalDims(_w,_h);
         if (_md3D)
             Cn.set3D(true);
         if ((window.$OS_X_APPLICATION) && (_w) && (_h)) {
@@ -476,11 +475,37 @@ function CoordsSystem(_C) {
     me.isOnlyPos = function() {
         return onlypos;
     };
-
+//MEAG >Modificación para que las figuras salgan proporcionales en todas las pantallas
     me.getSource = function() {
-        var txt = "SetCoords(" + x0 + "," + y0 + "," + Unit + "," + Cn.is3D() + "," + window.innerWidth + "," + window.innerHeight + ");\n";
+		
+		var centerx=x0;
+		var centery=y0;
+		var txt="var lastWindoww="+window.innerWidth+";\n var lastWindowh="+window.innerHeight+";\n "
+		
+		unid=Unit;
+		txt+= "parent.$U.escala=Math.min(widthWindow()/lastWindoww,heightWindow()/lastWindowh);\n ";
+		txt+= "if (parent.$U.escala==0){parent.$U.escala=1};\n";
+        txt+= "SetCoords(parent.$U.escala*" + centerx + ",parent.$U.escala*" + centery + ",parent.$U.escala*"+unid+"," + Cn.is3D() + "," + window.innerWidth + "," + window.innerHeight + ");\n";
+		
         return txt;
     };
+	
+	 me.getSource1 = function() {
+		var txt = "SetCoords(" + x0 + "," + y0 + "," + Unit + "," + Cn.is3D() + "," + window.innerWidth + "," + window.innerHeight + ");\n";
+        return txt;
+		
+        };
+		
+//fin modificación
+    // MEAG start
+    me.wWindow = function() {
+      return window.innerWidth;
+    }
+
+    me.hWindow = function() {
+      return window.innerHeight;
+    }
+    // MEAG end
 
     me.getStyle = function() {
         var t = "SetCoordsStyle(\"";
