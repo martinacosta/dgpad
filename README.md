@@ -1,10 +1,10 @@
 dgpad-colombia es una modificación del proyecto dgpad, adaptándolo a las necesidades de los colegios y universidades colombianos, siguiendo aplicaciones didácticas de la Teoría de Situaciones.
 Cambios realizados a la versión francesa
-  •	Cambio del icono de Ocultar/Mostrar
-  •	Se eliminó la herramienta ‘mano alzada’.
-  •	Se eliminaron las herramientas ‘subir a la nube’, ‘bajar de la nube’ por ser servicios externos que no funcionan correctamente.
-  •	Se añadió un control para bloquear/desbloquear zoom
-  •	Se añadió un control para ocultar las herramientas de los menús contextuales
+	- Cambio del icono de Ocultar/Mostrar
+  - Se eliminó la herramienta ‘mano alzada’.
+ - Se eliminaron las herramientas ‘subir a la nube’, ‘bajar de la nube’ por ser servicios externos que no funcionan correctamente.
+  - 	Se añadió un control para bloquear/desbloquear zoom
+  - 	Se añadió un control para ocultar las herramientas de los menús contextuales
   •	Se añadió una herramienta para deshacer zoom. Se necesita para darle sentido a las medidas mostradas por dgpad: esas medidas dependen de la unidad del sistema de coordenadas; al iniciar esa unidad es aproximadamente 1cm, pero el zoom la modifica. La herramienta deshacer zoom regresa el tamaño de la unidad del sistema de coordenadas a aprox 1cm
   •	Se añadieron letreros para la creación de objetos: en la previsualización de los objetos que hace dgpad mientras se están creando, para describir el objeto.
   •	Se añadieron globos de texto con los nombres de las herramientas (solo funcionan para dispositivos con mouse)
