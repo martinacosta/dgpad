@@ -38,8 +38,6 @@ Blockly.Blocks['dgpad_object_style_fix'] = {
   }
 };
 
-
-
 Blockly.Blocks['dgpad_style_color_rgb'] = {
     init: function() {
         var me = this;

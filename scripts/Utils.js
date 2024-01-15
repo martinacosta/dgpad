@@ -8,6 +8,8 @@ $U.DE_height = (localStorage.getItem("doceval_height")) ? parseInt(localStorage.
 $U.DE_question = (localStorage.getItem("doceval_question")) ? localStorage.getItem("doceval_question") : ""; // DocEval question
 $U.nullproc = function() {};
 
+//escala para que las figuras conserven las proporciones en pantallas diferentes
+$U.escala=1; 
 
 $U.lang = function() {
     var language_Code = navigator.language || navigator.userLanguage;
@@ -221,6 +223,7 @@ $U.isVar = function(_s, _v) {
 
 // Récupère les variables eventuelles d'une formule
 // sous forme de chaine :
+// Recupera las variables eventuales de una fórmula en forma de cadena :
 $U.getVars = function(_s) {
     var vars = [];
     if ($U.isVar(_s, "x"))
@@ -258,6 +261,7 @@ $U.log = function(_x) {
 };
 
 // Distance entre deux points :
+// Distancia entre dos puntos :
 $U.d = function(p1, p2) {
     return Math.sqrt((p2.getX() - p1.getX()) * (p2.getX() - p1.getX()) + (p2.getY() - p1.getY()) * (p2.getY() - p1.getY()));
 };
@@ -265,6 +269,7 @@ $U.d = function(p1, p2) {
 
 // Renvoie l'angle que forme un vecteur (x;y) avec l'horizontale
 // dans l'intervalle [0;2π[ orienté dans le sens trigo :
+// Devuelve el ángulo que forma un vector (x;y) con la horizontal en el intervalo [0;2π[ en el sentido trigo :
 $U.angleH = function(x, y) {
     if (y < 0)
         return Math.atan2(-y, x);
@@ -273,11 +278,13 @@ $U.angleH = function(x, y) {
 };
 
 // Compare en dessous de la précision du logiciel (1E-10) :
+// compara por debajo de la precisión del software (1E-10) :
 $U.approximatelyEqual = function(a, b) {
     return (Math.abs(a - b) < 1E-10);
 };
 
 // Renvoie les coordonnées du vecteur AB normé :
+// Devuelve las coordenadas del vector AB normado :
 $U.normalize = function(xA, yA, xB, yB) {
     var l = Math.sqrt((xB - xA) * (xB - xA) + (yB - yA) * (yB - yA));
     return {
@@ -291,6 +298,9 @@ $U.computeBorderPoints = function(xA, yA, dx, dy, W, H) {
     // On centre un cercle autour de A d'un rayon supérieur à la diagonale
     // du canvas (W+H). Forcément les point (xmin,ymin) et (xmax,ymax) de
     // ce cercle seront à l'extérieur du canvas
+	// Se centra un círculo alrededor de A con un radio superior a la diagonal
+	// del canvas (W+H). Forzosamente los puntos (xmin,ymin) y (xmax,ymax) de
+	// ese círculo estan por fuera del canvas.
     var l = W + H + Math.abs(xA) + Math.abs(yA);
     return [xA - l * dx, yA - l * dy, xA + l * dx, yA + l * dy];
 };
@@ -328,6 +338,7 @@ $U.computeArcParams = function(xA, yA, xB, yB, xC, yC) {
     var d = 2 * (xB * yAC + xC * yBA + xA * yCB);
 
     // Coordonnées du centre du cercle :
+	// coordenadas del centro del círculo:
     var xO = (xB * xB * yAC + xC * xC * yBA + xA * xA * yCB - yAC * yBA * yCB) / d;
     var yO = (xAC * xBA * xCB - xCB * yA * yA - xAC * yB * yB - xBA * yC * yC) / d;
 
@@ -337,6 +348,7 @@ $U.computeArcParams = function(xA, yA, xB, yB, xC, yC) {
     var trigo = (xBA * yCB < yBA * xCB);
 
     // Calcul de la mesure de l'angle AOC (dans [0;2π]) :
+	// Cálculo de la medida del ángulo AOC (en [0;2π]) :
     var AOC = (trigo) ? (endangle - startangle) : ($U.doublePI - endangle + startangle);
     AOC += ((AOC < 0) - (AOC > $U.doublePI)) * $U.doublePI;
 
@@ -365,10 +377,13 @@ $U.computeAngleParams = function(xA, yA, xO, yO, xC, yC) {
     var AOC180;
 
     // Calcul de la mesure de l'angle AOC orienté trigo (dans [0;2π]) :
-    var AOC = endangle - startangle;
+	// Cálculo de la medida del ángulo AOC orientado trigo (en [0;2π]) :
+     if(Math.abs(xA-xO+yA-yO)<0.01||Math.abs(xC-xO+yC-yO)<0.01){var AOC=NaN} else{
+	 AOC = endangle - startangle;}
     AOC += ((AOC < 0) - (AOC > $U.doublePI)) * $U.doublePI;
 
     // Calcul de la mesure de l'angle AOC (dans [0;π]) :
+	// Cálculo de la medida del ángulo AOC (en [0;2π]) :
     if (AOC > Math.PI)
         AOC180 = $U.doublePI - AOC;
     else
@@ -384,6 +399,7 @@ $U.computeAngleParams = function(xA, yA, xO, yO, xC, yC) {
 };
 
 // d est la distance en dessous de laquelle on est jugé "near" :
+// d es la distancia por debajo de la cual se considera "near" :
 $U.isNearToPoint = function(xA, yA, xB, yB, d) {
     if (isNaN(xA + yA + xB + yB))
         return false;
@@ -393,6 +409,7 @@ $U.isNearToPoint = function(xA, yA, xB, yB, d) {
 };
 
 // d est la distance en dessous de laquelle on est jugé "near" :
+// d es la distancia por debajo de la cual se considera "near" :
 $U.isNearToCircle = function(xA, yA, r, xM, yM, d) {
     if (isNaN(xA + yA + r))
         return false;
@@ -422,6 +439,7 @@ $U.ptOnArc = function(xO, yO, xM, yM, fromAngle, toAngle, trigo) {
 
 
 // d est la distance en dessous de laquelle on est jugé "near" :
+// d es la distancia por debajo de la cual se considera "near" :
 $U.isNearToArc = function(xO, yO, AOC, fromAngle, toAngle, trigo, r, xM, yM, d) {
     if (isNaN(xO + yO + r))
         return false;
@@ -442,6 +460,7 @@ $U.isNearToArc = function(xO, yO, AOC, fromAngle, toAngle, trigo, r, xM, yM, d) 
 
 
 // d est la distance en dessous de laquelle on est jugé "near" :
+// d es la distancia por debajo de la cual se considera "near" :
 $U.isNearToLine = function(xA, yA, dx, dy, xM, yM, d) {
     if (isNaN(xA + yA + dx + dy))
         return false;
@@ -451,6 +470,7 @@ $U.isNearToLine = function(xA, yA, dx, dy, xM, yM, d) {
 };
 
 // d est la distance en dessous de laquelle on est jugé "near" :
+// d es la distancia por debajo de la cual se considera "near" :
 $U.isNearToSegment = function(xA, yA, xB, yB, xM, yM, d) {
     if (isNaN(xA + yA + xB + yB))
         return false;
@@ -466,12 +486,14 @@ $U.isNearToSegment = function(xA, yA, xB, yB, xM, yM, d) {
         return false;
     var MAMB = (xA - xM) * (xB - xM) + (yA - yM) * (yB - yM);
     // Le point dépasse des extrémités du segment :
+	// El punto sobrepasa los extremos del segmento :
     if (MAMB > MH2)
         return false;
     return true;
 };
 
 // d est la distance en dessous de laquelle on est jugé "near" :
+// d es la distancia por debajo de la cual se considera "near" :
 $U.isNearToRay = function(xA, yA, xB, yB, xM, yM, d) {
     if (isNaN(xA + yA + xB + yB))
         return false;
@@ -483,10 +505,12 @@ $U.isNearToRay = function(xA, yA, xB, yB, xM, yM, d) {
         return false;
     var MH2 = (a * a) / dab;
     // Le point est loin de la droite :
+	// el punto está lejos de la recta :
     if (MH2 > (d * d))
         return false;
     var MAMB = (xA - xM) * (xB - xM) + (yA - yM) * (yB - yM);
     // Le point dépasse des extrémités du segment [AB] :
+	// El punto sobrepasa los extremos del segmento [AB] :
     if (MAMB > MH2) {
         var MA2 = (xA - xM) * (xA - xM) + (yA - yM) * (yA - yM);
         var MB2 = (xB - xM) * (xB - xM) + (yB - yM) * (yB - yM);
@@ -631,6 +655,7 @@ $U.hexToHSV = function(h) {
 }
 
 // Associe une liste de styles (séparés par ;) à un élément DOM :
+// Asocia una lista de estilos (separados por ;) a un elemento DOM :
 $U.STL = function(_dom, _st) {
     var t = _st.split(";");
     for (var i = 0, len = t.length; i < len; i++) {
@@ -640,6 +665,7 @@ $U.STL = function(_dom, _st) {
 };
 
 // Associe une liste d'attributs (séparés par ;) à un élément DOM :
+// Asocia una lista de atributos (separados por ;) a un elemento DOM :
 $U.ATT = function(_dom, _st) {
     var t = _st.split(";");
     for (var i = 0, len = t.length; i < len; i++) {
@@ -676,6 +702,7 @@ $U.getElementOffset = function(obj) {
 
 
 // Renvoie "-moz" ou "-webkit" ou "-o" en fonction du navigateur :
+// Devuelve "-moz" o "-webkit" o "-o" en función del navegador :
 $U.browserCode = function() {
     if (navigator.appVersion.indexOf("MSIE 10") != -1)
         return "-ms";
@@ -1128,10 +1155,95 @@ $U.prompt = function(_mess, _default, _type, _proc, _w, _h, _inp_w) {
         if (!Object.touchpad) inp.focus();
     }, 200);
 }
+//MEAG
+$U.confirm = function(_mess,  _w, _h) {
 
+    return new Promise((resolve, reject) => {
+
+        var w = _w ? _w : 350;
+        var h = _h ? _h : 165;
+        var t = 40;
+        var msg_height = 50; // Message height
+        var msg_width = 300; // Message width
+        var msg_top = 0; // Distance from message to top
+
+        var ok_top = 120; // Ok btn top
+        var ok_width = 80; // Ok btn width
+        var ok_height = 30; // Ok btn height
+        var ok_right = 23; // Ok btn right margin
+        var cancel_left = 23; // Cancel btn left margin
+
+        var scrn = $U.createDiv();
+        var wp = $U.createDiv();
+        var msg = $U.createDiv();
+
+        var ok = $U.createDiv();
+        var cancel = $U.createDiv();
+        var answer=null;
+
+        scrn.stls("position:absolute;z-index:10000;overflow:hidden;background-color:rgba(50,50,50,0.7)");
+        wp.stls("position:absolute;border-radius:5px;font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;font-weight: 300;letter-spacing: 1.2px;overflow:hidden;border: 1px solid #b4b4b4;transition:transform 0.2s linear;transform:translate(0px,-200px);background-color:rgba(255,255,255,1)");
+        msg.stls("position:relative;text-align:center;display:table-cell;vertical-align:bottom;color:#797979;font-size:16px;white-space: pre-wrap;margin:0px;overflow:hidden");
+        //inw.stls("position:absolute;border: 0px;border: 1px solid #555");
+        ok.stls("position:absolute;text-align:center;vertical-align:middle;background-color:#8CD4F5;color:white;border:none;box-shadow:none;font-size:17px;font-weight:500;-webkit-border-radius:4px;border-radius:5px;cursor: pointer");
+        cancel.stls("position:absolute;text-align:center;vertical-align:middle;background-color:#C1C1C1;color:white;border:none;box-shadow:none;font-size:17px;font-weight:500;-webkit-border-radius:4px;border-radius:5px;cursor: pointer");
+        //inw.stl("line-height", inp_height + "px");
+        var winW = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        var winH = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+        scrn.bnds(0, 0, winW, winH);
+        wp.bnds((winW - w) / 2, t, w, h);
+        msg.bnds((w - msg_width) / 2, msg_top, msg_width, msg_height);
+        msg.innerHTML = _mess;
+        //inw.bnds((w - inp_width) / 2, inp_top, inp_width, inp_height);
+        ok.bnds(w - ok_width - ok_right, ok_top, ok_width, ok_height);
+        ok.innerHTML = $L.blockly.import_ok;
+        ok.stl("line-height", ok_height + "px");
+        cancel.bnds(cancel_left, ok_top, ok_width, ok_height);
+        cancel.innerHTML = $L.blockly.import_cancel;
+        cancel.stl("line-height", ok_height + "px");
+
+        scrn.kd(function(ev) {
+            if (ev.keyCode === 13) valid(ev);
+        });
+
+        scrn.md(function(ev) {
+            ev.stopPropagation();
+        });
+        ok.mu(function(ev) {
+            answer=true;
+            window.document.body.removeChild(scrn);
+            resolve(answer);
+        });
+        ok.mm(function(ev) {
+            ok.stl("background-color", "#1EAAD0");
+            ev.stopPropagation();
+        });
+        cancel.mm(function(ev) {
+            cancel.stl("background-color", "#b9b9b9");
+            ev.stopPropagation();
+        });
+        cancel.mu(function() {
+            answer=false;
+            window.document.body.removeChild(scrn);
+            resolve(answer);
+        });
+
+        wp.add(msg);
+        //wp.add(inw);
+        wp.add(ok);
+        wp.add(cancel);
+        scrn.add(wp);
+        window.document.body.appendChild(scrn);
+        setTimeout(function() {
+            wp.stls("transform:translate(0px,0px)");
+        }, 1);
+    });
+}
+//MEAG
 
 $U.clearOneLocalStorage = function() {
     // On parcours le localstorage tant qu'on rencontre un élément verrouillé :
+	// Se recorre el localstorage hasta encontrar un elemento cerrado :
     var m = localStorage.length;
     var c = JSON.parse(localStorage.getItem($P.localstorage.base + m));
     while ((m > 0) && (!c || c.lock)) {
@@ -1141,9 +1253,11 @@ $U.clearOneLocalStorage = function() {
 
     if (m === 0) {
         // Si tous les éléments sont verrouillés, on supprime le dernier verrouillé :
+		// Si todos los elementos estan cerrados, se suprime el último cerrado :
         localStorage.removeItem($P.localstorage.base + localStorage.length);
     } else {
         // Sinon, on supprime l'élement m :
+		// si no, se suprime el elemento m :
         localStorage.removeItem($P.localstorage.base + m);
     }
 };
@@ -1161,25 +1275,25 @@ $U.shiftLocalStorages = function() {
     }
 };
 
-$U.setFilePickerDefaultBox = function(_s) {
-    localStorage.setItem("FilePickerDefaultBox", _s);
-};
+// $U.setFilePickerDefaultBox = function(_s) {
+    // localStorage.setItem("FilePickerDefaultBox", _s);
+// };
 
-$U.getFilePickerDefaultBox = function() {
-    var box = localStorage.getItem("FilePickerDefaultBox");
-    if (box)
-        return box;
-    else
-        return "";
-};
+// $U.getFilePickerDefaultBox = function() {
+    // var box = localStorage.getItem("FilePickerDefaultBox");
+    // if (box)
+        // return box;
+    // else
+        // return "";
+// };
 
-$U.set$FPICKERFRAME = function(_p) {
-    $FPICKERFRAME = _p
-}
+// $U.set$FPICKERFRAME = function(_p) {
+    // $FPICKERFRAME = _p
+// }
 
-$U.get$FPICKERFRAME = function() {
-    return $FPICKERFRAME
-}
+// $U.get$FPICKERFRAME = function() {
+    // return $FPICKERFRAME
+// }
 
 
 
@@ -1360,7 +1474,7 @@ $U.initEvents = function(ZC, cTag) {
     cTag.oncontextmenu = function() {
         return false;
     };
-    window.addEventListener('message', function(e) {
+	window.addEventListener('message', function(e) {
         var message = e.data;
         switch (message) {
             case "get_SVG":
@@ -1379,7 +1493,13 @@ $U.initEvents = function(ZC, cTag) {
                 window.$CANVAS.setFullScreen();
                 break;
             case "repaint":
-                window.$CANVAS.paint();
+                //MEAG comienzo
+                setTimeout(function() {
+                    window.$CANVAS.setFullScreen();
+                    window.$CANVAS.getConstruction().computeAll();
+                    //MEAG fin
+                    window.$CANVAS.paint();
+                }, 500);
                 break;
         }
     });
@@ -1417,7 +1537,7 @@ $U.changed = function() {
     if (!$U.isloading) {
         // Pour l'appli Linux :
         window.status = "changed"
-        // Pour l'appli OS X :
+            // Pour l'appli OS X :
         if (window.$OS_X_APPLICATION) {
             interOp.somethingChanged("");
         };
@@ -1445,7 +1565,9 @@ $U.initCanvas = function(_id) {
     if (cTag.hasAttribute("data-presentation")) {
         ZC.demoModeManager.setDemoMode(cTag.getAttribute("data-presentation").toLowerCase() === "true");
     };
-
+    //variables para ancho y alto de ventana
+		$U.winW = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        $U.winH = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
     // ZC.setMode(1);
 
     ZC.addTool(new PointConstructor());
@@ -1484,6 +1606,20 @@ $U.initCanvas = function(_id) {
     ZC.addTool(new BlocklyConstructor());
     ZC.addTool(new DocEvalConstructor());
     ZC.addTool(new DGScriptNameConstructor());
+    // MEAG start herramientas ocultar, medida, traslación
+    ZC.addTool(new CallHide());
+    ZC.addTool(new CallValue());
+	ZC.addTool(new TranslationConstructor());
+    // MEAG end
+
+    //JDIAZ herramientas quitar medida, quitar nombre, rotación homotecia
+    ZC.addTool(new RemoveValue());
+	ZC.addTool(new RemoveName());
+    ZC.addTool(new RotationConstructor());
+    ZC.addTool(new HomothetyConstructor());
+    //JDIAZ end
+    //JDIAZ 12/15
+    ZC.addTool(new IntersectionConstructor());
     ZC.clearBackground();
 
 

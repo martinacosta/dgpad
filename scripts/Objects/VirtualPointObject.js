@@ -30,6 +30,10 @@ function VirtualPointObject(_x, _y) {
     this.getAlpha = function() {
         return alpha;
     };
+	
+	this.getCode = function() {
+    return "virtualPoint";
+  };
 
     this.near = function(_x, _y) {
         return ((Math.abs(X - _x) < 1E-10) && (Math.abs(Y - _y) < 1E-10));

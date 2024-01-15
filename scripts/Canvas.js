@@ -28,18 +28,100 @@ function Canvas(_id) {
     var width = 0;
     var height = 0;
 
-    me.getSource = function() {
-        return (me.macrosManager.getSource() + Cn.getSource() + me.textManager.getSource())
+    // MEAG start
+    //función para bloquear/habilitar el zoom
+    var stateZoom = true;
+    me.enableZoom = function(_b) {
+      if(_b === true) {
+        stateZoom = true;
+      } else {
+        stateZoom = false;
+      }
     }
 
-    me.getHTML = function(hide_ctrl_panel) {
+    me.version = function() {
+      return docObject.getAttribute("data-version");
+    }
+
+    //variable para definir las herramientas ocultas
+    var hideTools = [];
+    me.gethideTools = function() {
+      return hideTools;
+    }
+    var token = null;
+    //función para deshabilitar herramientas
+    me.disabledTools = function(_a) {
+	if($U.isArray(_a)){	
+      // if (!token) {
+        hideTools = _a;
+        // token = Math.random();
+	  // }
+      }
+    }
+	
+	me.resetToken= function () {
+		token= null;
+	}
+    // MEAG end
+    //función para deshabilitar macros
+    var hidePlugins = [];
+	
+    me.gethidePlugins = function() {
+      return hidePlugins;
+    }
+	
+    var token2 = null;
+    me.disabledPlugins = function(_a) {
+	if($U.isArray(_a)){	
+      // if (!token) {
+        hidePlugins = _a;
+        // token = Math.random();
+	  // }
+      }
+    }
+	
+	me.resetToken2= function () {
+		token2= null;
+	}
+    // MEAG end
+
+    //función para obtener el código, sirve para guardar el archivo. Los parámetros sirven para definir si se muestra la barra de herramientas, se fijan los widgets y los dgscripts, zoom habilitado/deshabilitado, dgpad local/internet, profesores/estudiantes
+    me.getSource = function(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version) {
+      //MEAG
+      // if (!stateZoom) {
+        // var zoom_txt = "\nenableZoom(false)\n";
+		// return (me.macrosManager.getSource() + Cn.getSource(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom) + zoom_txt + me.textManager.getSource());
+      // } else {
+
+        return (me.macrosManager.getSource() + Cn.getSource(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom) +  me.textManager.getSource(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom));
+      // }        
+        // return (me.macrosManager.getSource() + Cn.getSource() + me.textManager.getSource()) codigo original
+    }
+	
+	me.getSource1 = function(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version) {
+      //MEAG
+      // if (!stateZoom) {
+        // var zoom_txt = "\nenableZoom(false)\n";
+		// return (me.macrosManager.getSource() + Cn.getSource(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom) + zoom_txt + me.textManager.getSource());
+      // } else {
+        return (me.macrosManager.getSource() + Cn.getSource1(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom) +  me.textManager.getSource(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom));
+      // }        
+        // return (me.macrosManager.getSource() + Cn.getSource() + me.textManager.getSource()) codigo original
+    }
+
+    me.getHTML = function(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version) {
         var _w = width;
         var _h = height;
-        var _src = me.getSource();
+        var _src = me.getSource(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version);
         _src = $U.base64_encode(_src);
         var d = new Date();
         var _frm = "dgpad_frame_" + d.getTime();
-        var s = '<form action="https://www.dgpad.net/index.php" target="' + _frm + '" method="post" width="' + _w + '" height="' + (_h + 40) + '">';
+        //MEAG
+        
+        //se modifica el valor de action para definir si busca dgpad local o de internet, profesores/estudiantes
+		if (local){var urldgpad = "http://localhost:8080";if (version){urldgpad=urldgpad+"/profesores";}else {urldgpad=urldgpad+"/estudiantes";};}else {var urldgpad = "https://dgpad-colombia.udistrital.edu.co";if (version){urldgpad=urldgpad+"/profesores.html";}else {urldgpad=urldgpad+"/estudiantes.html";};};
+		
+        var s = '<form action="' + urldgpad + '" target="' + _frm + '" method="post" width="' + _w + '" height="' + (_h + 40) + '">';
         s += '<input type="hidden" name="file_content" value="' + _src + '">';
         if (hide_ctrl_panel)
             s += '<input type="hidden" name="hide_ctrlpanel" value="true">';
@@ -47,7 +129,7 @@ function Canvas(_id) {
         s += '<div style="height:40px;line-height:40px;vertical-align: baseline;">';
         s += '<input type="submit" value="' + $L.export_button + '" style="display: inline-block;zoom: 1;*display: inline;vertical-align: baseline;margin: 0 2px;outline: none;cursor: pointer;text-align: center;text-decoration: none;font: 14px/100% Arial, Helvetica, sans-serif;padding: .5em 2em .55em;text-shadow: 0 1px 1px rgba(0,0,0,.3);-webkit-border-radius: .5em;-moz-border-radius: .5em;border-radius: .5em;-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);box-shadow: 0 1px 2px rgba(0,0,0,.2);color: #d7d7d7;border: solid 1px #333;background: #333;background: -webkit-gradient(linear, left top, left bottom, from(#666), to(#000));background: -moz-linear-gradient(top,  #666,  #000);">';
         s += '</div>';
-        s += '<iframe name="' + _frm + '" width="' + _w + '" height="' + _h + '" src="about:blank" scrolling="no" frameborder="no"></iframe>';
+        s += '<iframe name="' + _frm + '" width="100%" height="100%" src="about:blank" scrolling="no" frameborder="no"></iframe>';
         s += '</div>';
         s += '</form>';
         return s;
@@ -73,8 +155,10 @@ function Canvas(_id) {
             stls += '-webkit-transform-origin: 0 0;';
             stls += '"'
         };
-
-        var s = '<form action="https://dgpad.net/index.php" target="' + _frm + '" method="post" width="' + _w + '" height="' + (_h + 40) + '">';
+        //MEAG
+        
+        //se modifica el valor de action para definir si dgpad es local/internet
+        var s = '<form action="' + window.location.pathname +'" target="' + _frm + '" method="post" width="' + _w + '" height="' + (_h + 40) + '">';
         s += '<input type="hidden" name="file_content" value="' + _src + '">';
         if (hide_ctrl_panel)
             s += '<input type="hidden" name="hide_ctrlpanel" value="true">';
@@ -84,20 +168,48 @@ function Canvas(_id) {
         return s;
     };
 
-    me.getHTMLJS = function(hide_ctrl_panel) {
+    me.getHTMLJS = function(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version) {
         var _w = width;
         var _h = height;
-        var _src = me.getSource();
+        var _src = me.getSource(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version);
         _src = $U.base64_encode(_src);
         var d = new Date();
         var _frm = "dgpad_frame_" + d.getTime();
-        var s = '<form action="https://www.dgpad.net/index.php" target="' + _frm + '" method="post" width="' + _w + '" height="' + _h + '">';
+        //MEAG
+        
+        //se modifica el valor de action
+		if (local){var urldgpad = "http://localhost:8080";}else {var urldgpad = "https://dgpad-colombia.udistrital.edu.co";};
+		if (version){urldgpad=urldgpad+"/profesores.html";}else {urldgpad=urldgpad+"/estudiantes.html";};
+		
+        var s = '<form action="' + urldgpad + '" target="' + _frm + '" method="post" width="' + _w + '" height="' + _h + '">';
         s += '<input type="hidden" name="file_content" value="' + _src + '">';
-        if (hide_ctrl_panel)
-            s += '<input type="hidden" name="hide_ctrlpanel" value="true">';
-        s += '<iframe name="' + _frm + '" width="' + _w + '" height="' + _h + '" src="about:blank" scrolling="no" frameborder="no" oNlOAd="if (!this.parentNode.num) {this.parentNode.submit();this.parentNode.num=true}"></iframe>';
+        // if (hide_ctrl_panel)
+            // s += '<input type="hidden" name="hide_ctrlpanel" value="true">';
+        s += '<iframe name="' + _frm + '" width="100%" height="100%" src="about:blank" scrolling="no" frameborder="no" oNlOAd="if (!this.parentNode.num) {this.parentNode.submit();this.parentNode.num=true}"></iframe>';
         s += '</form>';
         return s;
+    };
+	
+	me.getHTMLJS1 = function(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version) {
+        var _w = width;
+        var _h = height;
+        var _src = me.getSource1(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version);
+        _src = $U.base64_encode(_src);
+        // var d = new Date();
+        // var _frm = "dgpad_frame_" + d.getTime();
+        // MEAG
+        
+        // se modifica el valor de action
+		// if (local){var urldgpad = "http://localhost:8080";}else {var urldgpad = "https://dgpad-colombia.udistrital.edu.co";};
+		// if (version){urldgpad=urldgpad+"/profesores";}else {urldgpad=urldgpad+"/estudiantes";};
+		
+        // var s = '<form action="' + urldgpad + '" target="' + _frm + '" method="post" width="' + _w + '" height="' + _h + '">';
+        // s += '<input type="hidden" name="file_content" value="' + _src + '">';
+        // if (hide_ctrl_panel)
+            // s += '<input type="hidden" name="hide_ctrlpanel" value="true">';
+        // s += '<iframe name="' + _frm + '" width="100%" height="100%" src="about:blank" scrolling="no" frameborder="no" oNlOAd="if (!this.parentNode.num) {this.parentNode.submit();this.parentNode.num=true}"></iframe>';
+        // s += '</form>';
+        return _src;
     };
 
     me.load64 = function(_str) {
@@ -136,6 +248,7 @@ function Canvas(_id) {
         buff.style.setProperty("image-rendering", "-moz-crisp-edges");
         buff.style.setProperty("image-rendering", "-webkit-optimize-contrast");
         var scale = 1.5 * $P.localstorage.iconwidth / Math.max(width, height);
+        t.scale = scale;
         Cn.zoom(width / 2, height / 2, scale);
         Cn.computeAll();
         me.paint();
@@ -172,6 +285,7 @@ function Canvas(_id) {
     };
 
     // Utilisé pour régler un bug d'Android (voir méthode resizeWindow) :
+	// Utilizado para solucionar un bug de Android (ver método resizeWindow):
     var cloneCanvas = function() {
         var parent = docObject.parentNode;
         var newcanvas = document.createElement('canvas');
@@ -225,6 +339,8 @@ function Canvas(_id) {
 
     // Appelée lorsqu'on change la taille de la fenêtre (ordinateur)
     // ou bien lorsqu'on change d'orientation sur une tablette :
+	// Se usa al cambiar el tamaño de la ventana (computador)
+	// o cuando se cambia de orientación en una tableta:
     var resizeWindow = function() {
         setFullScreen();
         me.trackManager.resize();
@@ -255,8 +371,8 @@ function Canvas(_id) {
             me.paint();
         }
     };
-
-    me.setFullScreen = function() {
+	
+	  me.setFullScreen = function() {
         setFullScreen();
         me.paint();
     }
@@ -317,8 +433,11 @@ function Canvas(_id) {
             ct = off.top;
             cw = 1 * docObject.getAttribute("width");
             ch = 1 * docObject.getAttribute("height");
+            //definen ancho y alto de canvas
             width = cw;
             height = ch;
+            //para devolver el zoom
+            scale_zoom = 1.5 * $P.localstorage.iconwidth / Math.max(width, height);
             docObject.style.top = ct + "px";
             docObject.style.left = cl + "px";
             bounds = {
@@ -342,7 +461,7 @@ function Canvas(_id) {
                     // que la taille de la fenêtre soit changée (resize event).
                     // Du coup il faut attendre l'évenement resize qui
                     // n'aura un effet que si on est passé précédement par
-                    // onorientationchange. 
+                    // onorientationchange.
                     window.onorientationchange = function() {
                         var or = true;
                         window.onresize = function() {
@@ -358,12 +477,15 @@ function Canvas(_id) {
                 };
                 // Seulement utilisée par l'application iPad (stockage de la figure dans
                 // l'historique à chaque fois que DGPad est désactivé (passe en background) :
+				// lo usa solamente la aplicación iPad (almacenamiento de la figura en
+				// el histórico cada vez que DGPad se desactiva (pasa a background):
                 window.$IPADUNLOAD = function() {
                     me.quit(true);
                     iPadDidFirstEnterBackground = false;
                     docObject.style.visibility = "visible";
-                    // On inverse l'homothétie effectuée dans me.quit() pour rétablir la 
+                    // On inverse l'homothétie effectuée dans me.quit() pour rétablir la
                     // figure dans ses dimensions d'origine :
+					
                     // var scale = Math.max(width, height) / (1.5 * $P.localstorage.iconwidth);
                     // Cn.zoom(width / 2, height / 2, scale);
                     Cn.computeAll();
@@ -425,7 +547,28 @@ function Canvas(_id) {
         }
         me.paint();
     };
-
+	
+	me.ctrl_show2 = function(_bool) {
+        if (_bool) {
+			if (mainpanel) {
+                docObject.parentNode.removeChild(mainpanel.getDocObject());
+                mainpanel = null;
+            }
+            mainpanel = new ControlPanel(me);
+            // mainpanel.show();
+			
+        } else {
+            mainpanel.hide();
+        }
+        // me.paint();
+    };
+	
+	me.disableButton = function(name){
+		mainpanel.disableButton(name);
+	};
+	me.enableButton = function(name){
+		mainpanel.enableButton(name);
+	};
 
 
 
@@ -520,7 +663,7 @@ function Canvas(_id) {
         var _src = me.getSource();
         _src = $U.base64_encode(_src);
         var _hide = _hide_control_panel;
-        var html = "<!DOCTYPE html>\n<html>\n\t<head>\n\t\t<title></title>\n\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"favicon.png\" />\n\t\t<link rel=\"apple-touch-icon\" href=\"scripts/NotPacked/images/icon.png\"/>\n\t\t<meta name=\"apple-mobile-web-app-capable\" content=\"yes\">\n\t\t<meta   id=\"wholeViewport\" name=\"viewport\" content=\"width=device-width, maximum-scale=1.0, initial-scale=1 ,user-scalable=no\">\n\t\t<script>\n\t\t\tvar $MOBILE_PHONE;\n\t\t\tif (navigator.userAgent.match(/(android|iphone|ipad|blackberry|symbian|symbianos|symbos|netfront|model-orange|javaplatform|iemobile|windows phone|samsung|htc|opera mobile|opera mobi|opera mini|presto|huawei|blazer|bolt|doris|fennec|gobrowser|iris|maemo browser|mib|cldc|minimo|semc-browser|skyfire|teashark|teleca|uzard|uzardweb|meego|nokia|bb10|playbook)/gi)) {\n\t\t\t\tif (((screen.width >= 480) && (screen.height >= 800)) || ((screen.width >= 800) && (screen.height >= 480)) || navigator.userAgent.match(/ipad/gi)) {\n\t\t\t\t\t$MOBILE_PHONE = false;//tablette\n\t\t\t\t} else {\n\t\t\t\t\t$MOBILE_PHONE = true;//mobile\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\t$MOBILE_PHONE = false;//Desktop\n\t\t\t}\n\t\t\tif ($MOBILE_PHONE) {\n\t\t\t\tdocument.getElementById('wholeViewport').setAttribute(\"content\", \"width=device-width, maximum-scale=0.7, initial-scale=0.7 ,user-scalable=no\");\n\t\t\t}\n\t\t</script>\n\t</head>\n\t<body style=\"-ms-touch-action: none;\">\n\t\t<script src=\"scripts/DGPad.js\" data-source=\"" + _src + "\" data-hidectrlpanel=\"" + _hide + "\"></script>\n\t</body> \n</html>\n";
+        var html = "<!DOCTYPE html>\n<html>\n\t<head>\n\t\t<title></title>\n\t\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n\t\t<link rel=\"icon\" type=\"image/png\" href=\"favicon.png\" />\n\t\t<link rel=\"apple-touch-icon\" href=\"scripts/NotPacked/images/icon.png\"/>\n\t\t<meta name=\"apple-mobile-web-app-capable\" content=\"yes\">\n\t\t<meta   id=\"wholeViewport\" name=\"viewport\" content=\"width=device-width, maximum-scale=1.0, initial-scale=1 ,user-scalable=no\">\n\t\t<script>\n\t\t\tvar $MOBILE_PHONE;\n\t\t\tif (navigator.userAgent.match(/(android|iphone|ipad|blackberry|symbian|symbianos|symbos|netfront|model-orange|javaplatform|iemobile|windows phone|samsung|htc|opera mobile|opera mobi|opera mini|presto|huawei|blazer|bolt|doris|fennec|gobrowser|iris|maemo browser|mib|cldc|minimo|semc-browser|skyfire|teashark|teleca|uzard|uzardweb|meego|nokia|bb10|playbook)/gi)) {\n\t\t\t\tif (((screen.width >= 480) && (screen.height >= 800)) || ((screen.width >= 800) && (screen.height >= 480)) || navigator.userAgent.match(/ipad/gi)) {\n\t\t\t\t\t$MOBILE_PHONE = false;//tablette\n\t\t\t\t} else {\n\t\t\t\t\t$MOBILE_PHONE = true;//mobile\n\t\t\t\t}\n\t\t\t} else {\n\t\t\t\t$MOBILE_PHONE = false;//Desktop\n\t\t\t}\n\t\t\tif ($MOBILE_PHONE) {\n\t\t\t\tdocument.getElementById('wholeViewport').setAttribute(\"content\", \"width=device-width, maximum-scale=0.7, initial-scale=0.7 ,user-scalable=no\");\n\t\t\t}\n\t\t</script>\n\t</head>\n\t<body style=\"-ms-touch-action: none;\">\n\t\t<script src=\"DGPad.js\" data-source=\"" + _src + "\" data-hidectrlpanel=\"" + _hide + "\"></script>\n\t</body> \n</html>\n";
         var plist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n\t<key>CFBundleDisplayName</key>\n\t<string>DGPad</string>\n\t<key>CFBundleIdentifier</key>\n\t<string>" + _id + "</string>\n\t<key>MainHTML</key>\n\t<string>index.html</string>\n\t<key>Width</key>\n\t<integer>" + _w + "</integer>\n\t<key>Height</key>\n\t<integer>" + _h + "</integer>\n</dict>\n</plist>\n";
         var png = me.exportPNG();
 
@@ -561,6 +704,11 @@ function Canvas(_id) {
     me.getHeight = function() {
         return height;
     };
+    //para deshacer el zoom
+    me.getScale = function() {
+        return scale_zoom;
+    };
+
     var mousedown = false;
 
 
@@ -615,10 +763,14 @@ function Canvas(_id) {
     };
 
 
-    // mode 0 pour consultation, 1 pour pointeur, 2 pour gomme, 3 pour poubelle, 
+    // mode 0 pour consultation, 1 pour pointeur, 2 pour gomme, 3 pour poubelle,
     // 4 pour construction de macros, 5 pour execution de macros
     // 6 pour les propriétés, 7 pour le tracé, 8 pour la calculatrice,
     // 9 pour le magnétisme, 10 pour le TeX, 11 pour les dépendances :
+	// modo 0 para Mover, 1 para construir, 2 para ocultar, 3 para borrar,
+	// 4 para definir macro, 5 para ejecutar macro
+	// 6 para propiedades, 7 para mano alzada, 8 para calculadora,
+	//9 para magnetismo, 10 para TeX, 11 para las dependencias:
     me.setMode = function(_mode) {
         closeTools();
         me.magnifyManager.show();
@@ -719,13 +871,16 @@ function Canvas(_id) {
         switch (Cn.getMode()) {
             case 0:
                 // Outil de consultation :
+				// mover
                 break;
             case 1:
                 // Outil curseur-création :
+				// cursor-creación
                 toolsManager.showTools(ev);
                 break;
             case 2:
                 // Outil gomme :
+				// Ocultar
                 if (!obj.isSuperHidden()) {
                     obj.setHidden(!obj.isHidden());
                     obj.setSelected(false);
@@ -735,6 +890,7 @@ function Canvas(_id) {
                 break;
             case 3:
                 // Outil poubelle :
+				// borrar
                 if (!obj.isHidden()) {
                     me.undoManager.deleteObjs(Cn.safelyDelete(obj));
                     me.refreshKeyboard();
@@ -743,6 +899,7 @@ function Canvas(_id) {
                 break;
             case 4:
                 // Outil construction de macro :
+				// definir macro
                 if (!obj.isHidden()) {
                     Cn.macroConstructionTag(obj);
                     me.paint(ev);
@@ -750,6 +907,7 @@ function Canvas(_id) {
                 break;
             case 5:
                 // Outil execution de macro :
+				// ejecutar macro
                 if (!obj.isHidden()) {
                     Cn.macroExecutionTag(obj);
                     me.paint(ev);
@@ -762,21 +920,25 @@ function Canvas(_id) {
                 break;
             case 8:
                 // Outil propriétés des objets :
+				// propiedades
                 me.calcManager.edit(obj);
                 me.paint(ev);
                 break;
             case 9:
                 // Outil magnétisme :
+				// magnetismo
                 me.magnetManager.add(obj);
                 me.paint(ev);
                 break;
             case 10:
                 // Outil TEX :
+				// TeX:
                 me.textManager.addName(obj.getName());
                 me.paint(ev);
                 break;
             case 11:
                 // Outil depends :
+				// Dependencia
                 me.dependsManager.add(obj);
                 me.paint(ev);
                 break;
@@ -844,12 +1006,17 @@ function Canvas(_id) {
 
     // Trie les indicateds pour éviter la prédominance des
     // polygone lorsqu'on clique :
+	// Selección de los indicados para evitar la predominancia 
+	// de los polígonos al hacer clic:
     var cleanInds = function() {
         var inds = Cn.getIndicated();
         // On trie en laissant les polygones en fin de liste :
+		// se seleccionar dejando los polígonos al final de la lista:
         inds.sort(moveableSortFilter);
         // Si le premier indiqué n'est pas un polygone et que
         // le dernier indiqué en est un, on vire tous les polygones :
+		// si el primer indicado no es un polígono y el último
+		// indicado sí es uno, se borran todos los polígonos:
         if ((inds.length > 1) && (inds[0].getCode() !== "area") && (inds[inds.length - 1].getCode() === "area")) {
             while (inds[inds.length - 1].getCode() === "area") {
                 inds[inds.length - 1].setIndicated(false);
@@ -952,22 +1119,26 @@ function Canvas(_id) {
         dragCoords = null;
         actualCoords.x = me.mouseX(ev);
         actualCoords.y = me.mouseY(ev);
+		
         setMouseCoords();
+		
         //        $ALERT("x="+actualCoords.x+" y="+actualCoords.y);
         pressedCoords = {
             x: actualCoords.x,
             y: actualCoords.y,
             t: $U.getTime()
         };
-
+		
         //        actualCoords
 
         // Si on a cliqué à côté des outils :
+		// Si se hizo clic al lado de una herramienta:
         if (toolsManager.isVisible()) {
             closeTools();
             Cn.validate(ev);
             me.paint(ev);
             // Fait en sorte que le mousereleased ne crée pas un point :
+			// Hace que el mousereleased no cree un punto:
             pressedCoords = {
                 x: NaN,
                 y: NaN
@@ -975,6 +1146,7 @@ function Canvas(_id) {
             return;
         }
         // S'il s'agit d'un click droit :
+		// Si se trata de un clic derecho:
         if (ev.which === 2 || ev.which === 3) {
             dragCoords = {
                 x: actualCoords.x,
@@ -984,9 +1156,9 @@ function Canvas(_id) {
         }
         mousedown = true;
         Cn.validate(ev);
-
+		
         draggedObject = me.selectMoveable(ev);
-
+		
         if (draggedObject === null && Cn.getMode() === 1) {
             // Si on a tapé/cliqué "dans le vide" et qu'aucun objet
             // n'est sous le doigt/souris (pour le longpress menu) :
@@ -997,6 +1169,8 @@ function Canvas(_id) {
         if (draggedObject === null && Cn.getMode() === 0) {
             // Si on a tapé/cliqué "dans le vide" et qu'aucun objet
             // n'est sous le doigt/souris (pour le translate en mode présentation) :
+			// Si se tocó/clic "en vacío" y ningún objeto está bajo el dedo/cursor
+			// (para translate en modo presentación):
 
             dragCoords = {
                 x: actualCoords.x,
@@ -1004,8 +1178,11 @@ function Canvas(_id) {
             };
             return;
         }
+		
         if (draggedObject) draggedObject.blocks.evaluate("onmousedown"); // blockly
+		
         me.paint(ev);
+		
     };
 
     me.translate = function(x, y) {
@@ -1021,9 +1198,12 @@ function Canvas(_id) {
         clearTimeout(longPressTimeout);
         actualCoords.x = me.mouseX(ev);
         actualCoords.y = me.mouseY(ev);
+		// me.magnifyManager.magnifierPaint(actualCoords);
+		
         setMouseCoords();
         if (dragCoords) {
             // S'il s'agit d'un click droit glissé :
+			// Si se trat ade un clic derecho y arrastre:
             me.translate(actualCoords.x - dragCoords.x, actualCoords.y - dragCoords.y);
             dragCoords.x = actualCoords.x;
             dragCoords.y = actualCoords.y;
@@ -1034,7 +1214,10 @@ function Canvas(_id) {
             return;
         }
         if (mousedown) {
+			
+			
             if (draggedObject) {
+				
                 if (!isClick(ev))
                     pressedCoords = {
                         x: NaN,
@@ -1042,16 +1225,21 @@ function Canvas(_id) {
                         t: 0
                     };
                 draggedObject.dragTo(actualCoords.x, actualCoords.y);
+				
+				
                 me.textManager.evaluateStrings();
                 draggedObject.blocks.evaluate("ondrag"); // blockly
-                actualCoords.x = NaN;
-                actualCoords.y = NaN;
+                // actualCoords.x = NaN; modificación hecha el 020323 para hacer que en la lupa aparezcan los objetos que se están arrastrando
+                // actualCoords.y = NaN;
             } else {
                 Cn.validate(ev);
+				
             }
         } else {
             Cn.validate(ev);
+			
         }
+		
         // If a tool is selected :
         OC.selectInitialObjects(me);
         me.paint(ev, actualCoords);
@@ -1094,9 +1282,11 @@ function Canvas(_id) {
             draggedObject.blocks.evaluate("onmouseup"); // blockly
             if (isClick(ev)) {
                 // Si on a cliqué sur l'objet :
+				// si se hizo clic sobre el objeto:
                 if ((!me.coincidenceManager.checkCoincidences(ev))) {
                     // Et s'il n'y a pas ambiguité, on lance les outils
                     // contextuels :
+					// y si no hay ambiguedad, se lanzan las herramientas contextuales:
                     if (Cn.getIndicated().length > 1) {
                         Cn.addSelected(Cn.getIndicated()[0]);
                         Cn.addSelected(Cn.getIndicated()[1]);
@@ -1122,6 +1312,8 @@ function Canvas(_id) {
                     if (Cn.isMode(1, 5, 7, 8)) {
                         // On est dans le mode arrow, tracé ou execution de macro :
                         // On a cliqué dans le vide, on crée un point à la volée :
+						// Estamos en modo arrow, trazado o ejecución de macro:
+						// Se hizo clic vacío, se crea un punto:
                         OC.selectCreatePoint(me, ev);
                         var o = OC.createObj(me, ev);
                         Cn.validate(ev);
@@ -1134,9 +1326,11 @@ function Canvas(_id) {
                     }
                 } else {
                     // Si on a cliqué sur un objet :
+					// Si hubo clic sobre un objeto:
                     if ((!me.coincidenceManager.checkCoincidences(ev))) {
                         // Et s'il n'y a pas ambiguité, on lance les outils
                         // contextuels :
+						// Si no hay ambiguedad se lanzan las herramientas contextuales
                         Cn.addSelected(sels[0]);
                         if (sels.length > 1)
                             Cn.addSelected(sels[1]);
@@ -1149,9 +1343,12 @@ function Canvas(_id) {
 
             } else {
                 // Sinon, il s'agit d'une caresse :
+				// si no, se trata de una caricia:
                 if (sels.length > 0) {
                     // On a caressé un objet (point sur) ou deux objets (intersection)
                     // On crée un point à la volée (dans le mode arrow, tracé ou execution de macro) :
+					// Se acarició un objeto (punto sobre) o dos objetos (intersección)
+					// Se crea un punto sobre la marcha (en el modo arrow, trazo o ejecución de macro):
                     if (Cn.isMode(1, 5, 7, 8)) {
                         OC.setInitialObjects(sels);
                         OC.selectCreatePoint(me, ev);
@@ -1178,26 +1375,31 @@ function Canvas(_id) {
         }
     };
 
-    me.mouseClicked = function(ev) {};
+    //se añadió parámetro para mostrar la lupa
+    me.mouseClicked = function(ev) {me.magnifyManager.magnifierPaint(actualCoords);};
 
 
     me.mouseWheel = function(ev) {
         ev.preventDefault();
-        var zoom = 1 + $U.extractDelta(ev) / 2000;
-        Cn.zoom(me.mouseX(ev), me.mouseY(ev), zoom);
-        Cn.validate(ev);
-        Cn.computeAll();
-        me.paint(ev);
+        if (stateZoom) {                                  //MEAG revisa si se habilito el zoom
+            var zoom = 1 + $U.extractDelta(ev) / 2000;
+            Cn.zoom(me.mouseX(ev), me.mouseY(ev), zoom);
+            Cn.validate(ev);
+            Cn.computeAll();
+            me.paint(ev);
+        }
     };
 
     var zoomGesture = null;
 
     // Lorsque le navigateur mobile ne connaît pas les évenements "gesture"
+	// Cuando el navegador movil no reconoce los eventos "gestos"
     var touchToMouse = function(_tch, _proc) {
         _tch.preventDefault();
         if (_tch.touches.length < 2) {
             if (zoomGesture) {
                 // On vient probablement de passer de 2 doigts à 1 doigt :
+				// probablemente se pasó de 2 dedos a 1 dedo:
                 zoomGesture = null;
                 pressedCoords = {
                     x: NaN,
@@ -1218,7 +1420,9 @@ function Canvas(_id) {
             var x = (x0 + x1) / 2;
             var y = (y0 + y1) / 2;
             var dis = Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
-            if (zoomGesture) {
+            // MEAG
+            if (zoomGesture && stateZoom) {
+            // if (zoomGesture) { codigo original
                 Cn.translateANDzoom(x - zoomGesture.x, y - zoomGesture.y, x, y, dis / zoomGesture.d);
                 zoomGesture.x = x;
                 zoomGesture.y = y;
@@ -1238,7 +1442,7 @@ function Canvas(_id) {
                 };
             }
         }
-        // Une nuit de boulot avant de comprendre qu'il faut décommenter 
+        // Une nuit de boulot avant de comprendre qu'il faut décommenter
         // cette ligne pour que le mode demo fonctionne sur tablette :
         //        _tch.stopPropagation();
     };
@@ -1376,7 +1580,7 @@ function Canvas(_id) {
         } else previewEvent = null;
         handPath.paint(context);
         Cn.paint(context, coords);
-        me.trackManager.draw();
+		me.trackManager.draw();
     };
 
 
@@ -1392,11 +1596,17 @@ function Canvas(_id) {
     //    me.sandboxFrame=null;
     /* Les variables globales sont en fait des propriétés
      de l'objet window. Interpréter un script utilisateur risque
-     d'ajouter des globales susceptibles de mettre la 
+     d'ajouter des globales susceptibles de mettre la
      pagaille dans l'objet window dans lesquel s'execute
      DGPad. Pour éviter cela, on execute les scripts (lecture
      de fichier aussi) dans un bac à sable : une iframe invisible.
      */
+	 /* Las variables globales son en realidad propiedades
+	  del objeto window. Interpretar un script de usuario puede
+	  añadir globales susceptibles de desordenar el objeto window
+	  en el que se ejecuta DGPad. Para evitarlo, se ejecutan los 
+	  scripts (también lectura de archivo) en una caja de arena: un iframe
+	  invisible */
     var createSandbox = function() {
         var el = document.createElement("iframe");
         el.setAttribute('name', ID);
@@ -1408,6 +1618,7 @@ function Canvas(_id) {
         el.setAttribute('marginwidth', 0);
         el.setAttribute('scrolling', 'no');
         // Trouver éventuellement un paramètre de langue dans le script du body :
+		// Encontrar eventualmente un parámetro de lengua en el script del body:
         var lang = ($BODY_SCRIPT.hasAttribute("data-lang")) ? "?lang=" + $BODY_SCRIPT.getAttribute("data-lang").toUpperCase() : "";
 
         el.setAttribute('src', $APP_PATH + 'NotPacked/Sandbox/sandbox.html' + lang);
@@ -1425,9 +1636,11 @@ function Canvas(_id) {
                 interpreter.LoadPlugins(request.responseText);
                 if (docObject.hasAttribute("data-source")) {
                     // Si le canvas a une figure attachée (base64) :
+					// Si el canvas tiene una figura enlazada (base64):
                     me.OpenFile("", $U.base64_decode(docObject.getAttribute("data-source")));
                 } else if (docObject.hasAttribute("data-url")) {
                     // Si le canvas a une adresse de figure (relative au .html) :
+					// Si el canvas tiene una dirección de figura (relativa al html):
                     var fileurlrequest = new XMLHttpRequest();
                     fileurlrequest.open("GET", docObject.getAttribute("data-url"), true);
                     fileurlrequest.send();
@@ -1436,6 +1649,7 @@ function Canvas(_id) {
                     }
                 } else {
                     // Si une figure a été postée sur index.php, on l'ouvre :
+					// Si una figura fue posteada en un index.php, se abre:
                     try {
                         me.OpenFile("", $U.base64_decode($DGPAD_FIGURE));
                     } catch (e) {}
@@ -1505,6 +1719,7 @@ function Canvas(_id) {
     ////        me.sandboxFrame=el;
     //    }();
     // Intepréteur de scripts lancé par un bouton :
+	// Interpretador de scripts lanzado por un botón: 
     me.InterpretScript = function(_o, s) {
         interpreter.setCaller(_o);
         interpreter.Interpret(s);
@@ -1535,7 +1750,9 @@ function Canvas(_id) {
         // Pour assurer la compatibilité avec les anciennes figures
         // on se met en radians (old style). Si une figure est en degrés
         // elle s'ouvrira en mode degré.
-
+		// Para garantizar la compatibilidad con las figuras antiguas
+		// se pone en radianes. Si una figura está en grados
+		// se abrirá en modo grados.
         if (_src === "") Cn.setDEG(true)
         else Cn.setDEG(false);
         iPadDidFirstEnterBackground = true;
@@ -1546,6 +1763,8 @@ function Canvas(_id) {
         interpreter.Interpret(_src);
         // Mode construction si la figure est vide,
         // mode consultation sinon (sauf si demandé par l'url) :
+		// Modo construir si la figura está vacía,
+		// Modo mover en caso contrario (salvo solicitud por la url):
         var md = (_src === "") ? 1 : 0;
         if (docObject.hasAttribute("data-tools")) {
             md = (docObject.getAttribute("data-tools") === "true") ? 1 : 0
@@ -1561,12 +1780,15 @@ function Canvas(_id) {
         Cn.computeAll();
         me.textManager.refreshInputs();
         me.paint();
-        parent.postMessage("figure_loaded", "*");
+		parent.postMessage("figure_loaded","*");
     };
 
     // Uniquement pour l'iApp DGPad s'executant en local
     // dans iOS (ouverture des fichiers par "ouvrir dans..."
     // à partir d'autres applications) :
+	// Unicamente para la iApp DGPad que se ejecuta en local
+	// en iOS (apertura de archivos por "abrir en..."
+	// a partir de otras aplicaciones):
     window.$IPADOPENFILE = function(_s) {
         setTimeout(function() {
             me.OpenFile("", $U.base64_decode(_s));
@@ -1580,9 +1802,12 @@ function Canvas(_id) {
         if (Cn.isDEG()) t += ";degree:true";
         else t += ";degree:false";
         t += ";dragmoveable:" + Cn.isDragOnlyMoveable();
+        //parámetro para mostrar la lupa
+		t += ";magniferOn:"+me.magnifyManager.getMagnifierMode();
         // if (Cn.isDragOnlyMoveable()) t += ";dragmoveable:true";
         t += "\");\n";
         return t;
     };
+
 
 }

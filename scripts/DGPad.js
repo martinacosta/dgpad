@@ -72,7 +72,7 @@ if (!$APP_PATH) {
     //    var $STOP_MOUSE_EVENTS = false;
     var $SCALE = 1;
     var $FPICKERFRAME = null;
-    // Détermination sans autre globale du chemin 
+    // Détermination sans autre globale du chemin
     // de ce script (dans quel dossier il se trouve) :
     var $APP_PATH = document.getElementsByTagName("script");
     $APP_PATH = $APP_PATH[$APP_PATH.length - 1];
@@ -146,11 +146,17 @@ if (!$APP_PATH) {
     };
 
     var $LOADPICKER = function() {
-        //        var script = $HEADSCRIPT($APP_PATH + "NotPacked/thirdParty/FilePicker.js");
-        var script = $HEADSCRIPT("https://api.filepicker.io/v1/filepicker.js");
-        script.onload = function() {
-            filepicker.setKey('A11o-dWi-S-ePxgyeWpfyz');
-        };
+                // var script = $HEADSCRIPT($APP_PATH + "NotPacked/thirdParty/FilePicker.js");
+         // var script = $HEADSCRIPT("https://api.filepicker.io/v1/filepicker.js");
+         // script.onload = function() {
+             // filepicker.setKey('A11o-dWi-S-ePxgyeWpfyz');
+         // };
+        // var script = $HEADSCRIPT("https://static.filestackapi.com/v3/filestack-0.11.1.js");
+        // script.onload = function() {
+          // const apikey = 'Apcx13KffRBSNtSzza1toz';
+          // const client = filestack.init(apikey);
+          // console.log(filestack.version);
+        // };
     };
 
     var $MAIN_INIT = function() {
@@ -182,7 +188,6 @@ if (!$APP_PATH) {
                 if (k === $INCLUDED_FILES.length) {
                     $INCLUDED_FILES.push("var $MAIN_INIT = " + $MAIN_INIT.toString());
                     $INCLUDED_FILES.push("window.onload = function() {\n$MAIN_INIT();\n};");
-                    console.log($INCLUDED_FILES.join("\n"));
                 }
             }
         }
@@ -285,17 +290,17 @@ if (!$APP_PATH) {
         //        img.src=style.href;
         $LOADLANGUAGE();
         $LOADMAIN();
-        $LOADPICKER();
+        // $LOADPICKER();
         var standalone = window.navigator.standalone;
         var userAgent = window.navigator.userAgent.toLowerCase();
         var safari = /safari/.test(userAgent);
         var ios = /iphone|ipod|ipad/.test(userAgent);
-        if (!standalone && !safari) {
+        /* if (!standalone && !safari) {
             // DGPad s'ouvre dans l'iApp :
             window.open = function(url) {
-                $FPICKERFRAME = new windowOpenIFrame(url);
-            };
-        }
+                // $FPICKERFRAME = new windowOpenIFrame(url);
+            }; */
+        // }
     })();
 
 
@@ -328,6 +333,21 @@ if (!$APP_PATH) {
 
 // Création du canvas associé :
 (function() {
+
+
+    // Inicio Prueba Google Analytics
+    var imported = document.createElement('script')
+    imported.src = 'https://www.googletagmanager.com/gtag/js?id=G-5J95Z4Y54W';
+    document.head.appendChild(imported);
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-5J95Z4Y54W');
+    // Final Prueba Google Analytics
+
+
     // On crée le canvas :
     var canvas = document.createElement("canvas");
     // Transfert sur le canvas de la largeur et hauteur éventuelle :
@@ -363,6 +383,12 @@ if (!$APP_PATH) {
     if ($BODY_SCRIPT.hasAttribute("data-googleid")) {
         canvas.setAttribute("data-googleid", $BODY_SCRIPT.getAttribute("data-googleid"));
     }
+    // MEAG start para diferenciar version profesores/estudiantes
+    if ($BODY_SCRIPT.hasAttribute("data-version")) {
+        canvas.setAttribute("data-version", $BODY_SCRIPT.getAttribute("data-version"));
+    }
+    // MEAG end
+
 
     var num = document.getElementsByTagName("canvas").length;
     canvas.setAttribute("id", "DGPad" + num);

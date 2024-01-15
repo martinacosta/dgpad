@@ -1,12 +1,13 @@
 //************************************************
 //************ FIXED ANGLE OBJECT ****************
 //************************************************
-function FixedAngleObject(_construction, _name, _P1, _P2, _trigo) {
-    var superObject = $U.extend(this, new PrimitiveLineObject(_construction, _name, _P2));
+function FixedAngleObject(_construction, _name, _sr1, _trigo) {
+	var O = _sr1.P1;
+    var superObject = $U.extend(this, new PrimitiveLineObject(_construction, _name, O));
     $U.extend(this, new MoveableObject(_construction)); // Héritage
     var me = this;
-    var A = _P1;
-    var O = _P2;
+    var A = _sr1.P2;
+    
     var C = new VirtualPointObject(0, 0);
     var E1 = null;
     var VALUE = 0;
@@ -58,6 +59,13 @@ function FixedAngleObject(_construction, _name, _P1, _P2, _trigo) {
     this.getAssociatedTools = function() {
         var at = superObject.getAssociatedTools();
         at += ",@callcalc,@blockly";
+		//JDIAZ
+    if (this.getShowName()===true)
+      at += ",@removename";
+    
+    //JDIAZ
+    
+    
         return at;
     };
 
@@ -144,7 +152,7 @@ function FixedAngleObject(_construction, _name, _P1, _P2, _trigo) {
         ctx.restore();
     };
 
-    this.paintObject = function(ctx) {
+    /* this.paintObject = function(ctx) {
         ctx.beginPath();
         ctx.moveTo(O.getX(), O.getY());
         ctx.lineTo(this.getXmax(), this.getYmax());
@@ -157,7 +165,52 @@ function FixedAngleObject(_construction, _name, _P1, _P2, _trigo) {
         ctx.stroke();
         ctx.lineTo(O.getX(), O.getY());
         ctx.fill();
-    };
+    }; */
+	
+	this.paintObject = function(ctx) {
+    ctx.beginPath();
+    ctx.moveTo(O.getX(), O.getY());
+    ctx.lineTo(superObject.getXmax(), superObject.getYmax());
+    ctx.stroke();
+    ctx.moveTo(O.getX(), O.getY());
+    ctx.beginPath();
+    ctx.lineTo(O.getX() + R * Math.cos(-fromAngle), O.getY() + R * Math.sin(-fromAngle));
+    ctx.lineWidth = ctx.lineWidth * 3;
+    ctx.arc(O.getX(), O.getY(), R, -fromAngle, -toAngle, trigo);
+    ctx.stroke();
+    ctx.lineTo(O.getX(), O.getY());
+    ctx.fill();
+	
+  };
+
+	
+	//JDIAZ start
+  var paintTxt= function(ctx, txt) {
+    ctx.save();
+    var r = R + me.prefs.fontmargin + me.getRealsize() / 2;
+    ctx.textAlign = "left";
+    var prec = me.getPrecision();
+    var display = VALUE;
+    display = Math.round(display * prec) / prec;
+    var a = trigo ? -toAngle + AOC / 2 : Math.PI - toAngle + AOC / 2;
+    a = a - Math.floor(a / $U.doublePI) * $U.doublePI; // retour dans [0;2π]
+    if ((a > $U.halfPI) && (a < 3 * $U.halfPI)) {
+      a += Math.PI;
+      r = -r - 60;
+      ctx.textAlign = "right";
+    }
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.translate(O.getX(), O.getY());
+    ctx.rotate(a);
+    ctx.fillText(txt + ":", r, me.getFontSize() / 2);
+    ctx.restore();
+  }
+  //JDIAZ end
+  
+  //LLamar a la función painTxt para dibujar el nombre
+  this.paintName = function(ctx) {
+    paintTxt(ctx, this.getSubName());
+  };
 
     this.compute = function() {
         E1.compute();
@@ -176,11 +229,18 @@ function FixedAngleObject(_construction, _name, _P1, _P2, _trigo) {
         C.setXY(O.getX() + x, O.getY() + y);
         fromAngle = $U.angleH(A.getX() - O.getX(), A.getY() - O.getY());
         toAngle = $U.angleH(C.getX() - O.getX(), C.getY() - O.getY());
+		// MEAG start
+    if (!Cn.getFrame().ifObject(this.getName())) {
+      Cn.getFrame().getTextCons(this);
+    } else {
+      Cn.getFrame().updateTextCons(this);
+    }
+    // MEAG end
     };
 
     this.getSource = function(src) {
         var _ex = "\"" + E1.getUnicodeSource().replace(/\n/g, "\\n") + "\"";
-        src.geomWrite(false, this.getName(), "FixedAngle", A.getVarName(), O.getVarName(), _ex, trigo);
+        src.geomWrite(false, this.getName(), "FixedAngle", _sr1.getName(), _ex, trigo);
     };
 
     this.mouseInside = function(ev) {
@@ -191,4 +251,26 @@ function FixedAngleObject(_construction, _name, _P1, _P2, _trigo) {
 
 
     this.setDefaults("fixedangle");
+	// MEAG start
+  this.getTextCons = function() {
+    if (this.getParentLength()) {
+      var _ex = E1.getUnicodeSource().replace(/\n/g, "\\n");
+      texto = "";
+	  if(trigo){
+      texto = this.getName() + $L.object_fixedAngle_description0+O.getVarName()+ $L.object_fixedAngle_description_measure + _ex + $L.object_fixedAngle_description1+_sr1.getVarName()+$L.tool_FixedAngle_help_2_sentidoA;}
+	  else {
+		  texto = this.getName() + $L.object_fixedAngle_description0+O.getVarName()+ $L.object_fixedAngle_description_measure + _ex + $L.object_fixedAngle_description1+_sr1.getVarName()+$L.tool_FixedAngle_help_2_sentidoB;}
+      parents = [O.getVarName()];
+      return {
+        "texto": texto,
+        "parents": parents
+      };
+    }
+  }
+  // MEAG end
+  //JDIAZ start
+   this.nameMover = function(ev, zc) {
+    me.setShowName(true);
+  }
+  //JDIAZ end
 }

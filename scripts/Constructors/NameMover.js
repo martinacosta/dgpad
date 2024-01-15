@@ -1,4 +1,4 @@
-/* 
+/*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -9,6 +9,11 @@ function NameMover() {
     this.getCode = function() {
         return "namemover";
     };
+
+    //MEAG insert title in image
+    this.getTitle = function() {
+      return $L.tool_title_namemover;
+    }
 
     // Retourne 0 pour un outil standard, 1 pour un outil de changement de propriété
     this.getType = function() {
@@ -27,9 +32,13 @@ function NameMover() {
 
     this.preview = function(ev, zc) {
         var o = this.getC(0);
-        var a = $U.angleH(o.getX() - zc.mouseX(ev), o.getY() - zc.mouseY(ev));
-        o.setNamePosition(a);
-        o.setShowName(true);
+        // MEAG start
+        o.nameMover(ev, zc);
+        // MEAG end
+        // original _code
+        // var a = $U.angleH(o.getX() - zc.mouseX(ev), o.getY() - zc.mouseY(ev));
+        // o.setNamePosition(a);
+        // o.setShowName(true);
     };
 
 

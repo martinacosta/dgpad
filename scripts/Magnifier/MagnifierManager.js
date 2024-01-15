@@ -10,7 +10,19 @@ function MagnifierManager(_canvas) {
             panel = null;
         }
     };
+	me.setMonkeyMode = function(_magn) {
+        if (_magn) {
+            panel = new MonkeyPanel(_canvas);
+            panel.show();
+        } else if (panel) {
+            panel.close();
+            panel = null;
+        }
+    };
     me.getMagnifierMode = function() {
+        return (panel !== null);
+    };
+	me.getMonkeyMode = function() {
         return (panel !== null);
     };
     me.hide = function() {

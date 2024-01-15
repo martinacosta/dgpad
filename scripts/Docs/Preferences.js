@@ -48,7 +48,7 @@ $P.size = {};
 $P.size.marginwidth = 0;
 $P.size.marginheight = 0;
 $P.size.touchfactor = 1 * $SCALE;
-$P.size.point = 6 * $SCALE;
+$P.size.point = 6 * $U.escala;
 $P.size.list = 1 * $SCALE;
 $P.size.pointborder = 2 * $SCALE;
 $P.size.line = 1 * $SCALE;
@@ -92,7 +92,9 @@ $P.precision.area = -1;
 $P.precision.angle = 1;
 $P.precision.fixedangle = 1;
 $P.precision.expression = 2;
-
+//MEAG start se quitó la medida de círculo
+$P.precision.circle = -1;
+//MEAG end
 
 $P.precision.over = {};
 $P.precision.over.touchfactor = 4;
@@ -142,6 +144,13 @@ $P.MagnifierBounds.l = 10;
 $P.MagnifierBounds.t = 10;
 $P.MagnifierBounds.w = 75;
 $P.MagnifierBounds.captureWidth = 75;
+
+//MEG parámetros de Monkey
+$P.MonkeyBounds = {};
+$P.MonkeyBounds.l = 10;
+$P.MonkeyBounds.t = 10;
+$P.MonkeyBounds.w = 75;
+$P.MonkeyBounds.captureWidth = 75;
 
 $P.clone = function() {
     return JSON.parse(JSON.stringify($P));

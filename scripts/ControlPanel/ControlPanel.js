@@ -15,7 +15,8 @@ function ControlPanel(_canvas) {
     me.setStyle("border-top", "1px solid hsla(0,0%,0%,.1)");
     me.setStyle("border-radius", "0px");
     me.show();
-    
+	me.buttons={};
+
 
     var left = 10 * SCALE;
     var size = 30 * SCALE;
@@ -26,9 +27,10 @@ function ControlPanel(_canvas) {
     var copyDlog = null;
     var historyDlog = null;
 
-    var addBtnLeft = function(_code, _sel, _group, _proc) {
-        var btn = new ControlButton(me, left, margintop, size, size, "NotPacked/images/controls/" + _code + ".png", _sel, _group, _proc);
+    var addBtnLeft = function(_code, _sel, _group, _proc, _title) {
+        var btn = new ControlButton(me, left, margintop, size, size, "NotPacked/images/controls/" + _code + ".png", _sel, _group, _proc, _title, _code); //MEAG agrego parametro title
         left += size;
+		me.buttons[_code]=btn;
         return btn;
     };
     var addSpaceLeft = function(h) {
@@ -41,8 +43,8 @@ function ControlPanel(_canvas) {
     var addNullLeft = function() {
         var btn = new ControlButton(me, left, margintop, 0, size, "NotPacked/images/controls/sep.png", true, null, null);
     };
-    var addBtnRight = function(_code, _sel, _group, _proc) {
-        var btn = new ControlButton(me, right, margintop, size, size, "NotPacked/images/controls/" + _code + ".png", _sel, _group, _proc);
+    var addBtnRight = function(_code, _sel, _group, _proc, _title, _alive) {
+        var btn = new ControlButton(me, right, margintop, size, size, "NotPacked/images/controls/" + _code + ".png", _sel, _group, _proc, _title); //MEAG agrego parametro title
         right -= size;
         return btn;
     };
@@ -63,7 +65,7 @@ function ControlPanel(_canvas) {
     };
 
     var arrowMode = function() {
-        //        if (checkMode(1)) 
+        //        if (checkMode(1))
         //        arrowBtn.select();
         if (checkMode(1))
             return;
@@ -150,6 +152,7 @@ function ControlPanel(_canvas) {
 
 
     var nameProc = function() {
+		
         if (canvas.namesManager.isVisible()) {
             canvas.namesManager.hide();
             nameBtn.deselect();
@@ -158,7 +161,7 @@ function ControlPanel(_canvas) {
             nameBtn.select();
         }
     };
-
+	
     var historyProc = function() {
         if (historyDlog) {
             historyDlog.close();
@@ -186,6 +189,19 @@ function ControlPanel(_canvas) {
         }
     };
 
+    //MEAG deshacer el zoom
+    var zoomProc = function() {
+      var Cn = canvas.getCn();
+      var width = canvas.getWidth();
+      var height = canvas.getHeight();
+      var _zoom = Cn.coordsSystem.isCenterZoom() ? true : false;
+      Cn.coordsSystem.setCenterZoom(true);
+      Cn.zoom(width / 2, height / 2, 40/Cn.coordsSystem.getUnit());
+      Cn.computeAll();
+      canvas.paint();
+      Cn.coordsSystem.setCenterZoom(_zoom);
+    };
+
     var exportProc = function() {
         if (copyDlog) {
             copyDlog.close();
@@ -203,134 +219,170 @@ function ControlPanel(_canvas) {
         }
     };
 
-    
-    var downloadProc = function() {
-        filepicker.pick({
-                extensions: ['.txt', '.dgp'],
+    //JDIAZ begin
+    var longPressProc = function(){
+        y = me.getBounds();
+        x =  SCALE * (15 * 11 + 5 * 3 + 30 * 14) //12 buttons, 11 hspaces, 3 smalspaces, 2 separators
+        var eventReplica = {pageX: x, pageY: y.top - y.height - 100};
+        canvas.longpressManager.show(eventReplica);
+    }
+
+ 
+    //JDIAZ end
+
+
+    // var downloadProc = function() {
+      // const apikey = 'Apcx13KffRBSNtSzza1toz';
+      // const client = filestack.init(apikey);
+
+        // filepicker.pick({
+                // extensions: ['.txt', '.dgp'],
                 // mimetype: 'text/plain',
-                openTo: $U.getFilePickerDefaultBox()
-            },
-            function(FPFile) {
-                filepicker.read(FPFile, function(data) {
-                    canvas.OpenFile("", $U.utf8_decode(data));
-                    if ($FPICKERFRAME !== null) {
-                        $FPICKERFRAME.close();
-                        $FPICKERFRAME = null;
-                    }
-                });
-            });
-    };
+                // openTo: $U.getFilePickerDefaultBox()
+            // },
+            // function(FPFile) {
+                // filepicker.read(FPFile, function(data) {
+                    // canvas.OpenFile("", $U.utf8_decode(data));
+                    // if ($FPICKERFRAME !== null) {
+                        // $FPICKERFRAME.close();
+                        // $FPICKERFRAME = null;
+                    // }
+                // });
+            // });
+        // client.pick({
+                // accept: ['.txt', '.dgp'],
+                // mimetype: 'text/plain',
+                // openTo: $U.getFilePickerDefaultBox(),
+                // onOpen: $U.getFilePickerDefaultBox(),
+            // }).then((res) => {
+              // canvas.OpenFile("", $U.utf8_decode(data));
+            // });
+    // };
 
-    var uploadProc = function() {
-        if (canvas.getConstruction().isEmpty())
-            return;
-        var source = canvas.macrosManager.getSource() + canvas.getConstruction().getSource() + canvas.textManager.getSource();
+    // var uploadProc = function() {
+        // if (canvas.getConstruction().isEmpty())
+            // return;
+        // var source = canvas.macrosManager.getSource() + canvas.getConstruction().getSource() + canvas.textManager.getSource();
 
 
 
-        filepicker.exportFile(
-            "http://dgpad.net/scripts/NotPacked/thirdParty/temp.txt", {
-                suggestedFilename: "",
-                extension: ".dgp",
-                services: ['DROPBOX', 'GOOGLE_DRIVE', 'BOX', 'SKYDRIVE', 'EVERNOTE', 'FTP', 'WEBDAV'],
-                openTo: $U.getFilePickerDefaultBox()
-            },
-            function(InkBlob) {
+        // filepicker.exportFile(
+            // "http://dgpad.net/scripts/NotPacked/thirdParty/temp.txt", {
+                // suggestedFilename: "",
+                // extension: ".dgp",
+                // services: ['DROPBOX', 'GOOGLE_DRIVE', 'BOX', 'SKYDRIVE', 'EVERNOTE', 'FTP', 'WEBDAV'],
+                // openTo: $U.getFilePickerDefaultBox()
+            // },
+            // function(InkBlob) {
                 // console.log(InkBlob.url);
-                filepicker.write(
-                    InkBlob,
-                    source, {
-                        base64decode: false,
-                        mimetype: 'text/plain'
-                    },
-                    // $U.base64_encode(source), {
-                    //     base64decode: true,
-                    //     mimetype: 'text/plain'
+                // filepicker.write(
+                    // InkBlob,
+                    // source, {
+                        // base64decode: false,
+                        // mimetype: 'text/plain'
                     // },
-                    function(InkBlob) {
-                        if ($FPICKERFRAME !== null) {
-                            $FPICKERFRAME.close();
-                            $FPICKERFRAME = null;
-                        }
-                    },
-                    function(FPError) {
-                        console.log(FPError.toString());
-                    }
-                );
-            },
-            function(FPError) {
-                console.log(FPError.toString());
-            }
-        );
+                    // $U.base64_encode(source), {
+                        // base64decode: true,
+                        // mimetype: 'text/plain'
+                    // },
+                    // function(InkBlob) {
+                        // if ($FPICKERFRAME !== null) {
+                            // $FPICKERFRAME.close();
+                            // $FPICKERFRAME = null;
+                        // }
+                    // },
+                    // function(FPError) {
+                        // console.log(FPError.toString());
+                    // }
+                // );
+            // },
+            // function(FPError) {
+                // console.log(FPError.toString());
+            // }
+        // );
 
-        //        filepicker.store(
-        //                $U.base64_encode(source),
-        //                {
-        //                    base64decode: true,
-        //                    mimetype: 'text/plain'
-        //                },
-        //        function(InkBlob) {
-        //            filepicker.exportFile(
-        //                    InkBlob,
-        //                    {suggestedFilename:"",extension: ".txt",openTo: $U.getFilePickerDefaultBox()},
-        //            function(InkBlob) {
-        //                if ($FPICKERFRAME !== null) {
-        //                    $FPICKERFRAME.close();
-        //                    $FPICKERFRAME = null;
-        //                }
-        //            },
-        //                    function(FPError) {
-        //                        console.log(FPError.toString());
-        //                    }
-        //            );
-        //        },
-        //                function(FPError) {
-        //                    console.log(FPError.toString());
-        //                }
-        //        );
-    };
+               // filepicker.store(
+                       // $U.base64_encode(source),
+                       // {
+                           // base64decode: true,
+                           // mimetype: 'text/plain'
+                       // },
+               // function(InkBlob) {
+                   // filepicker.exportFile(
+                           // InkBlob,
+                           // {suggestedFilename:"",extension: ".txt",openTo: $U.getFilePickerDefaultBox()},
+                   // function(InkBlob) {
+                       // if ($FPICKERFRAME !== null) {
+                           // $FPICKERFRAME.close();
+                           // $FPICKERFRAME = null;
+                       // }
+                   // },
+                           // function(FPError) {
+                               // console.log(FPError.toString());
+                           // }
+                   // );
+               // },
+                       // function(FPError) {
+                           // console.log(FPError.toString());
+                       // }
+               // );
+    // };
 
 
 
-    var arrowBtn = addBtnLeft("arrow", true, modeGroup, arrowMode);
+    var arrowBtn = addBtnLeft("arrow", true, modeGroup, arrowMode, $L.button_title_arrow, true);
     addSpaceLeft(hspace);
-    var fingerBtn = addBtnLeft("finger", false, modeGroup, fingerMode);
+//    var fingerBtn = addBtnLeft("finger", false, modeGroup, fingerMode, $L.button_title_finger);
+//    addSpaceLeft(hspace);
+    var gommeBtn = addBtnLeft("hide", false, modeGroup, hideMode, $L.button_title_gomme, true);
     addSpaceLeft(hspace);
-    var gommeBtn = addBtnLeft("gomme", false, modeGroup, hideMode);
+    var trashBtn = addBtnLeft("trash", false, modeGroup, trashMode, $L.button_title_trash, true);
     addSpaceLeft(hspace);
-    var trashBtn = addBtnLeft("trash", false, modeGroup, trashMode);
+    var macrosBtn = addBtnLeft("macros", false, modeGroup, macroMode, $L.button_title_macros, true);
     addSpaceLeft(hspace);
-    var macrosBtn = addBtnLeft("macros", false, modeGroup, macroMode);
+    var calcBtn = addBtnLeft("calc", false, modeGroup, calcMode, $L.button_title_calc, true);
     addSpaceLeft(hspace);
-    var calcBtn = addBtnLeft("calc", false, modeGroup, calcMode);
+    // if (!$U.isMobile.mobilePhone()) {
+    var texBtn = addBtnLeft("tex", false, modeGroup, texMode, $L.button_title_tex, true);
     addSpaceLeft(hspace);
-    if (!$U.isMobile.mobilePhone()) {
-        var texBtn = addBtnLeft("tex", false, modeGroup, texMode);
-        addSpaceLeft(hspace);
-    }
-    var propBtn = addBtnLeft("properties", false, modeGroup, propsMode);
+    // }
+    var propBtn = addBtnLeft("properties", false, modeGroup, propsMode, $L.button_title_properties, true);
     addSpaceLeft(smallhspace);
     addSepLeft();
     addSpaceLeft(smallhspace);
-    var historyBtn = addBtnLeft("history", false, null, historyProc);
+    var historyBtn = addBtnLeft("history", false, null, historyProc, $L.button_title_history,true);
     addSpaceLeft(hspace);
-    if (!$U.isMobile.mobilePhone()) {
-        var copyBtn = addBtnLeft("copy", false, null, exportProc);
-        addSpaceLeft(hspace);
-    }
+    // if (!$U.isMobile.mobilePhone()) {
+    var copyBtn = addBtnLeft("copy", false, null, exportProc, $L.button_title_copy, true);
+    addSpaceLeft(hspace);
+    // }
 
-    addBtnLeft("download", false, null, downloadProc);
-    addSpaceLeft(hspace);
-    addBtnLeft("upload", false, null, uploadProc);
+    // MEAG start -- retira botones
+    // addBtnLeft("download", false, null, downloadProc, $L.button_title_download);
+    // addSpaceLeft(hspace);
+    // addBtnLeft("upload", false, null, uploadProc, $L.button_title_upload);
+    // MEAG end
     addSpaceLeft(smallhspace);
     addSepLeft();
     addSpaceLeft(smallhspace);
-    var nameBtn = addBtnLeft("name", false, null, nameProc);
+    var nameBtn = addBtnLeft("name", false, null, nameProc, $L.button_title_name, true);
     addSpaceLeft(hspace);
-    var gridBtn = addBtnLeft("grid", false, null, gridProc);
-    var redoBtn = addBtnRight("redo", true, null, redoProc);
+    var gridBtn = addBtnLeft("grid", false, null, gridProc, $L.button_title_grid, true);
+    addSpaceLeft(hspace);
+    //MEAG
+    var zoomBtn = addBtnLeft("zoom", false, null, zoomProc, $L.button_title_zoom, true);
+    addSpaceLeft(hspace);
+
+    //JDIAZ
+    addSpaceLeft(hspace);
+    var longpBtn = addBtnLeft("OtherTools", false, null, longPressProc, $L.button_title_lPress, true);
+
+    
+    //JDIAZ
+
+    var redoBtn = addBtnRight("redo", true, null, redoProc, $L.button_title_redo, true);
     addSpaceRight(hspace);
-    var undoBtn = addBtnRight("undo", true, null, undoProc);
+    var undoBtn = addBtnRight("undo", true, null, undoProc, $L.button_title_undo, true);
 
     //    this.selectBtn = function(_mode) {
     //        switch (_mode) {
@@ -356,7 +408,8 @@ function ControlPanel(_canvas) {
     //    }
 
     this.selectPropBtn = function() {
-        propBtn.select();
+        
+		propBtn.select();
         propsMode();
     };
     this.selectCalcBtn = function() {
@@ -389,79 +442,85 @@ function ControlPanel(_canvas) {
         else nameBtn.deselect();
     };
 
-
+	this.disableButton = function (name){
+		me.buttons[name].setActive(false);
+	};
+	
+	this.enableButton = function (name){
+		me.buttons[name].setActive(true);
+	};
 }
 
 
-function FilePickerDIV(_c) {
-    var me = this;
-    var canvas = _c;
-    var ParentDOM = _c.getDocObject().parentNode;
-    var FPDiv = document.createElement("div");
-    FPDiv.setAttribute('width', canvas.getBounds().width);
-    FPDiv.setAttribute('height', canvas.getBounds().height);
-    FPDiv.style.position = "absolute";
-    FPDiv.style.left = (canvas.getBounds().left) + "px";
-    FPDiv.style.top = (canvas.getBounds().top) + "px";
-    FPDiv.style.width = (canvas.getBounds().width) + "px";
-    FPDiv.style.height = (canvas.getBounds().height) + "px";
-    FPDiv.style.backgroundColor = "rgba(0,0,0,0.75)";
+// function FilePickerDIV(_c) {
+    // var me = this;
+    // var canvas = _c;
+    // var ParentDOM = _c.getDocObject().parentNode;
+    // var FPDiv = document.createElement("div");
+    // FPDiv.setAttribute('width', canvas.getBounds().width);
+    // FPDiv.setAttribute('height', canvas.getBounds().height);
+    // FPDiv.style.position = "absolute";
+    // FPDiv.style.left = (canvas.getBounds().left) + "px";
+    // FPDiv.style.top = (canvas.getBounds().top) + "px";
+    // FPDiv.style.width = (canvas.getBounds().width) + "px";
+    // FPDiv.style.height = (canvas.getBounds().height) + "px";
+    // FPDiv.style.backgroundColor = "rgba(0,0,0,0.75)";
 
-    var FPsize = {
-        width: 820,
-        height: 520
-    };
-    var FPFrame = document.createElement("iframe");
-    FPFrame.setAttribute("ID", "FP_" + canvas.getID());
-    FPFrame.setAttribute('width', FPsize.width);
-    FPFrame.setAttribute('height', FPsize.height);
-    FPFrame.setAttribute('frameborder', 0);
-    FPFrame.setAttribute('marginheight', 0);
-    FPFrame.setAttribute('marginwidth', 0);
-    FPFrame.style.position = "absolute";
-    FPFrame.style.left = (canvas.getBounds().width - FPsize.width) / 2 + "px";
-    FPFrame.style.top = (canvas.getBounds().height - FPsize.height) / 2 + "px";
-    FPFrame.style.width = FPsize.width + "px";
-    FPFrame.style.height = FPsize.height + "px";
-    FPFrame.style.overflow = "hidden";
+    // var FPsize = {
+        // width: 820,
+        // height: 520
+    // };
+    // var FPFrame = document.createElement("iframe");
+    // FPFrame.setAttribute("ID", "FP_" + canvas.getID());
+    // FPFrame.setAttribute('width', FPsize.width);
+    // FPFrame.setAttribute('height', FPsize.height);
+    // FPFrame.setAttribute('frameborder', 0);
+    // FPFrame.setAttribute('marginheight', 0);
+    // FPFrame.setAttribute('marginwidth', 0);
+    // FPFrame.style.position = "absolute";
+    // FPFrame.style.left = (canvas.getBounds().width - FPsize.width) / 2 + "px";
+    // FPFrame.style.top = (canvas.getBounds().height - FPsize.height) / 2 + "px";
+    // FPFrame.style.width = FPsize.width + "px";
+    // FPFrame.style.height = FPsize.height + "px";
+    // FPFrame.style.overflow = "hidden";
 
-    var FPClose = document.createElement("img");
-    FPClose.style.position = "absolute";
-    FPClose.style.margin = "0px";
-    FPClose.style.padding = "0px";
-    FPClose.setAttribute('src', $APP_PATH + "NotPacked/images/dialog/closebox.svg");
-    FPClose.style.left = ((canvas.getBounds().width + FPsize.width) / 2 - 10) + "px";
-    FPClose.style.top = ((canvas.getBounds().height - FPsize.height) / 2 - 20) + "px";
-    FPClose.style.width = "30px";
-    FPClose.style.height = "30px";
-    FPClose.addEventListener('click', function(ev) {
-        ParentDOM.removeChild(FPDiv);
-    });
+    // var FPClose = document.createElement("img");
+    // FPClose.style.position = "absolute";
+    // FPClose.style.margin = "0px";
+    // FPClose.style.padding = "0px";
+    // FPClose.setAttribute('src', $APP_PATH + "NotPacked/images/dialog/closebox.svg");
+    // FPClose.style.left = ((canvas.getBounds().width + FPsize.width) / 2 - 10) + "px";
+    // FPClose.style.top = ((canvas.getBounds().height - FPsize.height) / 2 - 20) + "px";
+    // FPClose.style.width = "30px";
+    // FPClose.style.height = "30px";
+    // FPClose.addEventListener('click', function(ev) {
+        // ParentDOM.removeChild(FPDiv);
+    // });
 
-    FPDiv.appendChild(FPFrame);
-    FPDiv.appendChild(FPClose);
+    // FPDiv.appendChild(FPFrame);
+    // FPDiv.appendChild(FPClose);
 
-    me.div = function() {
-        return FPDiv;
-    };
+    // me.div = function() {
+        // return FPDiv;
+    // };
 
-    me.id = function() {
-        return ("FP_" + canvas.getID());
-    };
+    // me.id = function() {
+        // return ("FP_" + canvas.getID());
+    // };
 
-    me.frame = function() {
-        return FPFrame;
-    };
+    // me.frame = function() {
+        // return FPFrame;
+    // };
 
-    me.show = function() {
-        ParentDOM.appendChild(FPDiv);
-    };
+    // me.show = function() {
+        // ParentDOM.appendChild(FPDiv);
+    // };
 
-    me.close = function() {
-        ParentDOM.removeChild(FPDiv);
-    };
+    // me.close = function() {
+        // ParentDOM.removeChild(FPDiv);
+    // };
 
-}
+// }
 
 
 function windowOpenIFrame(url) {
