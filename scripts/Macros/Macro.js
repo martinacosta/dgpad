@@ -4,10 +4,12 @@
  */
 
 
-function Macro(_canvas, _name, _p, _proc) {
+function Macro(_canvas, _name, _p, _proc, _id) {
     this.name = _name;
     this.shortname = _name.split("/");
     this.shortname = this.shortname[this.shortname.length - 1];
+    this.id=_id;
+    
     var me = this;
     var paramTypes = _p;
     var exec = _proc;

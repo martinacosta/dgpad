@@ -383,7 +383,7 @@ if (!$APP_PATH) {
     if ($BODY_SCRIPT.hasAttribute("data-googleid")) {
         canvas.setAttribute("data-googleid", $BODY_SCRIPT.getAttribute("data-googleid"));
     }
-    // MEAG start
+    // MEAG start para diferenciar version profesores/estudiantes
     if ($BODY_SCRIPT.hasAttribute("data-version")) {
         canvas.setAttribute("data-version", $BODY_SCRIPT.getAttribute("data-version"));
     }

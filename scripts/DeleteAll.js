@@ -19,7 +19,8 @@ function DeleteAll(_canvas) {
         canvas.getConstruction().deleteAll();
         //        canvas.macrosManager.clearTools();
         canvas.textManager.clear();
-		inpsnames=Object.getOwnPropertyNames( canvas['TURTLE_INPUTS']);
+		//para borrar las casillas creadas con la tortuga
+        inpsnames=Object.getOwnPropertyNames( canvas['TURTLE_INPUTS']);
 		for (var i = 0;  i < inpsnames.length; i++) {
             canvas['TURTLE_INPUTS'][inpsnames[i]].remove();
         }

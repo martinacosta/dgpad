@@ -92,7 +92,7 @@ $P.precision.area = -1;
 $P.precision.angle = 1;
 $P.precision.fixedangle = 1;
 $P.precision.expression = 2;
-//MEAG start
+//MEAG start se quitó la medida de círculo
 $P.precision.circle = -1;
 //MEAG end
 
@@ -145,6 +145,7 @@ $P.MagnifierBounds.t = 10;
 $P.MagnifierBounds.w = 75;
 $P.MagnifierBounds.captureWidth = 75;
 
+//MEG parámetros de Monkey
 $P.MonkeyBounds = {};
 $P.MonkeyBounds.l = 10;
 $P.MonkeyBounds.t = 10;

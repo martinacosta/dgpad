@@ -228,11 +228,12 @@ function MainCalcPanel(_man, _canvas) {
 
     var segBtn = new ImageElt(me, "NotPacked/images/tools/bg_standard2.svg", transformToSegments, bleft - bwidth - bgap, btop, bwidth, bwidth);
     segBtn.addImage($APP_PATH + "NotPacked/images/tools/segment.svg");
-    // MEAG
+    // MEAG añde globo de texto con el nombre del icono segmento
     segBtn.setAttr("title", $L.tool_segment_button_calc);
 
     var pointBtn = new ImageElt(me, "NotPacked/images/tools/bg_standard2.svg", transformToPoints, bleft, btop, bwidth, bwidth);
     pointBtn.addImage($APP_PATH + "NotPacked/images/tools/point.svg");
+    //MEAG añade globo de texto con el nombre del icono punto
     pointBtn.setAttr("title", $L.tool_point_button_calc);
 
     var func1Btn = new ImageElt(me, "NotPacked/images/tools/bg_standard2.svg", transformToFunc, bleft, btop, bwidth, bwidth);
@@ -241,13 +242,13 @@ function MainCalcPanel(_man, _canvas) {
     func1Btn.setAttr("title", $L.tool_function_button_calc);
     bleft += bwidth + bgap;
     var validBtn = new ImageElt(me, "NotPacked/images/calc/valid.svg", me.valid, bleft, btop, bwidth, bwidth);
-    // MEAG
+    // MEAG añade globo de texto con el nombre de la herramienta validar
     validBtn.setAttr("title", $L.tool_validate_button_calc);
     // var validBtn = new ImageElt(me, "NotPacked/images/tools/function.svg", me.valid, bleft, btop, bwidth, bwidth);
     bleft += bwidth + bgap;
     var cancelBtn = new ImageElt(me, "NotPacked/images/calc/cancel.svg", me.cancel, bleft, btop, bwidth, bwidth);
     // var cancelBtn = new ImageElt(me, "NotPacked/images/tools/function.svg", me.cancel, bleft, btop, bwidth, bwidth);
-    // MEAG
+    // MEAG añade globo de texto con el nombre de la cruz
     cancelBtn.setAttr("title", $L.tool_cancel_button_calc);
     bleft += bwidth + bgap;
 
@@ -256,7 +257,7 @@ function MainCalcPanel(_man, _canvas) {
     KBBtn.setBounds(bleft, btop + (bwidth - 30) / 2, 48, 30);
     var KBBtn_img = new ImageElt(KBBtn, "NotPacked/images/calc/keyboard.png", null, 0, 0, 48, 30);
     // var KBBtn_img = new ImageElt(KBBtn, "NotPacked/images/tools/function.svg", null, 0, 0, 48, 30);
-    // MEAG
+    // MEAG añade globo de texto con el nombre del teclado
     KBBtn_img.setAttr("title", $L.tool_keyboard_button_calc);
     set_href(true);
     var doc = ($APPLICATION) ? window.parent.document.body : window.document.body;

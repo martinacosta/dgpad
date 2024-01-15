@@ -2,6 +2,7 @@ $macros = {};
 
 
 $macros[$L.macros.slope]={
+	id:"slope",
 	name:$L.macros.slope,
 	parameters:["line"],
 	exec:
@@ -14,6 +15,7 @@ return [E1];
 
 
 $macros[$L.macros.distance]={
+	id:"distance",
 	name:$L.macros.distance,
 	parameters:["point","point"],
 	exec:
@@ -25,6 +27,7 @@ return [blk_turtle_list_P1];
 }};
 
 $macros[$L.macros.distanceLine]={
+	id:"distanceLine",
 	name:$L.macros.distanceLine,
 	parameters:["line","point"],
 	exec:
@@ -42,6 +45,7 @@ return [blk_turtle_list_P1];
 }};
 
 $macros[$L.macros.RegPolCenter]={
+	id:"RegPolCenter",
 	name:$L.macros.RegPolCenter,
 	parameters:["point","point","expression"],
 	exec:
@@ -53,6 +57,7 @@ return [blk_turtle_list_P2];
 }};
 
 $macros[$L.macros.RegPolSide]={
+	id:"RegPolSide",
 	name:$L.macros.RegPolSide,
 	parameters:["point","point","expression"],
 	exec:
@@ -64,6 +69,7 @@ return [blk_turtle_list_P2];
 }};
 
 $macros[$L.macros.repere] = {
+	id:"repere",
     name: $L.macros.repere,
     parameters: ["point"],
     exec: function(O) {
@@ -89,6 +95,7 @@ $macros[$L.macros.repere] = {
 };
 
 $macros[$L.macros.coords3D] = {
+	id:"coords3D",
     name: $L.macros.coords3D,
     parameters: ["point"],
     exec: function(X) {
@@ -99,6 +106,7 @@ $macros[$L.macros.coords3D] = {
 };
 
 $macros[$L.macros.dist3D] = {
+	id:"dist3D",
     name: $L.macros.dist3D,
     parameters: ["point", "point"],
     exec: function(X, Y) {
@@ -109,7 +117,8 @@ $macros[$L.macros.dist3D] = {
 };
 
 $macros[$L.macros.norm3D] = {
-    name: $L.macros.norm3D,
+    id: "norm3D",
+	name: $L.macros.norm3D,
     parameters: ["area"],
     exec: function(Poly1) {
         Y = DefinitionPoint("Y", Poly1, 2);
@@ -126,6 +135,7 @@ $macros[$L.macros.norm3D] = {
 };
 
 $macros[$L.macros.perp3D] = {
+	id: "perp3D",
     name: $L.macros.perp3D,
     parameters: ["area", "point"],
     exec: function(Poly1, M1) {
@@ -149,6 +159,7 @@ $macros[$L.macros.perp3D] = {
 };
 
 $macros[$L.macros.circle3D3pts] = {
+	id: "circle3D3pts",
     name: $L.macros.circle3D3pts,
     parameters: ["point", "point", "point"],
     exec: function(P2, P1, P3) {
@@ -159,6 +170,7 @@ $macros[$L.macros.circle3D3pts] = {
 };
 
 $macros[$L.macros.circle3D] = {
+	id: "circle3D",
     name: $L.macros.circle3D,
     parameters: ["line", "point"],
     exec: function(L1, P) {
@@ -174,6 +186,7 @@ $macros[$L.macros.circle3D] = {
 };
 
 $macros[$L.macros.displayground] = {
+	id: "displayground",
     name: $L.macros.displayground,
     parameters: ["point"],
     exec: function(P1) {
@@ -217,6 +230,7 @@ $macros[$L.macros.displayground] = {
 };
 
 $macros[$L.macros.restrictTheta] = {
+	id: "restrictTheta",
     name: $L.macros.restrictTheta,
     parameters: [],
     exec: function() {
@@ -230,6 +244,7 @@ $macros[$L.macros.restrictTheta] = {
 };
 
 $macros[$L.macros.pt3Dwithdialog] = {
+	id: "pt3Dwithdialog",
     name: $L.macros.pt3Dwithdialog,
     parameters: [],
     exec: function(O) {
@@ -243,6 +258,7 @@ $macros[$L.macros.pt3Dwithdialog] = {
 };
 
 $macros[$L.macros.pt3Dwithoutdialog] = {
+	id: "pt3Dwithoutdialog",
     name: $L.macros.pt3Dwithoutdialog,
     parameters: ["expression"],
     exec: function(E1) {
@@ -255,6 +271,7 @@ $macros[$L.macros.pt3Dwithoutdialog] = {
 };
 
 $macros[$L.macros.edge] = {
+	id: "edge",
     name: $L.macros.edge,
     parameters: ["point", "point", "point", "point"],
     exec: function(B, F, H, E) {
@@ -268,6 +285,7 @@ $macros[$L.macros.edge] = {
 };
 
 $macros[$L.macros.solid_cube] = {
+	id: "solid_cube",
     name: $L.macros.solid_cube,
     parameters: ["point"],
     exec: function(P1) {
@@ -352,6 +370,7 @@ $macros[$L.macros.solid_cube] = {
 };
 
 $macros[$L.macros.inscribedcircle] = {
+	id: "inscribedcircle",
     name: $L.macros.inscribedcircle,
     parameters: ["point", "point", "point"],
     exec: function(A, B, C) {
@@ -369,6 +388,7 @@ $macros[$L.macros.inscribedcircle] = {
 };
 
 $macros[$L.macros.isosceles_triangle] = {
+	id: "isosceles_triangle",
     name: $L.macros.isosceles_triangle,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
@@ -382,6 +402,7 @@ $macros[$L.macros.isosceles_triangle] = {
 };
 
 $macros[$L.macros.right_triangle] = {
+	id:"right_triangle",
     name: $L.macros.right_triangle,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
@@ -395,6 +416,7 @@ $macros[$L.macros.right_triangle] = {
 };
 
 $macros[$L.macros.equilateral_triangle] = {
+	id: "equilateral_triangle",
     name: $L.macros.equilateral_triangle,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
@@ -409,6 +431,7 @@ $macros[$L.macros.equilateral_triangle] = {
 };
 
 $macros[$L.macros.carre] = {
+	id: "square",
     name: $L.macros.carre,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
@@ -433,6 +456,7 @@ $macros[$L.macros.carre] = {
 
 
 $macros[$L.macros.rectangle] = {
+	id: "rectangle",
     name: $L.macros.rectangle,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
@@ -456,6 +480,7 @@ $macros[$L.macros.rectangle] = {
 
 
 $macros[$L.macros.tangent] = {
+	id: "tangent",
     name: $L.macros.tangent,
     parameters: ["circle", "point"],
     exec: function(C1, P2) {
@@ -470,7 +495,8 @@ $macros[$L.macros.tangent] = {
     }
 };
 
-$macros[$L.macros.translation] = {
+/* $macros[$L.macros.translation] = {
+	id: "tr
     name: $L.macros.translation,
     parameters: ["point", "point", "point"],
     exec: function(P1, P2, P3) {
@@ -523,9 +549,10 @@ $macros[$L.macros.dilationdlog] = {
         STL(P3, "c:#0000b2;s:6;f:30");
         return [P3];
     }
-};
+}; */
 
 $macros[$L.macros.inversion] = {
+	id: "inversion",
     name: $L.macros.inversion,
     parameters: ["circle", "point"],
     exec: function(C1, P2) {
@@ -546,6 +573,7 @@ $macros[$L.macros.inversion] = {
 
 
 $macros[$L.macros.testalign] = {
+	id: "testalign",
     name: $L.macros.testalign,
     parameters: ["point", "point", "point"],
     exec: function(A, M, B) {
@@ -556,6 +584,7 @@ $macros[$L.macros.testalign] = {
 };
 
 $macros[$L.macros.testparal]={
+	id: "testparal",
 	name:$L.macros.testparal,
 	parameters:["line","line","point"],
 	exec:
@@ -570,6 +599,7 @@ return [blk_turtle_list_P6];
 
 
 $macros[$L.macros.conic5pts] = {
+	id: "conic5pts",
     name: $L.macros.conic5pts,
     parameters: ["point", "point", "point", "point", "point"],
     exec: function(A, B, C, D, E) {
@@ -579,6 +609,7 @@ $macros[$L.macros.conic5pts] = {
 };
 
 $macros[$L.macros.coniccenter] = {
+	id: "coniccenter",
     name: $L.macros.coniccenter,
     parameters: ["quadric"],
     exec: function(Quad) {
@@ -589,6 +620,7 @@ $macros[$L.macros.coniccenter] = {
 };
 
 $macros[$L.macros.conicfoci] = {
+	id: "conicfoci",
     name: $L.macros.conicfoci,
     parameters: ["quadric"],
     exec: function(Quad) {
@@ -603,6 +635,7 @@ $macros[$L.macros.conicfoci] = {
 
 
 $macros[$L.macros.pingpong] = {
+	id: "pingpong",
     name: $L.macros.pingpong,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
@@ -615,6 +648,7 @@ $macros[$L.macros.pingpong] = {
 
 
 $macros[$L.macros.segmentB1] = {
+	id: "segmentB1",
     name: $L.macros.segmentB1,
     parameters: ["line"],
     exec: function(S1) {
@@ -643,6 +677,7 @@ $macros[$L.macros.segmentB1] = {
 };
 
 $macros[$L.macros.segmentB2] = {
+	id: "segmentB2",
     name: $L.macros.segmentB2,
     parameters: ["line"],
     exec: function(S1) {
@@ -678,6 +713,7 @@ $macros[$L.macros.segmentB2] = {
 };
 
 $macros[$L.macros.segmentB3] = {
+	id: "segmentB3",
     name: $L.macros.segmentB3,
     parameters: ["line"],
     exec: function(S1) {
@@ -720,6 +756,7 @@ $macros[$L.macros.segmentB3] = {
 };
 
 $macros[$L.macros.segmentB4] = {
+	id: "segmentB4",
     name: $L.macros.segmentB4,
     parameters: ["line"],
     exec: function(S1) {
@@ -769,6 +806,7 @@ $macros[$L.macros.segmentB4] = {
 };
 
 $macros[$L.macros.segmentBO] = {
+	id: "segmentBO",
     name: $L.macros.segmentBO,
     parameters: ["line"],
     exec: function(S1) {
@@ -796,6 +834,7 @@ $macros[$L.macros.segmentBO] = {
 };
 
 $macros[$L.macros.segmentBZ] = {
+	id: "segmentBZ",
     name: $L.macros.segmentBZ,
     parameters: ["line"],
     exec: function(S1) {

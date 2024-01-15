@@ -131,6 +131,7 @@ window.addEventListener("message",function(s){
         return tab
     };
 	
+    //funciones para recuperar objetos
 	me.getAllObjectsFromType = function(_t) {
         var tab = [];
         for (var i = 0; i < V.length; i++) {
@@ -504,7 +505,8 @@ window.addEventListener("message",function(s){
         params = [];
         varnames = [];
         canvas.getInterpreter().BLK_GLOB_DELETE();
-		if (!canvas['TURTLE_INPUTS']) {
+		//para borrar las casillas de input creadas con la tortuga
+        if (!canvas['TURTLE_INPUTS']) {
 			canvas['TURTLE_INPUTS'] = {};
 			
 		}
@@ -846,7 +848,7 @@ window.addEventListener("message",function(s){
                 delete AO[_o.getName()];
                 delete VARS[AV[_o.getName()]];
                 delete AV[_o.getName()];
-                //MEAG remover elemento
+                //MEAG remover descripcion construccion
                 me.getFrame().removeTextCons(_o);
             }
         }
@@ -1277,6 +1279,7 @@ window.addEventListener("message",function(s){
         return false;
     };
 
+    //se añadieron parámetros
     me.getSource = function(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version) {
         var len = V.length;
         if (len > 0) {
@@ -1298,8 +1301,9 @@ window.addEventListener("message",function(s){
             }
             var txt = "// Coordinates System :\n";
             txt += me.coordsSystem.getSource();
-			if (hide_ctrl_panel){txt+="GetCanvas().ctrl_show(false);";};
-			
+			//comando para ocultar/mostrar barra de herramientas
+            if (hide_ctrl_panel){txt+="GetCanvas().ctrl_show(false);";};
+			//comando para habilitar/deshabilitar zoom
 			if (disablezoom) {txt+="\nenableZoom(false);\n";};
             txt += "\n\n// Geometry :\n";
             txt += src.getGeom();
@@ -1312,7 +1316,8 @@ window.addEventListener("message",function(s){
                 txt += src.getBlock();
             };
             txt += me.getInterpreter().BLK_GLOB_SRC();
-			if (fixdgscripts) {txt+='var bool=true;\n if ((!GetCanvas().hasOwnProperty("fix_expression"))||(GetCanvas()["fix_expression"]!==bool)){\n names=GetCanvas().getConstruction().getNames();\n for (var i = 0, len = names.length; i < len; i++) {\n obj=names[i];\n obj=GetCanvas().getConstruction().find(obj);\n 	isExp=((obj.getCode()==="expression")||(obj.getCode()==="blockly_button"));\n if (isExp) {\n if (!obj.hasOwnProperty("fix_utility_dragTo")) {\n 				obj["fix_utility_dragTo"]=obj["dragTo"];\n }\n if (bool) {\n obj["dragTo"]=function(){};\n }\n else {obj["dragTo"]=blockly_var_obj["fix_utility_dragTo"]}\n }\n }\n };\n GetCanvas()["fix_expression"]=bool;';};
+			//comando para fijar/liberar dgscripts
+            if (fixdgscripts) {txt+='var bool=true;\n if ((!GetCanvas().hasOwnProperty("fix_expression"))||(GetCanvas()["fix_expression"]!==bool)){\n names=GetCanvas().getConstruction().getNames();\n for (var i = 0, len = names.length; i < len; i++) {\n obj=names[i];\n obj=GetCanvas().getConstruction().find(obj);\n 	isExp=((obj.getCode()==="expression")||(obj.getCode()==="blockly_button"));\n if (isExp) {\n if (!obj.hasOwnProperty("fix_utility_dragTo")) {\n 				obj["fix_utility_dragTo"]=obj["dragTo"];\n }\n if (bool) {\n obj["dragTo"]=function(){};\n }\n else {obj["dragTo"]=blockly_var_obj["fix_utility_dragTo"]}\n }\n }\n };\n GetCanvas()["fix_expression"]=bool;';};
 
             //            if (me.isAxisUsed()) txt+=me.coordsSystem.getStyle();
             return txt;
@@ -1771,7 +1776,7 @@ window.addEventListener("message",function(s){
     var animations_delay = 2;
     var animations_ctrl = null;
 
-    // MEAG start
+    // MEAG start para controlar animaciones Interpreter y blockly
     me.getCtrlAnimation = function() {
       return animations_ctrl;
     }

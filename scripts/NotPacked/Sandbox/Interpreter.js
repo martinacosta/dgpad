@@ -185,7 +185,7 @@ function Interpreter(_win, _canvas) {
             if ($macros) {
                 for (var i in $macros) {
                     if ($macros.hasOwnProperty(i)) {
-                        me.Z.macrosManager.addPlugin($macros[i].name, $macros[i].parameters, $macros[i].exec);
+                        me.Z.macrosManager.addPlugin($macros[i].name, $macros[i].parameters, $macros[i].exec, $macros[i].id);
                     }
                 }
             }
@@ -972,6 +972,32 @@ var EnsayoInput = function () {
 			me.Z.disabledTools(disTools);
 		}
 	}
+
+    //funcion para desactivar macros. El parámetro de esta función es una lista entre ["slope","distance","distanceLine","RegPolCenter","RegPolSide","repere","coords3D","dist3D","norm3D","perp3D","circle3D3pts","circle3D","displayground","restrictTheta","pt3Dwithdialog","pt3Dwithoutdialog","edge","solid_cube","inscribedcircle","isosceles_triangle","right_triangle","equilateral_triangle","square","rectangle","tangent","inversion","testalign","testparal","conic5pts","coniccenter","conicfoci","pingpong","segementB1","segementB2","segementB3","segementB4","segementBO","segementBZ"]; 
+    var disabledPlugins = function(_a) {
+        me.Z.disabledPlugins(_a);
+      }
+      
+      //función para desactivar una macro (escribirla entre comillas)
+      var disableOnePlugin = function (tool) {
+          
+          pos = me.Z.gethidePlugins().indexOf(tool);
+          disPlugins=me.Z.gethidePlugins()
+          if (pos==-1) {
+              disPlugins.push(tool);
+              me.Z.disabledPlugins(disPlugins);
+          }
+      }
+          
+      //función para reactivar una macro
+      var enablePlugin = function (tool){
+          pos= me.Z.gethidePlugins().indexOf(tool);
+          disPlugins=me.Z.gethidePlugins()
+          if (pos>-1) {
+              displugins.splice(pos, 1);
+              me.Z.disabledPlugins(disTools);
+          }
+      }
 	
 	// funciones para desactivar/activar los botones de la barra de herramientas (ctrlPanel)
 	// dependen de funciones en Canvas y ControlPanel

@@ -1,5 +1,6 @@
 //************************************************
-//**************** AREA CONSTRUCTOR **************
+//**************** ANGLEBISSECTOR CONSTRUCTOR **************
+// MEAG Esta herramienta cambió de ser semirrecta a ser recta
 //************************************************
 function AngleBisectorConstructor() {
     $U.extend(this, new ObjectConstructor()); //Herencia

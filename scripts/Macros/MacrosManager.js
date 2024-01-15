@@ -23,12 +23,20 @@ function MacrosManager(_canvas) {
             return 1;
     };
 
-    var loadPluginsList = function() {
+    //Modificación para controlar cuáles macros se cargan
+	var loadPluginsList = function() {
+		
         for (var i = 0, len = plugins.length; i < len; i++) {
-            macroPanel.addPlugins(plugins[i]);
+			pos= canvas.gethidePlugins().indexOf(plugins[i].id);
+            console.log(plugins[i].id);
+            console.log(pos)
+			if (pos===-1) {
+				macroPanel.addPlugins(plugins[i]);
+			}
         }
         macroPanel.showPlugins();
     };
+    //fin MEAG
     var loadToolsList = function() {
         tools.sort(macrosSortFilter);
         for (var i = 0, len = tools.length; i < len; i++) {
@@ -119,9 +127,9 @@ function MacrosManager(_canvas) {
         tools.push(m);
         return m;
     };
-
-    me.addPlugin = function(_n, _p, _e) {
-        var m = new Macro(canvas, _n, _p, _e);
+    console.log(this);
+    me.addPlugin = function(_n, _p, _e, _id) {
+        var m = new Macro(canvas, _n, _p, _e, _id);
         plugins.push(m);
         return m;
     };

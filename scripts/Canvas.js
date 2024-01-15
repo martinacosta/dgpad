@@ -29,6 +29,7 @@ function Canvas(_id) {
     var height = 0;
 
     // MEAG start
+    //función para bloquear/habilitar el zoom
     var stateZoom = true;
     me.enableZoom = function(_b) {
       if(_b === true) {
@@ -42,11 +43,13 @@ function Canvas(_id) {
       return docObject.getAttribute("data-version");
     }
 
+    //variable para definir las herramientas ocultas
     var hideTools = [];
     me.gethideTools = function() {
       return hideTools;
     }
     var token = null;
+    //función para deshabilitar herramientas
     me.disabledTools = function(_a) {
 	if($U.isArray(_a)){	
       // if (!token) {
@@ -60,7 +63,29 @@ function Canvas(_id) {
 		token= null;
 	}
     // MEAG end
+    //función para deshabilitar macros
+    var hidePlugins = [];
+	
+    me.gethidePlugins = function() {
+      return hidePlugins;
+    }
+	
+    var token2 = null;
+    me.disabledPlugins = function(_a) {
+	if($U.isArray(_a)){	
+      // if (!token) {
+        hidePlugins = _a;
+        // token = Math.random();
+	  // }
+      }
+    }
+	
+	me.resetToken2= function () {
+		token2= null;
+	}
+    // MEAG end
 
+    //función para obtener el código, sirve para guardar el archivo. Los parámetros sirven para definir si se muestra la barra de herramientas, se fijan los widgets y los dgscripts, zoom habilitado/deshabilitado, dgpad local/internet, profesores/estudiantes
     me.getSource = function(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version) {
       //MEAG
       // if (!stateZoom) {
@@ -93,7 +118,7 @@ function Canvas(_id) {
         var _frm = "dgpad_frame_" + d.getTime();
         //MEAG
         
-        //se modifica el valor de action
+        //se modifica el valor de action para definir si busca dgpad local o de internet, profesores/estudiantes
 		if (local){var urldgpad = "http://localhost:8080";if (version){urldgpad=urldgpad+"/profesores";}else {urldgpad=urldgpad+"/estudiantes";};}else {var urldgpad = "https://dgpad-colombia.udistrital.edu.co";if (version){urldgpad=urldgpad+"/profesores.html";}else {urldgpad=urldgpad+"/estudiantes.html";};};
 		
         var s = '<form action="' + urldgpad + '" target="' + _frm + '" method="post" width="' + _w + '" height="' + (_h + 40) + '">';
@@ -132,7 +157,7 @@ function Canvas(_id) {
         };
         //MEAG
         
-        //se modifica el valor de action
+        //se modifica el valor de action para definir si dgpad es local/internet
         var s = '<form action="' + window.location.pathname +'" target="' + _frm + '" method="post" width="' + _w + '" height="' + (_h + 40) + '">';
         s += '<input type="hidden" name="file_content" value="' + _src + '">';
         if (hide_ctrl_panel)
@@ -411,6 +436,7 @@ function Canvas(_id) {
             //definen ancho y alto de canvas
             width = cw;
             height = ch;
+            //para devolver el zoom
             scale_zoom = 1.5 * $P.localstorage.iconwidth / Math.max(width, height);
             docObject.style.top = ct + "px";
             docObject.style.left = cl + "px";
@@ -678,6 +704,7 @@ function Canvas(_id) {
     me.getHeight = function() {
         return height;
     };
+    //para deshacer el zoom
     me.getScale = function() {
         return scale_zoom;
     };
@@ -1348,6 +1375,7 @@ function Canvas(_id) {
         }
     };
 
+    //se añadió parámetro para mostrar la lupa
     me.mouseClicked = function(ev) {me.magnifyManager.magnifierPaint(actualCoords);};
 
 
@@ -1774,6 +1802,7 @@ function Canvas(_id) {
         if (Cn.isDEG()) t += ";degree:true";
         else t += ";degree:false";
         t += ";dragmoveable:" + Cn.isDragOnlyMoveable();
+        //parámetro para mostrar la lupa
 		t += ";magniferOn:"+me.magnifyManager.getMagnifierMode();
         // if (Cn.isDragOnlyMoveable()) t += ";dragmoveable:true";
         t += "\");\n";

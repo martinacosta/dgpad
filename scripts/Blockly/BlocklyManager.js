@@ -11,7 +11,7 @@
            path1 + "msg/js/" + $L.blockly.lang,
            path1 + "perso/hacks.js",
            path1 + "perso/blocks/core.js",
-           //MEAG start
+           //MEAG start menús acciones y restricciones
            path1 + "perso/blocks/actions.js",
 		   path1 + "perso/blocks/restrictions.js",
 		   //path1 + "perso/blocks/geometry.js"
@@ -24,7 +24,7 @@
            path1 + "perso/blocks/globals.js",
            path1 + "perso/blocks/text.js",
            path1 + "perso/js/core.js",
-           //MEAG start
+           //MEAG start menús acciones y restricciones
            path1 + "perso/js/actions.js",
 		   path1 + "perso/js/restrictions.js",
            //MEAG end

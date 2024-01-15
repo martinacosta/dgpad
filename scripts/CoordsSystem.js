@@ -4,6 +4,7 @@ function CoordsSystem(_C) {
     var P = Cn.prefs; // Properties
     var OX = null;
     var OY = null;
+    //cambio para que la unidad sea relativa
     var Unit = Cn.getBounds().width /30; // x and y Axis units, in pixels
     var x0 = Cn.getBounds().width / 2; // x origin coord, in canvas coord system
     var y0 = Cn.getBounds().height / 2; // y origin coord, in canvas coord system
@@ -75,7 +76,7 @@ function CoordsSystem(_C) {
         Unit *= _h;
     };
 
-
+    //se eliminó parámetro no_clear_track
     me.translate = function(_xt, _yt) {
         Cn.getTrackManager().clear();
         _yt = (me.islockOx()) ? 0 : _yt;

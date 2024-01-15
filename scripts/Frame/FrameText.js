@@ -1,6 +1,7 @@
 /*
 To change this template, choose Tools | Templates
 and open the template in the editor.
+Cuadro de texto con la descripción de la construcción
 */
 
 function FrameText(_construction) {

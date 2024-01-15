@@ -36,7 +36,7 @@ $INCLUDE("Properties/PropertiesPanel.js");
 $INCLUDE("ControlPanel/ControlButton.js");
 $INCLUDE("ControlPanel/ControlPanel.js");
 $INCLUDE("Export/ExportPanel.js");
-// MEAG start
+// MEAG start extensión descripción construcción
 $INCLUDE("Frame/FrameText.js");
 $INCLUDE("Frame/FrameWrapper.js");
 $INCLUDE("Objects/TranslationObject.js");
@@ -118,7 +118,7 @@ $INCLUDE("Objects/Circle3ptsObject_3D.js");
 $INCLUDE("Objects/VectorObject.js");
 $INCLUDE("Objects/BlocklyButtonObject.js");
 
-//JDIAZ
+//JDIAZ extensión rotación, homotecia
 $INCLUDE("Objects/RotationObject.js");
 $INCLUDE("Objects/RotationPointObject.js");
 $INCLUDE("Objects/RotationSegmentObject.js");
@@ -169,7 +169,7 @@ $INCLUDE("Constructors/CallMagnet.js");
 $INCLUDE("Constructors/CallDepends.js");
 $INCLUDE("Constructors/CallList.js");
 $INCLUDE("Constructors/CallTrash.js");
-// MEAG start
+// MEAG start iconos ocultar y medida en menú contextual
 $INCLUDE("Constructors/CallHide.js");
 $INCLUDE("Constructors/CallValue.js");
 // MEAG end
@@ -209,6 +209,7 @@ $INCLUDE("SymbolicCompute.js");
 $INCLUDE("Expression.js");
 $INCLUDE("Magnifier/MagnifierManager.js");
 $INCLUDE("Magnifier/MagnifierPanel.js");
+//herramienta Mico
 $INCLUDE("Magnifier/MonkeyPanel.js");
 $INCLUDE("Magnifier/DemoModeManager.js");
 $INCLUDE("Magnifier/DemoModePanel.js");
@@ -217,10 +218,10 @@ $INCLUDE("Names/NamesPanel.js");
 $INCLUDE("Blockly/BlocklyManager.js");
 $INCLUDE("Blockly/BlocklyPanel.js");
 $INCLUDE("Blockly/TurtleObject.js");
-//JDIAZ 12/05
+//JDIAZ 12/05 (Mostrar todos los objetos ocultos)
 $INCLUDE("Eraser/ShowAll.js");
 //JDIAZ end
-//JDIAZ 12/12");
+//JDIAZ 12/12"(herramienta intersección));
 $INCLUDE("Constructors/IntersectionConstructor.js");
 //JDIAZ 02/01
 $INCLUDE("Objects/LineIntersectionObject.js");

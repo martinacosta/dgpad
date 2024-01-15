@@ -1,5 +1,5 @@
 //************************************************
-//***************** ARC CONSTRUCTOR **************
+//***************** ANGLE CONSTRUCTOR **************
 //************************************************
 function AngleConstructor() {
     $U.extend(this, new ObjectConstructor()); //Herencia

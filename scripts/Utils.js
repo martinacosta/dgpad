@@ -8,6 +8,7 @@ $U.DE_height = (localStorage.getItem("doceval_height")) ? parseInt(localStorage.
 $U.DE_question = (localStorage.getItem("doceval_question")) ? localStorage.getItem("doceval_question") : ""; // DocEval question
 $U.nullproc = function() {};
 
+//escala para que las figuras conserven las proporciones en pantallas diferentes
 $U.escala=1; 
 
 $U.lang = function() {
@@ -1154,7 +1155,7 @@ $U.prompt = function(_mess, _default, _type, _proc, _w, _h, _inp_w) {
         if (!Object.touchpad) inp.focus();
     }, 200);
 }
-
+//MEAG
 $U.confirm = function(_mess,  _w, _h) {
 
     return new Promise((resolve, reject) => {
@@ -1238,7 +1239,7 @@ $U.confirm = function(_mess,  _w, _h) {
         }, 1);
     });
 }
-
+//MEAG
 
 $U.clearOneLocalStorage = function() {
     // On parcours le localstorage tant qu'on rencontre un élément verrouillé :
@@ -1492,9 +1493,11 @@ $U.initEvents = function(ZC, cTag) {
                 window.$CANVAS.setFullScreen();
                 break;
             case "repaint":
+                //MEAG comienzo
                 setTimeout(function() {
                     window.$CANVAS.setFullScreen();
                     window.$CANVAS.getConstruction().computeAll();
+                    //MEAG fin
                     window.$CANVAS.paint();
                 }, 500);
                 break;
@@ -1562,6 +1565,7 @@ $U.initCanvas = function(_id) {
     if (cTag.hasAttribute("data-presentation")) {
         ZC.demoModeManager.setDemoMode(cTag.getAttribute("data-presentation").toLowerCase() === "true");
     };
+    //variables para ancho y alto de ventana
 		$U.winW = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
         $U.winH = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
     // ZC.setMode(1);
@@ -1602,13 +1606,13 @@ $U.initCanvas = function(_id) {
     ZC.addTool(new BlocklyConstructor());
     ZC.addTool(new DocEvalConstructor());
     ZC.addTool(new DGScriptNameConstructor());
-    // MEAG start
+    // MEAG start herramientas ocultar, medida, traslación
     ZC.addTool(new CallHide());
     ZC.addTool(new CallValue());
 	ZC.addTool(new TranslationConstructor());
     // MEAG end
 
-    //JDIAZ
+    //JDIAZ herramientas quitar medida, quitar nombre, rotación homotecia
     ZC.addTool(new RemoveValue());
 	ZC.addTool(new RemoveName());
     ZC.addTool(new RotationConstructor());
