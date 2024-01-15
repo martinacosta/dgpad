@@ -30,7 +30,7 @@ function MacrosManager(_canvas) {
 			pos= canvas.gethidePlugins().indexOf(plugins[i].id);
             console.log(plugins[i].id);
             console.log(pos)
-			if (pos=-1) {
+			if (pos===-1) {
 				macroPanel.addPlugins(plugins[i]);
 			}
         }
