@@ -994,8 +994,8 @@ var EnsayoInput = function () {
           pos= me.Z.gethidePlugins().indexOf(tool);
           disPlugins=me.Z.gethidePlugins()
           if (pos>-1) {
-              displugins.splice(pos, 1);
-              me.Z.disabledPlugins(disTools);
+              disPlugins.splice(pos, 1);
+              me.Z.disabledPlugins(disPlugins);
           }
       }
 	
