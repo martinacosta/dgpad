@@ -215,19 +215,11 @@
                var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
                xml = Blockly.Xml.domToText(xml);
                localStorage.setItem("blockly_clipboard", xml);
-
-               // workspace2PNG();
-
-
-               // var aa = new XMLSerializer().serializeToString(Blockly.svg);
-               // prompt(aa);
            };
 
            Blockly.custom_menu_print = function() {
                var svg = workspace2SVG();
-               // svg = svg.replace(/&gt;/g, "@@@@GT@@@@");
-               // svg = svg.replace(/&lt;/g, "@@@@LT@@@@");
-               var svgsrc = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
+                var svgsrc = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
                svgsrc += svg;
 
                if (window.$OS_X_APPLICATION) {
@@ -359,41 +351,163 @@
        }
 
 
-       // Appelée chaque fois que quelque chose change
-       // dans le workspace de Blockly :
-	   // llamada cada vez que algo cambia
-       // en el espacio de trabajo de Blockly :
-       var onchanged = function() {
-           // console.log("onchanged : " + OBJ.getName());
-           // Bloquer l'évenement "onchanged" quand on vient d'éditer un objet :
-		   // Bloquear el evento "onchanged" cuando se acaba de editar un objeto:
-           if (from_edit) {
-               from_edit = false;
-               return
-           }
-           if (OBJ) {
-               var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
-               var mod = OBJ.blocks.getMode()[panel.getMode()];
-               if (xml.innerHTML === "") {
-                   OBJ.blocks.setBehavior(mod, null, null, null);
-                   me.resetTurtle(OBJ.getVarName());
-               } else {
-                   xml = Blockly.Xml.domToText(xml);
-                   Blockly.dgpad.VARS = [];
-                   Blockly.dgpad.PARS = [];
-                   var snc = Blockly.JavaScript.workspaceToCode(workspace);
-                   OBJ.blocks.setBehavior(mod, xml, snc, null);
-                   OBJ.blocks.setChilds(mod, Blockly.dgpad.VARS);
-                   OBJ.blocks.setParents(mod, Blockly.dgpad.PARS);
-               }
-               Cn.orderObjects();
-               if (mod !== "onprogram") {
-                   OBJ.blocks.evaluate(mod);
-                   Cn.computeAll();
-                   canvas.paint();
-               }
-           }
-       };
+       
+
+    var onchanged = function(e) {
+    
+        // Bloquer l'évenement "onchanged" quand on vient d'éditer un objet :
+        // Bloquear el evento "onchanged" cuando se acaba de editar un objeto:
+        if (from_edit) {
+            from_edit = false;
+            return
+        }
+
+        if (e.type === Blockly.Events.DELETE) {
+
+            let inputs = canvas.getInputs();
+            // Verificar si hay múltiples bloques eliminados
+            var deletedBlockIds = e.ids || [e.blockId];
+            const workspace = Blockly.getMainWorkspace();
+        
+            for (var i = 0; i < deletedBlockIds.length; i++) {
+                var blockId = deletedBlockIds[i];
+                let inputid = blockId + "A";
+                const selector = `#${CSS.escape(inputid)}`;
+                let input = canvas.getDocObject().parentNode.querySelector(selector);
+        
+                // Verificar si el bloque está en el origen y eliminar el input si es necesario
+                if (!Blockly.getObj().blocks.getSource().includes(blockId)) {
+                    if (input) {
+                        delete inputs[input.name];
+                        canvas.setInputs(inputs);
+                        input.remove();
+                        input = null;
+                    }
+                }
+        
+                
+                if (e.oldXml) {
+                    if (typeof e.oldXml === 'object') {
+                        // Convertir el objeto a una cadena XML si es necesario
+                        e.oldXml = new XMLSerializer().serializeToString(e.oldXml);
+                    }
+                
+                    // console.log("Contenido de e.oldXml:", e.oldXml);
+                
+                    // Envolver el XML en una etiqueta raíz si es necesario
+                    const xmlContent = `<xml>${e.oldXml}</xml>`;
+                    // console.log("XML envuelto:", xmlContent);
+                
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
+                
+                    const parseError = xmlDoc.getElementsByTagName('parsererror');
+                    if (parseError.length > 0) {
+                        console.error("Error en el análisis del XML:", parseError[0].textContent);
+                        return;
+                    }
+                
+                    const blocks = xmlDoc.getElementsByTagName("block");
+                    // console.log("Bloques encontrados:", blocks);
+                
+                    for (let i = 0; i < blocks.length; i++) {
+                        const block = blocks[i];
+                        // console.log("Bloque encontrado:", block);
+                        const blockType = block.getAttribute("type");
+                        // console.log("Tipo de bloque:", blockType);
+                        const blockId = block.getAttribute("id");
+                        // console.log("ID del bloque:", blockId);
+                
+                        if (blockType === 'dgpad_actions_iman') {
+                            // console.log("Procesando bloque de tipo 'dgpad_actions_iman'");
+                
+                            const fields = block.getElementsByTagName("field");
+                            let imantadoObj = null;
+                            let imantadoPto = null;
+                
+                            for (let j = 0; j < fields.length; j++) {
+                                const field = fields[j];
+                                const fieldName = field.getAttribute("name");
+                                const fieldValue = field.textContent;
+                
+                                // console.log("Campo encontrado:", fieldName, "Valor:", fieldValue);
+                
+                                if (fieldName === "NAME") {
+                                    // Dependiendo del bloque, decide si este es el nombre del objeto a imantar
+                                    if (!imantadoObj) {
+                                        imantadoObj = fieldValue;
+                                    } else {
+                                        imantadoPto = fieldValue;
+                                    }
+                                }
+                            }
+                
+                            // Manejo del campo OBJ1 si está presente en el XML
+                            const valueNodes = block.getElementsByTagName("value");
+                            for (let k = 0; k < valueNodes.length; k++) {
+                                const valueNode = valueNodes[k];
+                                const nestedBlock = valueNode.getElementsByTagName("block")[0];
+                                if (nestedBlock) {
+                                    const nestedFields = nestedBlock.getElementsByTagName("field");
+                                    for (let l = 0; l < nestedFields.length; l++) {
+                                        const nestedField = nestedFields[l];
+                                        const nestedFieldName = nestedField.getAttribute("name");
+                                        const nestedFieldValue = nestedField.textContent;
+                
+                                        // console.log("Campo anidado encontrado:", nestedFieldName, "Valor:", nestedFieldValue);
+                
+                                        if (nestedFieldName === "NAME") {
+                                            imantadoPto = nestedFieldValue;
+                                        }
+                                    }
+                                }
+                            }
+                
+                            if (imantadoObj && imantadoPto) {
+                                // console.log("Valores de los campos:", imantadoPto, imantadoObj);
+                                Cn.getInterpreter().Interpret(`imantar("${imantadoPto}", "${imantadoObj}", 0);`);
+
+                            } else {
+                                console.error("Error: Los valores del bloque no son válidos.", imantadoObj, imantadoPto);
+                            }
+                        } 
+                    }
+                } 
+                
+                
+                
+                
+            }
+        }
+        
+        
+        
+        if (OBJ) {
+            var xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+            var mod = OBJ.blocks.getMode()[panel.getMode()];
+            if (xml.innerHTML === "") {
+                OBJ.blocks.setBehavior(mod, null, null, null);
+                me.resetTurtle(OBJ.getVarName());
+            } else {
+                xml = Blockly.Xml.domToText(xml);
+                Blockly.dgpad.VARS = [];
+                Blockly.dgpad.PARS = [];
+                var snc = Blockly.JavaScript.workspaceToCode(workspace);
+                OBJ.blocks.setBehavior(mod, xml, snc, null);
+                OBJ.blocks.setChilds(mod, Blockly.dgpad.VARS);
+                OBJ.blocks.setParents(mod, Blockly.dgpad.PARS);
+                
+            }
+            Cn.orderObjects();
+            if (mod !== "onprogram") {
+                OBJ.blocks.evaluate(mod);
+                Cn.computeAll();
+                canvas.paint();
+            }
+        }
+    };
+
+       
 
        var addScript = function(_scpnum) {
            var next = _scpnum + 1;
