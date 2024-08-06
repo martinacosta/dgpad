@@ -29,6 +29,7 @@ function BlocklyPanel(_owner, _canvas, _closeCallback, _currentTabCallBack, _hei
     var tab_gap = 5; // gap between tabs
     var tab_left_margin = 133; // space before tabs
     var current_tab = -1; // Current selected tab
+    var isClosing = false;
 
 
     me.getMode = function() {
@@ -88,22 +89,7 @@ function BlocklyPanel(_owner, _canvas, _closeCallback, _currentTabCallBack, _hei
         }
     }
 
-    me.hide = function(_ev) {
-        // Reload workspace to avoid focuses inputs to be
-        // displayed onto the dgpad canvas :
-        canvas.blocklyManager.reload_workspace();
-        _closeCallback();
-        canvas.setNoMouseEvent(true);
-        // _ev.stopPropagation();
-        _ev.preventDefault();
-        setTimeout(function() {
-            wp.stls("transform:scale(0)");
-        }, 1);
-        setTimeout(function() {
-            // if (typeof Blockly !== 'undefined') Blockly.fireUiEvent(window, 'resize');
-            _owner.removeChild(wp);
-        }, 210);
-    };
+    
 
     me.show = function() {
         if (wp.parentNode === null) _owner.appendChild(wp);
@@ -111,9 +97,27 @@ function BlocklyPanel(_owner, _canvas, _closeCallback, _currentTabCallBack, _hei
             wp.stls("transform:scale(1)");
         }, 1);
         setTimeout(function() {
-            me.setbounds(left, top, width, height)
+            me.setbounds(left, top, width, height);
+            isPanelOpen = true;  // Actualizar el estado a abierto
+            isClosing = false;   // Resetear el flag de cierre
         }, 310);
     };
+    
+    me.hide = function(_ev) {
+        canvas.blocklyManager.reload_workspace();
+        _closeCallback();
+        canvas.setNoMouseEvent(true);
+        _ev.preventDefault();
+        setTimeout(function() {
+            wp.stls("transform:scale(0)");
+        }, 1);
+        setTimeout(function() {
+            _owner.removeChild(wp);
+            isPanelOpen = false;  // Actualizar el estado a cerrado
+            isClosing = true;     // Establecer el flag de cierre
+        }, 210);
+    };
+    
 
     me.isHidden = function() {
         return (wp.parentNode === null);
