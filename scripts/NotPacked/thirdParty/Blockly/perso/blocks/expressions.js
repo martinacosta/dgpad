@@ -322,3 +322,78 @@ Blockly.Blocks['dgpad_print'] = {
         this.setHelpUrl('');
     }
 };
+
+
+
+Blockly.Blocks['dgpad_inputs_value'] = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField($L.blockly.expressions_InputValue)
+            .appendField(new Blockly.FieldDropdown(this.updateDropdownOptions.bind(this)), "NAME");
+
+        this.setInputsInline(true);
+        this.setOutput(true);
+        this.setColour(47);
+        this.setTooltip('Selecciona el valor de una casilla disponible');
+        this.setHelpUrl('');
+
+        this.listaInputs = [];
+        this.listaIds = [];
+        this.listaNumerados = [];
+        this.updateDropdownOptions();
+    },
+
+   
+    updateDropdownOptions: function() {
+        if (parent.$U.inputs && Object.keys(parent.$U.inputs).length > 0) {
+            let nombreInput = Object.keys(parent.$U.inputs);
+            this.listaInputs = [];
+            this.listaIds = [];
+    
+            nombreInput.forEach(nom => {
+                let [input, id] = nom.split("-");
+                this.listaInputs.push(input);
+                this.listaIds.push(id);
+            });
+    
+            this.listaNumerados = this.listaInputs.map((item, index) => {
+                let count = this.listaInputs.slice(0, index).filter(x => x === item).length;
+                return count > 0 ? `${item}_${count}` : item;
+            });
+    
+            return this.listaNumerados.map(inputName => [inputName, inputName]);
+        } else {
+            return [[$L.blockly.aspect_deleteValue2, $L.blockly.aspect_deleteValue2]];
+        }
+    },
+    
+
+    getSelectedId: function() {
+        let selectedValue = this.getFieldValue("NAME");
+        let index = this.listaNumerados.indexOf(selectedValue);
+        if (index !== -1) {
+            return this.listaIds[index];
+        } else {
+            return null;
+        }
+    }
+};
+
+  Blockly.Blocks['dgpad_compute'] = {
+    init: function() {
+        this.appendDummyInput('obj_name')
+            .appendField($L.blockly.expressions_compute)
+            .appendField(Blockly.dgpad.objectPopup("any"), "OBJECT")
+          
+        
+        this.setInputsInline(true);
+        this.setOutput(false);
+        this.setPreviousStatement(true);
+        this.setNextStatement(true);
+        this.setColour(20);
+        this.setTooltip('');
+        this.setHelpUrl('');
+    },
+    
+};
+
