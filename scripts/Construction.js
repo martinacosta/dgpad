@@ -141,6 +141,21 @@ window.addEventListener("message",function(s){
         };
         return tab
     };
+
+    me.getAllObjectsNamesFromType = function(_t) {
+        var tab = [];
+        var objs=[];
+        for (var i = 0; i < V.length; i++) {
+            if (V[i].getCode() === "expression_cursor") continue;
+            if (_t === "any") tab.push(V[i])
+            else if ((V[i].getCode() === _t) || ((V[i].getFamilyCode() === _t))) tab.push(V[i])
+        };
+        for (var i = 0; i < tab.length; i++) {
+            
+            objs.push(tab[i].getName())
+        };
+        return objs
+    };
 	
 	me.getAllPointsFromName = function(_t) {
         var tab = [];
@@ -505,20 +520,26 @@ window.addEventListener("message",function(s){
         params = [];
         varnames = [];
         canvas.getInterpreter().BLK_GLOB_DELETE();
+        Expression.deleteAll();
 		//para borrar las casillas de input creadas con la tortuga
-        if (!canvas['TURTLE_INPUTS']) {
-			canvas['TURTLE_INPUTS'] = {};
-			
-		}
-		inpsnames=Object.getOwnPropertyNames(canvas['TURTLE_INPUTS']);
-		
-		
-		if (inpsnames.length>0){
-			for (var i = 0;  i < inpsnames.length; i++) {
-				canvas['TURTLE_INPUTS'][inpsnames[i]].remove();
-			}
-			delete canvas['TURTLE_INPUTS'];
-		}
+        
+		inpsnames=canvas.getInputs;
+        
+        
+		for (var i = 0;  i < Object.keys(inpsnames).length; i++) {
+            let inpBorrar=Object.keys(inpsnames)[i];
+            let inpBorrarId=inpBorrar.split("-")[1];
+            const selector = `#${CSS.escape(inpBorrarId)}`;
+            
+            const input = canvas.getDocObject().parentNode.querySelector(selector);
+            
+            if (input) {
+                input.remove();
+                
+            }
+        }
+        canvas.setInputs({});
+        
     };
 
     me.setAllSize = function(_type, _sze) {
@@ -872,6 +893,42 @@ window.addEventListener("message",function(s){
         for (var i = 0; i < len; i++) {
             me.remove(deleteObjs[i]);
         }
+        
+        if (_o.isInstanceType("point")) {
+            var inputs = canvas.getInputs();
+            var inputEliminado = false; // Bandera para indicar si se ha eliminado algún input
+        
+            for (const key in inputs) {
+                if (inputs.hasOwnProperty(key)) {
+                    // Obtener el valor de la propiedad actual
+                    const input = inputs[key];
+        
+                    // Verificar si la propiedad "name" comienza con la cadena de prefijo
+                    if (input.name.startsWith("input" + _o.getName())||input.name.startsWith("inputNumber" + _o.getName())) {
+                        
+                        const inputId = input.id;
+                        const selector = `#${CSS.escape(inputId)}`;
+                        let inputPorBorrar = canvas.getDocObject().parentNode.querySelector(selector);
+                        
+                        if (inputPorBorrar) {
+                            inputPorBorrar.remove();
+                            inputPorBorrar=null;
+                        }
+        
+                        delete inputs[key];
+                        inputEliminado = true; // Indicar que se ha eliminado un input
+                      
+                    }
+                }
+            }
+        
+            if (inputEliminado) {
+                canvas.setInputs(inputs); // Actualizar los inputs en el canvas si se ha eliminado alguno
+            }
+        
+            
+        }
+        
         return deleteObjs;
     };
 
@@ -1077,26 +1134,7 @@ window.addEventListener("message",function(s){
         applyValidateFilters(ev);
     };
 
-    //    var clearAllIndicated = function() {
-    //        for (var i = 0, len = V.length; i < len; i++) {
-    //            V[i].setIndicated(false);
-    //        }
-    //    };
-    //
-    //    me.validate = function(ev) {
-    //        indicatedObjs = [];
-    //        selectedObjs = [];
-    //        for (var i = 0, len = V.length; i < len; i++) {
-    //            if (V[i].setIndicated(V[i].validate(ev))) {
-    //                if ((V[i].isInstanceType("point"))) {
-    //                    clearAllIndicated();
-    //                    indicatedObjs = [V[i]];
-    //                    V[i].setIndicated(true);
-    //                    return;
-    //                } else indicatedObjs.push(V[i]);
-    //            }
-    //        }
-    //    };
+    
 
 
     me.compute = function() {};
