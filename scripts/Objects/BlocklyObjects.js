@@ -277,6 +277,7 @@ function BlocklyObject(_owner, _construction) {
                 var rand = (Math.floor(Math.random() * (Math.abs(1 - 1000000000) + 1) + (1 + 1000000000 - Math.abs(1 - 1000000000)) / 2));
 
                 var fname = "bl_" + $U.number2letter(rand.toString());
+               
                 cod += "var " + fname + "=function(){\n";
 
                 cod += "TURTLE_INIT(\"" + startpt + "\"," + startpt + ");\n";

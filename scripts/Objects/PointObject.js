@@ -542,11 +542,13 @@ function PointObject(_construction, _name, _x, _y) {
   this.computeMagnets = function() {
     var mgObj = null;
     var t = this.getMagnets();
+    
     if (t.length === 0)
       return;
     var reps = [];
     for (var i = 0; i < t.length; i++) {
       var c = t[i][0].projectXY(X, Y);
+      
       var pt = new VirtualPointObject(c[0], c[1]);
       t[i][0].setMagnetAlpha(pt);
       t[i][0].projectMagnetAlpha(pt);
@@ -602,9 +604,7 @@ function PointObject(_construction, _name, _x, _y) {
 
 
   var computeGeom = function() {
-    //        console.log(this.getName()+" len="+this.getParentLength());
-    //        this.computeMagnets();
-    //console.log(this.getName()+" : ");
+    
     // MEAG start
     if (!Cn.getFrame().ifObject(this.getName())) {
       Cn.getFrame().getTextCons(this);

@@ -29,29 +29,6 @@ Blockly.JavaScript['dgpad_object_name'] = function(block) {
     return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
-// Blockly.JavaScript['dgpad_tex'] = function(block) {
-//     var statements_name = Blockly.JavaScript.statementToCode(block, 'NAME');
-//     // TODO: Assemble JavaScript into code variable.
-//     // var code = '$$'+statements_name.trim()+'$$';
-
-//     var code = "TURTLE_TEXT('$$" + statements_name.trim() + "$$')";
-
-//     console.log(code);
-
-//     // TODO: Change ORDER_NONE to the correct strength.
-//     return [code, Blockly.JavaScript.ORDER_NONE];
-// };
-
-
-// Blockly.JavaScript['dgpad_tex_2'] = function(block) {
-//     var dropdown_name = block.getFieldValue('NAME');
-//     var value_first = Blockly.JavaScript.valueToCode(block, 'FIRST', Blockly.JavaScript.ORDER_ATOMIC);
-//     var value_second = Blockly.JavaScript.valueToCode(block, 'SECOND', Blockly.JavaScript.ORDER_ATOMIC);
-//     // TODO: Assemble JavaScript into code variable.
-//     var code = "\\\\"+dropdown_name+"{'+"+value_first+"+'}{'+"+value_second+"+'}";
-//     // var code = '\\\\' + dropdown_name + '{' + value_first + '}{' + value_second + '}';
-//     return code;
-// };
 
 Blockly.JavaScript['dgpad_tex_2'] = function(block) {
     var dropdown_name = block.getFieldValue('NAME');
@@ -96,30 +73,4 @@ Blockly.JavaScript['dgpad_output_precision'] = function(block) {
 };
 
 
-// Blockly.JavaScript['text_join'] = function(block) {
-//   // Create a string made up of any number of elements of any type.
-//   var code;
-//   if (block.itemCount_ == 0) {
-//     return ['\'\'', Blockly.JavaScript.ORDER_ATOMIC];
-//   } else if (block.itemCount_ == 1) {
-//     var argument0 = Blockly.JavaScript.valueToCode(block, 'ADD0',
-//         Blockly.JavaScript.ORDER_NONE) || '\'\'';
-//     code = ""+argument0;
-//     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-//   } else if (block.itemCount_ == 2) {
-//     var argument0 = Blockly.JavaScript.valueToCode(block, 'ADD0',
-//         Blockly.JavaScript.ORDER_NONE) || '\'\'';
-//     var argument1 = Blockly.JavaScript.valueToCode(block, 'ADD1',
-//         Blockly.JavaScript.ORDER_NONE) || '\'\'';
-//     code = argument0 + '+' + argument1;
-//     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-//   } else {
-//     code = new Array(block.itemCount_);
-//     for (var n = 0; n < block.itemCount_; n++) {
-//       code[n] = Blockly.JavaScript.valueToCode(block, 'ADD' + n,
-//           Blockly.JavaScript.ORDER_COMMA) || '\'\'';
-//     }
-//     code = '[' + code.join(',') + '].join(\'\')';
-//     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-//   }
-// };
+

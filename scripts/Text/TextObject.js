@@ -493,7 +493,8 @@ function TextObject(_canvas, _m, _l, _t, _w, _h) {
 	me.setFixPosition= function (bool) {
 		fixPosition=bool;
 		if (fixPosition) {
-			container.removeDownEvent(dragdown);
+            container.addDownEvent(dragup);
+            
 		}
 		else {
 			container.addDownEvent(dragdown);
@@ -508,7 +509,7 @@ function TextObject(_canvas, _m, _l, _t, _w, _h) {
 	me.setFixSize= function (bool) {
 		fixSize=bool;
 		if (fixSize) {
-			growbox.removeDownEvent(sizedown);
+			growbox.addDownEvent(sizeup);
 			
 		}
 		else {

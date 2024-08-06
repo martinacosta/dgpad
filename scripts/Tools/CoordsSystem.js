@@ -483,8 +483,8 @@ function CoordsSystem(_C) {
 		var txt="var lastWindoww="+window.innerWidth+";\n var lastWindowh="+window.innerHeight+";\n "
 		
 		unid=Unit;
-		txt+= "parent.$U.escala=Math.min(widthWindow()/lastWindoww,heightWindow()/lastWindowh);\n ";
-        txt+= "SetCoords(parent.$U.escala*" + centerx + ",parent.$U.escala*" + centery + ",parent.$U.escala*"+unid+"," + Cn.is3D() + "," + window.innerWidth + "," + window.innerHeight + ");\n";
+		txt+= "me.$U.escala=Math.min(widthWindow()/lastWindoww,heightWindow()/lastWindowh);\n ";
+        txt+= "SetCoords(me.$U.escala*" + centerx + ",me.$U.escala*" + centery + ",me.$U.escala*"+unid+"," + Cn.is3D() + "," + window.innerWidth + "," + window.innerHeight + ");\n";
 		//modificación para trabajar bases de numeración con varillas y casillas
 		if (Cn.getCanvas().hasOwnProperty("VarillasD")|Cn.getCanvas().hasOwnProperty("VarillasC")){
 			var varillasc=Cn.getCanvas()["VarillasC"];

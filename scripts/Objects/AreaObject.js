@@ -478,7 +478,49 @@ function AreaObject(_construction, _name, _Ptab) {
   this.getValue = function() {
     return (A);
   };
+  
+
+  function crossProduct(v1, v2) {
+    return [
+        v1[1] * v2[2] - v1[2] * v2[1],
+        v1[2] * v2[0] - v1[0] * v2[2],
+        v1[0] * v2[1] - v1[1] * v2[0]
+    ];
+}
+
+function magnitude(vector) {
+    return Math.sqrt(vector[0]**2 + vector[1]**2 + vector[2]**2);
+}
+
+function calculatePolygonArea(vertices) {
+    const n = vertices.length;
+    if (n < 3) return 0;
+
+    let referencePoint = vertices[0];
+    let sumCrossProducts = [0, 0, 0];
+
+    for (let i = 1; i < n - 1; i++) {
+        const v1 = [
+            vertices[i][0] - referencePoint[0],
+            vertices[i][1] - referencePoint[1],
+            vertices[i][2] - referencePoint[2]
+        ];
+
+        const v2 = [
+            vertices[i + 1][0] - referencePoint[0],
+            vertices[i + 1][1] - referencePoint[1],
+            vertices[i + 1][2] - referencePoint[2]
+        ];
+
+        const crossProd = crossProduct(v1, v2);
+        sumCrossProducts = sumCrossProducts.map((val, idx) => val + crossProd[idx]);
+    }
+
+    return 0.5 * magnitude(sumCrossProducts);
+}
+
   this.compute = function() {
+    
     X = 0;
     Y = 0;
     for (var i = 0, len = Ptab.length; i < len; i++) {
@@ -493,14 +535,34 @@ function AreaObject(_construction, _name, _Ptab) {
     }
     X = X / Ptab.length;
     Y = Y / Ptab.length;
+      //reconocer si es un poligono 3d
+    // let pts3d=0;
+    // for (var i = 0, len = Ptab.length; i < len; i++) {
+    //   if(Ptab[i].is3D()||Cn.isOrigin3D(Ptab[i])){
+    //     pts3d=pts3d+1;
+
+    //   }
+// console.log(pts3d)
+//     }
     // Calcula el área:
-    var sum = 0;
-    var len = Ptab.length;
-    for (var i = 1; i < len; i++) {
-      sum += (Ptab[i].getX() - X) * (Ptab[i - 1].getY() - Y) - (Ptab[i].getY() - Y) * (Ptab[i - 1].getX() - X);
+    //si es 2D
+    if (!Cn.is3D()) {
+      var sum = 0;
+      var len = Ptab.length;
+      for (var i = 1; i < len; i++) {
+        sum += (Ptab[i].getX() - X) * (Ptab[i - 1].getY() - Y) - (Ptab[i].getY() - Y) * (Ptab[i - 1].getX() - X);
+      }
+      sum += (Ptab[0].getX() - X) * (Ptab[len - 1].getY() - Y) - (Ptab[0].getY() - Y) * (Ptab[len - 1].getX() - X);
+      A = this.getCn().coordsSystem.a(Math.abs(sum / 2));
+  } else {
+    let vertices=[];
+    for (var i = 0, len = Ptab.length; i < len; i++) {
+      vertices.push(Ptab[i].getXYZ())
     }
-    sum += (Ptab[0].getX() - X) * (Ptab[len - 1].getY() - Y) - (Ptab[0].getY() - Y) * (Ptab[len - 1].getX() - X);
-    A = this.getCn().coordsSystem.a(Math.abs(sum / 2));
+    console.log(this.getName());
+    console.log(vertices);
+    A=calculatePolygonArea(vertices);
+  }
     valid = true;
     // MEAG start
     if (!Cn.getFrame().ifObject(this.getName())) {
@@ -510,12 +572,14 @@ function AreaObject(_construction, _name, _Ptab) {
   };
 
   this.paintLength = function(ctx) {
+    
     ctx.textAlign = "center";
     ctx.fillStyle = ctx.strokeStyle;
     var prec = this.getPrecision();
     var display = Math.round(A * prec) / prec;
     ctx.fillText($L.number(display), X, Y);
     ctx.restore();
+    
   };
   
   //Función para dibujar el nombre
@@ -524,9 +588,10 @@ function AreaObject(_construction, _name, _Ptab) {
     ctx.fillStyle = ctx.strokeStyle;
     ctx.textAlign = "center";
 	  //var prec = this.getPrecision();
-    var display = Math.round(A * prec) / prec;
+    //var display = Math.round(A * prec) / prec;
     ctx.fillText(txt, X - 50, Y - 50);
 	  ctx.restore();
+    
   }
   //LLamar a la función painTxt para dibujar el nombre
   this.paintName = function(ctx) {

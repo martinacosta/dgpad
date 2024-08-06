@@ -127,6 +127,7 @@ Blockly.JavaScript['turtle_print'] = function(block) {
     //     txt = txt.substr(1, txt.length - 2);
     // }
     var code = "TURTLE_PRINT(" + txt + ");\n";
+    
     // TODO: Change ORDER_NONE to the correct strength.
     return code;
 };
@@ -154,40 +155,52 @@ Blockly.JavaScript['turtle_img'] = function(block) {
 Blockly.JavaScript['turtle_input'] = function(block) {
     var value_width = Blockly.JavaScript.valueToCode(block, 'width', Blockly.JavaScript.ORDER_ATOMIC);
     var value_FontSize = Blockly.JavaScript.valueToCode(block, 'FontSize', Blockly.JavaScript.ORDER_ATOMIC);
-	var value_Display = Blockly.JavaScript.valueToCode(block, 'Display', Blockly.JavaScript.ORDER_ATOMIC);
-	var value_target = Blockly.JavaScript.valueToCode(block, 'target', Blockly.JavaScript.ORDER_ATOMIC);
-	var value_name = Blockly.JavaScript.valueToCode(block, 'name', Blockly.JavaScript.ORDER_ATOMIC);
-     var code = "CreateCustomInput(";
-    code +=  value_name ;
-    code += ',"' + value_FontSize + '"';
-    code += ',"' + value_width + '"';
-    code += ',"' + value_Display + '"';
-	code += ',"' + value_target + '"';
+	var code = "CreateCustomInput(";
+    code += '"' + value_FontSize +'"';
+    code += ',"' + value_width +'"';
+    code += ',"' + block.id +'"';
     code += ");\n";
-	console.log(code);
-    return code;
+    code += "TURTLE_UP(true);\n";
+    code += "TURTLE_MV("+value_width+"*parent.$U.escala+8,true);\n";
+    
+	return code;
+    
 };
 
 Blockly.JavaScript['turtle_input_number'] = function(block) {
     var value_width = Blockly.JavaScript.valueToCode(block, 'width', Blockly.JavaScript.ORDER_ATOMIC);
     var value_FontSize = Blockly.JavaScript.valueToCode(block, 'FontSize', Blockly.JavaScript.ORDER_ATOMIC);
-	var value_Display = Blockly.JavaScript.valueToCode(block, 'Display', Blockly.JavaScript.ORDER_ATOMIC);
-	var value_target = Blockly.JavaScript.valueToCode(block, 'target', Blockly.JavaScript.ORDER_ATOMIC);
-	var value_name = Blockly.JavaScript.valueToCode(block, 'name', Blockly.JavaScript.ORDER_ATOMIC);
 	var value_min = Blockly.JavaScript.valueToCode(block, 'min', Blockly.JavaScript.ORDER_ATOMIC);
 	var value_max = Blockly.JavaScript.valueToCode(block, 'max', Blockly.JavaScript.ORDER_ATOMIC);
 	var value_step = Blockly.JavaScript.valueToCode(block, 'step', Blockly.JavaScript.ORDER_ATOMIC);
-     var code = "CreateCustomInputNumber(";
-    code +=  value_name ;
-	code += ',"' + value_min + '"';
+    var value_target = Blockly.JavaScript.valueToCode(block, 'target', Blockly.JavaScript.ORDER_ATOMIC);
+    // Eliminar paréntesis si están presentes
+    if (value_target.startsWith('(') && value_target.endsWith(')')) {
+        value_target = value_target.slice(1, -1);
+    }
+    var code = "CreateCustomInputNumber(";
+    code += '"'+value_min + '"';
 	code += ',"' + value_max + '"';
 	code += ',"' + value_step + '"';
     code += ',"' + value_FontSize + '"';
     code += ',"' + value_width + '"';
-    code += ',"' + value_Display + '"';
-	code += ',"' + value_target + '"';
+    code += ',"' + block.id +'"';
+    code += ',"' + value_target + '"';
     code += ");\n";
-	console.log(code);
-    return code;
+    code += "TURTLE_UP(true);\n";
+    code += "TURTLE_MV("+value_width+"*parent.$U.escala+8,true);\n";
+    
+	return code;
 };
 
+Blockly.JavaScript['dynamic_dropdown'] = function(block) {
+    var code = '';
+    var options = block.optionCount();
+    for (var i = 1; i <= options; i++) {
+      var optionText = block.getFieldValue('OPTION' + i);
+      code += '"' + optionText + '", ';
+    }
+    code = '[' + code.slice(0, -2) + ']';
+    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+  };
+  
