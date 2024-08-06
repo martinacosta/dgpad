@@ -24,7 +24,7 @@ Blockly.JavaScript['dgpad_actions_iman'] = function(block) {
 	var value_im = Blockly.JavaScript.valueToCode(block, 'im', Blockly.JavaScript.ORDER_ATOMIC);
 	
 	if ((value_obj1 === "") || (value_obj2 === "")) return "";
-	var code = 'imantar("' + value_obj1 + '","' + value_obj2 + '", '+ value_im + ')';
+	var code = 'imantar("' + value_obj1 + '","' + value_obj2 + '", '+ value_im + ');';
 	
 	return code;
 	
@@ -82,5 +82,11 @@ Blockly.JavaScript['dgpad_actions_animPause'] = function(block) {
 
 Blockly.JavaScript['dgpad_actions_animStart'] = function(block) {
   var code = 'AnimationStart()';
+  return code;
+};
+
+Blockly.JavaScript['dgpad_actions_audio'] = function(block) {
+  var archivoAudio = Blockly.JavaScript.valueToCode(block, 'ArchivoAudio', Blockly.JavaScript.ORDER_NONE);
+  var code = 'var AUDIO=document.createElement("audio"); AUDIO.src=' + archivoAudio + '; document.body.appendChild(AUDIO); AUDIO.play();\n';
   return code;
 };

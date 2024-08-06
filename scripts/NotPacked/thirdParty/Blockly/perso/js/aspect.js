@@ -15,7 +15,7 @@ Blockly.JavaScript['dgpad_object_style_fix'] = function(block) {
     value_name = value_name.replace(/^\((.*)\)$/, "$1");
     value_object=value_object.replace(/^\'(.*)\'$/, "\"$1\"");
     // TODO: Assemble JavaScript into code variable.
-    var code = 'BLK_STL(' + value_object + ',' + value_name + ");\n";
+    var code = 'BLK_STL(' + Find(value_object) + ',' + value_name + ");\n";
     return code;
 };
 
@@ -53,3 +53,26 @@ Blockly.JavaScript['dgpad_style_arrow'] = function(block) {
   var code = '"setArrow",[[' + value_w + ',' + value_h + ']]';
   return [code, Blockly.JavaScript.ORDER_NONE];
 };
+
+
+
+
+Blockly.JavaScript['dgpad_inputs_deleteValue'] = function(block) {
+    
+    let selectedId = block.getSelectedId();
+    var code = 'CustomInputErase("'+selectedId+'");';
+    console.log(code)
+    return code;
+};
+
+
+
+
+Blockly.JavaScript['dgpad_inputs_showHide'] = function(block) {
+    let selectedId = block.getSelectedId();
+    var value_visible = Blockly.JavaScript.valueToCode(block, 'VISIBLE', Blockly.JavaScript.ORDER_ATOMIC);
+    var code = 'CustomInputShow("' + selectedId + '",' + value_visible + ');\n';
+    return code;
+  };
+
+

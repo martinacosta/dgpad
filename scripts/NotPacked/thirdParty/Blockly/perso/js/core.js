@@ -109,19 +109,7 @@ Blockly.JavaScript['math_random_int'] = function(block) {
     var b0 = Blockly.JavaScript.valueToCode(block, 'TO',
         Blockly.JavaScript.ORDER_COMMA) || '0';
     var code = 'Math.floor(Math.random()*(Math.abs(' + a0 + '-' + b0 + ')+1)+(' + a0 + '+' + b0 + '-Math.abs(' + a0 + '-' + b0 + '))/2)';
-    // var functionName = Blockly.JavaScript.provideFunction_(
-    //     'math_random_int',
-    //     [ 'function ' + Blockly.JavaScript.FUNCTION_NAME_PLACEHOLDER_ +
-    //         '(a, b) {',
-    //       '  if (a > b) {',
-    //       '    // Swap a and b to ensure a is smaller.',
-    //       '    var c = a;',
-    //       '    a = b;',
-    //       '    b = c;',
-    //       '  }',
-    //       '  return Math.floor(Math.random() * (b - a + 1) + a);',
-    //       '}']);
-    // var code = functionName + '(' + argument0 + ', ' + argument1 + ')';
+    
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
 };
 
@@ -440,3 +428,13 @@ Blockly.JavaScript['lists_repeat'] = function(block) {
   var code = functionName + '(' + element + ', ' + repeatCount + ')';
   return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
 };
+
+
+  
+  Blockly.JavaScript['mostrar_tabla'] = function(block) {
+    var arrayName = Blockly.JavaScript.valueToCode(block, 'ARRAY', Blockly.JavaScript.ORDER_ATOMIC);
+    var code = `mostrarTablaDatos(${arrayName});`;
+    console.log(code)
+    return code;
+  };
+  

@@ -67,18 +67,33 @@ Blockly.JavaScript['dgpad_get_object'] = function(block) {
     return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
+// Blockly.JavaScript['dgpad_set_object'] = function(block) {
+//     var name = block.getFieldValue('NAME');
+//     var arg0 = Blockly.JavaScript.valueToCode(block, 'obj_val');
+//     if (arg0 === "") return "";
+    
+//     Blockly.dgpad.pushVARS(name);
+//     var loopVar = 'blockly_var_' + Blockly.JavaScript.variableDB_.getDistinctName(
+//         'temp_var', Blockly.Variables.NAME_TYPE);
+//     var code = "var " + loopVar + " = " + arg0 + " ;\n";
+//     code += 'SET_EXP("' + name + '",' + loopVar + ');\n';
+//     return code;
+// };
+
 Blockly.JavaScript['dgpad_set_object'] = function(block) {
     var name = block.getFieldValue('NAME');
-    var arg0 = Blockly.JavaScript.valueToCode(block, 'obj_val');
+    var arg0 = Blockly.JavaScript.valueToCode(block, 'obj_val', Blockly.JavaScript.ORDER_ATOMIC);
     if (arg0 === "") return "";
-    // Blockly.dgpad.VARS.push(name);
+
     Blockly.dgpad.pushVARS(name);
     var loopVar = 'blockly_var_' + Blockly.JavaScript.variableDB_.getDistinctName(
         'temp_var', Blockly.Variables.NAME_TYPE);
     var code = "var " + loopVar + " = " + arg0 + " ;\n";
     code += 'SET_EXP("' + name + '",' + loopVar + ');\n';
+    
     return code;
 };
+
 
 Blockly.JavaScript['dgpad_expression_input'] = function(block) {
     var text_name = block.getFieldValue('NAME');
@@ -108,3 +123,22 @@ Blockly.JavaScript['dgpad_print'] = function(block) {
     if (dropdown_name === "a") return ('Println(' + value_name + ');\n');
     else return ('Print(' + value_name + ');\n');
 };
+
+
+Blockly.JavaScript['dgpad_inputs_value'] = function(block) {
+    let selectedId = block.getSelectedId();
+    var code = 'CustomInputValue("'+selectedId+'")';
+    
+    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
+
+
+
+Blockly.JavaScript['dgpad_compute'] = function(block) {
+    var dropdown_object = block.getFieldValue('OBJECT');
+    var code = dropdown_object + '.compute();'
+    return code;
+    
+};
+
