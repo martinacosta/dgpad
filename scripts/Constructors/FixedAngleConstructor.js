@@ -174,7 +174,7 @@ function FixedAngleConstructor() {
                 a += Math.PI;
                 ctx.fillStyle=zc.prefs.color.hilite;
 				ctx.font = "16px Verdana";
-				ctx.fillText($L.tool_FixedAngle_help_1+$L.number(display)+"°"+$L.tool_FixedAngle_help_2+this.getC(0).P1.getName()+this.getC(0).P2.getName(),zc.mouseX(ev)+40, zc.mouseY(ev));
+				ctx.fillText($L.tool_FixedAngle_help_1+$L.number(display)+"°"+$L.tool_FixedAngle_help_2+this.getC(0).getName(),zc.mouseX(ev)+40, zc.mouseY(ev));
                 ctx.fillText(this.getC(0).P2.getName(),this.getC(0).P2.getX()+20,this.getC(0).P2.getY());
 				ctx.fillText(this.getC(0).P1.getName(),this.getC(0).P1.getX()+20,this.getC(0).P1.getY());
                 //break;
