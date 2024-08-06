@@ -104,14 +104,23 @@ Blockly.Blocks['dgpad_actions_iman'] = {
     this.setColour(320);
     this.setTooltip('');
     this.setHelpUrl('');
-	setTimeout(function() {
-            var tpe = me.getInput('obj_type').fieldRow[0].getValue();
-            var nme = me.getInput('obj_name').fieldRow[0].getValue();
-            //me.removeInput('obj_name');
-            me.getInput('obj_name').fieldRow[0].removeField("NAME");
-			me.getInput('obj_name').fieldRow[0].insertField(Blockly.dgpad.objectPopup(tpe), "NAME");
-            me.getInput('obj_name').fieldRow[0].setValue(nme);
-        }, 0);
+	// setTimeout(function() {
+  //           var tpe = me.getInput('obj_type').fieldRow[0].getValue();
+  //           var nme = me.getInput('obj_name').fieldRow[0].getValue();
+  //           //me.removeInput('obj_name');
+  //           me.getInput('obj_name').fieldRow[0].removeField("NAME");
+	// 		me.getInput('obj_name').fieldRow[0].insertField(Blockly.dgpad.objectPopup(tpe), "NAME");
+  //           me.getInput('obj_name').fieldRow[0].setValue(nme);
+  //       }, 0);
+  setTimeout(function() {
+    var tpe = me.getInput('obj_type').fieldRow[0].getValue();
+    var nme = me.getInput('obj_name').fieldRow[0].getValue();
+    // Eliminar el campo "NAME" directamente desde el Input
+    me.getInput('obj_name').removeField("NAME");
+    me.getInput('obj_name').appendField(Blockly.dgpad.objectPopup(tpe), "NAME");
+    me.getInput('obj_name').fieldRow[0].setValue(nme);
+}, 0);
+
     },
     updateShape_: function(tpe) {
         
@@ -216,6 +225,20 @@ Blockly.Blocks['dgpad_actions_animStart'] = {
     this.setNextStatement(true);
 	this.appendDummyInput()
         .appendField("Reanudar animaciones");
+    this.setOutput(false);
+    this.setColour(320);
+    this.setTooltip('');
+    this.setHelpUrl('');
+  }
+};
+
+Blockly.Blocks['dgpad_actions_audio'] = {
+  init: function() {
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+    this.appendValueInput("ArchivoAudio")
+      .appendField($L.blockly.actions_audio);
+    this.setInputsInline(true);
     this.setOutput(false);
     this.setColour(320);
     this.setTooltip('');
