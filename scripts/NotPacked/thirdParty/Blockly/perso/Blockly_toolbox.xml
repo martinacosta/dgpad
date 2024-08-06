@@ -65,7 +65,7 @@
         <block type="dgpad_style_fix"></block>
         <block type="dgpad_object_style_fix">
             <value name="OBJECT">
-                <block type="dgpad_object_name">
+                <block type="text">
                     <field name="TEXT">P1</field>
                 </block>
             </value>
@@ -162,12 +162,30 @@
                 </block>
             </value>
         </block>
+       
+        <block type="dgpad_inputs_deleteValue">
+            
+        </block>
+        
+    <block type="dgpad_inputs_showHide">
+      <value name="VISIBLE">
+        <block type="math_number">
+          <field name="NUM">1</field>
+        </block>
+      </value>
+   
+
+        
     </category>
     <category name="$L.blockly.expression" colour="20">
         <block type="dgpad_return"></block>
         <block type="dgpad_set_object"></block>
         <block type="dgpad_get_object_short"></block>
-		<block type="dgpad_object_name">
+		<block type="dgpad_inputs_value"></block> 
+        <block type="dgpad_compute">
+            
+        </block>  
+        <block type="dgpad_object_name">
             <field name="TEXT">P1</field>
         </block>
         <block type="dgpad_get_object"></block>
@@ -398,49 +416,31 @@
             </value>
         </block>
 		<block type="turtle_input">
-		<value name="name">
-		<shadow type="text">
-                    <field name="TEXT">input1</field>
-                </shadow>
-				</value>
+		    
             <value name="width">
                 <shadow type="math_number">
                     <field name="NUM">50</field>
                 </shadow>
             </value>
-            			
-            
             <value name="FontSize">
                 <shadow type="math_number">
                     <field name="NUM">25</field>
                 </shadow>
             </value>
-			<value name="Display">
-                
-                    <block type="dgpad_get_object_short"></block>
-                
-            </value>
-			<value name="target">
-			<block type="dgpad_get_object_short"></block>	
-				</value>
+			
         </block>
 		
 		<block type="turtle_input_number">
-		<value name="name">
-		<shadow type="text">
-                    <field name="TEXT">inputNumber1</field>
-                </shadow>
-				</value>
-			<value name="min">
+		    <value name="min">
                 <shadow type="math_number">
                     <field name="NUM">0</field>
                 </shadow>
-				</value>
+			</value>
 			<value name="max">
                 <shadow type="math_number">
                     <field name="NUM">10</field>
                 </shadow>
-				</value>
+			</value>
 			<value name="step">
                 <shadow type="math_number">
                     <field name="NUM">1</field>
@@ -459,12 +459,10 @@
                     <field name="NUM">25</field>
                 </shadow>
             </value>
-			<value name="Display">
-                <block type="dgpad_get_object_short"></block>
-            </value>
+			
 			<value name="target">
-			<block type="dgpad_get_object_short"></block>	
-				</value>
+			    <block type="dgpad_get_object_short"></block>	
+			</value>
         </block>
 		
     </category>
@@ -472,6 +470,7 @@
         <block type="dgpad_output_precision"></block>
         <block type="text"></block>
         <block type="text_join"></block>
+        
         <block type="dgpad_tex">
         </block>
         <block type="dgpad_tex_2">
@@ -560,13 +559,21 @@
                 </block>
             </value>
         </block>
+        
         <block type="lists_length"></block>
         <block type="lists_isEmpty"></block>
         <block type="lists_indexOf"></block>
         <block type="lists_getIndex"></block>
         <block type="lists_setIndex"></block>
+        <block type="remove_item_from_named_list"></block>
+      <block type="math_number">
+        <field name="NUM">0</field>
+      </block>
+      
 		<block type="dgpad_get_list"></block>
         <block type="dgpad_set_list"></block>
+        <block type="dgpad_lista_objetos_tipo"></block>
+        <block type="dgpad_lista_NombresObjetos_tipo"></block>
     </category>
     <!-- MEAG start ><-->
     <category name="$L.blockly.actions_title" colour="320">
@@ -636,6 +643,13 @@
 	  </block>
 	  <block type="dgpad_actions_animPause"></block>
 	  <block type="dgpad_actions_animStart"></block>
+      <block type="dgpad_actions_audio">
+		<value name="ArchivoAudio">
+                <shadow type="text">
+                    <field name="TEXT">https://www.elongsound.com/images/mp3/amanecerconpajarosenlaciudad_01.mp3</field>
+                </shadow>
+            </value>
+		</block>
     </category>
     <!-- MEAG end ><-->
 	<!-- MEAG1 start ><-->
@@ -794,6 +808,8 @@
         </block>
 		
         <block type="dgpad_print"></block>
+        <block type="mostrar_tabla"></block>
+        
     </category>
     <category name="$L.blockly.variables" custom="VARIABLE" colour="330"></category>
     <category name="$L.blockly.functions" custom="PROCEDURE" colour="290">
