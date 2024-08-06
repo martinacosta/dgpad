@@ -196,7 +196,7 @@ function Interpreter(_win, _canvas) {
     };
 
     me.InterpretMacro = function(_s) {
-        // console.log("source :"+_s);
+        
         clearNameSpace();
         $macromode = true;
         $macroFinals = [];
@@ -220,7 +220,7 @@ function Interpreter(_win, _canvas) {
             }
             s += match[3];
             // Eval is evil ? :
-            // console.log(s);
+            
             eval(s);
             for (var i = 0, len = $macroFinals.length; i < len; i++) {
                 me.f($macroFinals[i]).setHidden(false);
@@ -633,190 +633,396 @@ function Interpreter(_win, _canvas) {
         $num_precision = Math.pow(10, _n);
     };
 	
-	var TURTLE_INPUT = function (name, width, ftsize, tar) {
-		
-		var coords= TURTLE_POS();
-		
-		var abs=me.C.coordsSystem.px(coords[0]);
-		var ord=me.C.coordsSystem.py(coords[1]);
-		
-		var txts= me.Z.textManager.elements();
-		var winps=me.Z.textManager.winps();
-		var exist=false;
-		var widg= null;
-		for (var i = 0, len = txts.length; i < len; i++) {
-			
-			var txt=txts[i].getText();
-			
-			if(txt.indexOf(name)>-1) {
-				
-				exist=true;
-				widg=txts[i];
-				
-				break;
-			}
-			
-		}
-		
-		if (exist) {
-			widg.setText("<input target="+tar+" id="+name+ " style='width:"+width+"px;font-size:"+ftsize+"px'>");
-			widg.setStyle("left",me.C.coordsSystem.px(TURTLE_POS()[0])+"px");
-			widg.setStyle("top",me.C.coordsSystem.py(TURTLE_POS()[1])-(ftsize)+"px");
-			
-			//falta un comando para que se ejecute el cambio de setText
-			
-			
-			
-		}
-			else {widg=Text("<input target="+tar+" id="+name+" style='width:"+width+"px;font-size:"+ftsize+"px'>",abs,ord,0,0,"");
-			widg.setStyle("left",me.C.coordsSystem.px(TURTLE_POS()[0])+"px");
-			widg.setStyle("top",me.C.coordsSystem.py(TURTLE_POS()[1])-(ftsize)+"px");
-			me.Z.textManager.winputs.push(name); 
-			};
-			
-	};
 	
-	
-	
-	// var WidgetInput = function (_name, width, height) {
-		// var name=_name;
-		// var coords= [300,500];
-		
-		// var txts= me.Z.textManager.elements();
-		// var winps=me.Z.textManager.winputs();
-		
-		// var exist=false;
-		// var widg= null;
-		// var p1=Find("P1");
-		// for (var i = 0, len = txts.length; i < len; i++) {
-			// var b = txts[i].getBounds();
-            // var TOP=b.top;
-			// var LEFT=b.left;
-			
-			// if(coords[0]==TOP&&coords[1]==LEFT) {
-				
-				// exist=true;
-				// widg=txts[i];
-				// console.log(widg);
-				// break;
-			// }
-			
-		// }
-		
-		// if (exist) {
-			// widg.setText("<input style='width:'"+width+"px';heigth:'"+height+"px'>");
-			
-		// }
-			// else {widg=Text("<input style='width:'"+width+"px';heigth:'"+height+"px'>",500,300,10,10,"");
-			// widg.setStyle("left",p1.getX()+"px");
-			// widg.setStyle("top",p1.getY()+"px");
-			// };
-			
-	// };
-				
-var EnsayoInput = function () {
-		new InputText2(canvas.getConstruction(), "inp", canvas.getDocObject());
-}
-	
-	var CreateCustomInput = function(name, fs, width, v, target) {
-		var disp=v.replaceAll("(","").replaceAll(")","");
-		var tar=target.replaceAll("(","").replaceAll(")","");
-		var Zo = GetCanvas().getDocObject();
-		var inputs = GetCanvas()['TURTLE_INPUTS'];
-		
-		if (!inputs) {
-			GetCanvas()['TURTLE_INPUTS'] = {};
-			inputs = GetCanvas()['TURTLE_INPUTS'];
-		}
-		input = inputs[name];
-		if (!input) {
-			
-			input = document.createElement('input');
-			inputs[name] = input;
-			if (GetExpressionValue(disp)==1) {
-			input.style = "position:absolute; top:" + me.C.coordsSystem.py(TURTLE_POS()[1]) + "px; left:" + me.C.coordsSystem.px(TURTLE_POS()[0]) + "px; width: "+width+"px; font-size:"+fs+"px; display: block; ";
-			Zo.parentNode.appendChild(input);
-			}
-			else {
-				
-			input.style = "position:absolute; top:" + me.C.coordsSystem.py(TURTLE_POS()[1]) + "px; left:" + me.C.coordsSystem.px(TURTLE_POS()[0]) + "px; width: "+width+"px; font-size:"+fs+"px; display: none; ";
-			Zo.parentNode.appendChild(input);
-			}
-			
-		}
-		else {
-			if (GetExpressionValue(disp)==1){
-				
-			input.style = "position:absolute; top:" + me.C.coordsSystem.py(TURTLE_POS()[1]) + "px; left:" + me.C.coordsSystem.px(TURTLE_POS()[0]) + "px; width: "+width+"px; font-size:"+fs+"px; display: block; "
-			}
-			else {
-				
-				input.style = "position:absolute; top:" + me.C.coordsSystem.py(TURTLE_POS()[1]) + "px; left:" + me.C.coordsSystem.px(TURTLE_POS()[0]) + "px; width: "+width+"px; font-size:"+fs+"px; display: none; "
-				
-			}
-			
-			};
-		Find(disp)
-		input.onkeyup=function() {
-			
-			
-			SetExpressionValue(tar,parseFloat(inputs[name].value));
-			computeAll();
-		};
-        	
-		
-	};
-	
-	var CreateCustomInputNumber = function(name, min, max, step, fs, width, v, target) {
-		disp=v.replaceAll("(","").replaceAll(")","");
-		var Zo = GetCanvas().getDocObject();
-		var inputs = GetCanvas()['TURTLE_INPUTS'];
-		
-		if (!inputs) {
-			GetCanvas()['TURTLE_INPUTS'] = {};
-			inputs = GetCanvas()['TURTLE_INPUTS'];
-		}
-		input = inputs[name];
-		if (!input) {
-			input = document.createElement('input');
-			inputs[name] = input;
-			input.type="number";
-			input.min=min;
-			input.max=max;
-			input.step=step;
-			if (GetExpressionValue(disp)==1) {
-				input.style = "position:absolute; top:" + me.C.coordsSystem.py(TURTLE_POS()[1]) + "px; left:" + me.C.coordsSystem.px(TURTLE_POS()[0]) + "px; width: "+width+"px; font-size:"+fs+"px; display: block; ";
-				Zo.parentNode.appendChild(input);
-			}
-			else {
-				input.style = "position:absolute; top:" + me.C.coordsSystem.py(TURTLE_POS()[1]) + "px; left:" + me.C.coordsSystem.px(TURTLE_POS()[0]) + "px; width: "+width+"px; font-size:"+fs+"px; display: none; ";
-				Zo.parentNode.appendChild(input);
-			};
 
-		}
-		else {input.type="number";
-			input.min=min;
-			input.max=max;
-			input.step=step;
-			if (GetExpressionValue(disp)==1) {
-				input.style = "position:absolute; top:" + me.C.coordsSystem.py(TURTLE_POS()[1]) + "px; left:" + me.C.coordsSystem.px(TURTLE_POS()[0]) + "px; width: "+width+"px; font-size:"+fs+"px; display: block; "
-				}
-				
-			else {
-				input.style = "position:absolute; top:" + me.C.coordsSystem.py(TURTLE_POS()[1]) + "px; left:" + me.C.coordsSystem.px(TURTLE_POS()[0]) + "px; width: "+width+"px; font-size:"+fs+"px; display: none; "
-				};
-			
-		
-		input.onchange=function() {
-			var e=target.replaceAll("(","").replaceAll(")","");
-			
-			SetExpressionValue(e,parseFloat(input.value));
-			computeAll();
-		};
-		}
-        	
-		
-	}
+const CreateCustomInput = function(fs, width, ident) {
+    const positiony = me.C.coordsSystem.py(TURTLE_POS()[1]) - fs;
+    const Zo = GetCanvas().getDocObject();
+    let inputs = parent.$U.inputs || {};
+    ident=ident+"A";
+    var nombre = `input${TURTLE_VARS.NAME}-${ident}`;
+    if (!inputs.hasOwnProperty(nombre)) {
+        const input = document.createElement('input');
+        input.id = ident;
+        input.name = nombre;
+        inputs[nombre] = { visibility: "block", id: ident, name: nombre };
+        parent.$U.inputs = inputs;
+        input.style.cssText = `position:absolute; top:${positiony}px; left:${me.C.coordsSystem.px(TURTLE_POS()[0])}px; width:${width*me.$U.escala}px; font-size:${fs*me.$U.escala}px; display:block;`;
+        GetCanvas().getDocObject().parentNode.appendChild(input);
+        
+    } else {
+        const inputId = inputs[nombre].id;
+        const selector = `#${CSS.escape(inputId)}`;
+        const input = GetCanvas().getDocObject().parentNode.querySelector(selector);
+        input.style.cssText = `position:absolute; top:${positiony}px; left:${me.C.coordsSystem.px(TURTLE_POS()[0])}px; width:${width*me.$U.escala}px; font-size:${fs*me.$U.escala}px; display:${inputs[nombre].visibility}`;
+    }
+};
+
+const CustomInputValue = function(id){
+    const inputId = id;
+    const selector = `#${CSS.escape(inputId)}`;
+    const input = GetCanvas().getDocObject().parentNode.querySelector(selector);
+    return input.value;
+};
+
+const CustomInputErase = function(id){
+    const inputId = id;
+    const selector = `#${CSS.escape(inputId)}`;
+    const input = GetCanvas().getDocObject().parentNode.querySelector(selector);
+    input.value="";
+};
+
+
+
+const CustomInputShow = function(id, visible) {
+    let inputs = parent.$U.inputs || {};
+    const inputId = id;
+    const selector = `#${CSS.escape(inputId)}`;
+    const input = GetCanvas().getDocObject().parentNode.querySelector(selector);
+    if (input) {
+        if (visible == 1) {
+            inputs[input.name].visibility = "block";
+        } else {
+            inputs[input.name].visibility = "none";
+        }
+        input.style.cssText = `display:${inputs[input.name].visibility}`;
+        computeAll();
+    } else {
+        console.error("Input not found for selector: " + selector);
+    }
+};
+
+var CreateCustomInputNumber = function(min, max, step, fs, width, ident, target) {
+    const positiony = me.C.coordsSystem.py(TURTLE_POS()[1]) - fs;
+    var Zo = GetCanvas().getDocObject();
+    let inputs = parent.$U.inputs || {};
+    ident = ident + "A";
+    var nombre = `inputNumber${TURTLE_VARS.NAME}-${ident}`;
+
+    let input;
+
+    if (!inputs.hasOwnProperty(nombre)) {
+        input = document.createElement('input');
+        input.id = ident;
+        input.name = nombre;
+        inputs[nombre] = { visibility: "block", id: ident, name: nombre, type: "number", min: min, max: max, step: step };
+        parent.$U.inputs = inputs;
+        input.type = "number";
+        input.min = min;
+        input.max = max;
+        input.step = step;
+        input.style.cssText = `position:absolute; top:${positiony}px; left:${me.C.coordsSystem.px(TURTLE_POS()[0])}px; width:${width*me.$U.escala}px; font-size:${fs*me.$U.escala}px; display:block;`;
+        GetCanvas().getDocObject().parentNode.appendChild(input);
+    } else {
+        const inputId = inputs[nombre].id;
+        const selector = `#${CSS.escape(inputId)}`;
+        input = GetCanvas().getDocObject().parentNode.querySelector(selector);
+        input.type = "number";
+        input.min = min;
+        input.max = max;
+        input.step = step;
+        input.style.cssText = `position:absolute; top:${positiony}px; left:${me.C.coordsSystem.px(TURTLE_POS()[0])}px; width:${width*me.$U.escala}px; font-size:${fs*me.$U.escala}px; display:` + parent.$U.inputs[nombre].visibility;
+    }
+
+    input.onchange = function() {
+        var e = target.replaceAll("(", "").replaceAll(")", "");
+        
+        SetExpressionValue(e, parseFloat(input.value));
+        computeAll();
+    };
+};
+
+// var mostrarTablaDatos =function (array) {
+//     var Zo = GetCanvas();
+//     if (!array || array.length === 0) {
+//       alert("No hay datos para mostrar.");
+//       return;
+//     }
+// console.log(array);
+
+//     var modal = document.createElement('div');
+//     console.log(modal)
+//     modal.style.display = 'block';
+//     modal.style.position = 'fixed';
+//     modal.style.zIndex = '100';
+//     modal.style.left = '0';
+//     modal.style.top = '0';
+//     modal.style.width = '300px';
+//     modal.style.height = '300px';
+//     modal.style.overflow = 'auto';
+//     modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+//     modal.style.paddingTop = '60px';
+// console.log("2",modal)
+//     var modalContent = document.createElement('div');
+//     modalContent.style.backgroundColor = '#fefefe';
+//     modalContent.style.margin = '5% auto';
+//     modalContent.style.padding = '20px';
+//     modalContent.style.border = '1px solid #888';
+//     modalContent.style.width = '80%';
+//     modalContent.style.maxWidth = '500px';
+
+//     var table = document.createElement('table');
+//     table.style.width = '100%';
+//     table.style.borderCollapse = 'collapse';
+// console.log("tabla",table)
+//     array.forEach((fila, i) => {
+//         console.log(i)
+//       var tr = document.createElement('tr');
+//       fila.forEach((celda) => {
+//         var td = document.createElement(i === 0 ? 'th' : 'td');
+//         td.style.border = '1px solid #ddd';
+//         td.style.padding = '8px';
+//         td.style.textAlign = 'left';
+//         td.textContent = celda;
+//         tr.appendChild(td);
+//       });
+//       table.appendChild(tr);
+//     });
+// console.log("tabla2",table)
+//     modalContent.appendChild(table);
+// console.log("3",modalContent)
+//     var closeButton = document.createElement('span');
+//     closeButton.style.color = '#aaa';
+//     closeButton.style.float = 'right';
+//     closeButton.style.fontSize = '28px';
+//     closeButton.style.fontWeight = 'bold';
+//     closeButton.innerHTML = '&times;';
+//     closeButton.onclick = function() {
+//       modal.style.display = 'none';
+//     };
+// console.log("4",closeButton)
+//     modalContent.insertBefore(closeButton, modalContent.firstChild);
+//     modal.appendChild(modalContent);
+//     console.log("Contenido del botón de cierre:", closeButton.innerHTML);
+
+//     document.body.appendChild(modal);
+// console.log("5",modal)
+//     window.onclick = function(event) {
+//       if (event.target == modal) {
+//         modal.style.display = 'none';
+//       }
+//     };
+//   }
+
+// var mostrarTablaDatos = function(array) {
+//     if (!array || array.length === 0) {
+//       alert("No hay datos para mostrar.");
+//       return;
+//     }
+//     console.log("Datos del array:", array);
+  
+//     // Crear el modal
+//     var modal = document.createElement('div');
+//     modal.id = 'custom-modal'; // Asignar un ID al modal
+//     modal.style.display = 'block';
+//     modal.style.position = 'fixed';
+//     modal.style.zIndex = '1000'; // Asegúrate de que el z-index sea alto
+//     modal.style.left = '0';
+//     modal.style.top = '0';
+//     modal.style.width = '300px';
+//     modal.style.height = '300px';
+//     modal.style.overflow = 'auto';
+//     modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+//     modal.style.paddingTop = '60px';
+  
+//     console.log("Modal creado", modal);
+  
+//     // Contenido del modal
+//     var modalContent = document.createElement('div');
+//     modalContent.style.backgroundColor = '#fefefe';
+//     modalContent.style.margin = '5% auto';
+//     modalContent.style.padding = '20px';
+//     modalContent.style.border = '1px solid #888';
+//     modalContent.style.width = '80%';
+//     modalContent.style.maxWidth = '500px';
+  
+//     console.log("Contenido del modal creado", modalContent);
+  
+//     // Crear la tabla
+//     var table = document.createElement('table');
+//     table.style.width = '100%';
+//     table.style.borderCollapse = 'collapse';
+  
+//     try {
+//       array.forEach((fila, i) => {
+//         console.log("Procesando fila", i);
+//         var tr = document.createElement('tr');
+//         fila.forEach((celda) => {
+//           var td = document.createElement(i === 0 ? 'th' : 'td');
+//           td.style.border = '1px solid #ddd';
+//           td.style.padding = '8px';
+//           td.style.textAlign = 'left';
+//           td.textContent = celda;
+//           tr.appendChild(td);
+//         });
+//         table.appendChild(tr);
+//       });
+//     } catch (error) {
+//       console.error("Error al procesar la fila del array:", error);
+//       return;
+//     }
+  
+//     modalContent.appendChild(table);
+  
+//     console.log("Tabla añadida al contenido del modal", modalContent);
+  
+//     // Botón de cierre
+//     var closeButton = document.createElement('span');
+//     closeButton.style.color = '#aaa';
+//     closeButton.style.float = 'right';
+//     closeButton.style.fontSize = '28px';
+//     closeButton.style.fontWeight = 'bold';
+//     closeButton.textContent = '×'; // Usa el carácter directamente
+//     closeButton.onclick = function() {
+//       modal.style.display = 'none';
+//     };
+  
+//     console.log("Botón de cierre creado", closeButton);
+  
+//     modalContent.insertBefore(closeButton, modalContent.firstChild);
+//     modal.appendChild(modalContent);
+  
+//     console.log("Modal completo", modal);
+  
+//     // Asegúrate de que el body está listo
+//     if (document.body) {
+//       document.body.appendChild(modal);
+//       console.log("Modal añadido al body");
+//     } else {
+//       console.error("document.body no está disponible");
+//     }
+  
+//     window.onclick = function(event) {
+//       if (event.target.id === 'custom-modal') {
+//         document.getElementById('custom-modal').style.display = 'none';
+//       }
+//     };
+//   };
+
+var mostrarTablaDatos = function(array) {
+    if (!array || array.length === 0) {
+      alert("No hay datos para mostrar.");
+      return;
+    }
+    console.log("Datos del array:", array);
+  
+    // Crear el modal
+    var modal = document.createElement('div');
+    modal.id = 'custom-modal'; // Asignar un ID al modal
+    modal.style.display = 'block';
+    modal.style.position = 'fixed';
+    modal.style.zIndex = '1000'; // Asegúrate de que el z-index sea alto
+    modal.style.left = '0';
+    modal.style.top = '0';
+    modal.style.width = '100vw';
+    modal.style.height = '100vh';
+    modal.style.overflow = 'auto';
+    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    modal.style.paddingTop = '60px';
+  
+    console.log("Modal creado", modal);
+  
+    // Contenido del modal
+    var modalContent = document.createElement('div');
+    modalContent.style.backgroundColor = '#fefefe';
+    modalContent.style.margin = '5% auto';
+    modalContent.style.padding = '20px';
+    modalContent.style.border = '1px solid #888';
+    modalContent.style.width = '80%';
+    modalContent.style.maxWidth = '500px';
+  
+    console.log("Contenido del modal creado", modalContent);
+  
+    // Crear la tabla
+    var table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+  
+    // Procesar cada fila del array
+    try {
+      array.forEach((fila, i) => {
+        console.log("Procesando fila", i, ":", fila);
+        var tr = document.createElement('tr');
+        
+        // Asegurarse de que cada fila es un array
+        if (Array.isArray(fila)) {
+          fila.forEach((celda, j) => {
+            console.log(`Añadiendo celda ${j} con valor:`, celda);
+            var td = document.createElement(i === 0 ? 'th' : 'td');
+            td.style.border = '1px solid #ddd';
+            td.style.padding = '8px';
+            td.style.textAlign = 'left';
+            td.textContent = celda;
+            tr.appendChild(td);
+          });
+        } else {
+          console.error("Fila no es un array:", fila);
+        }
+  
+        table.appendChild(tr);
+      });
+    } catch (error) {
+      console.error("Error al procesar el array:", error);
+      return;
+    }
+  
+    console.log("Tabla creada:", table);
+  
+    modalContent.appendChild(table);
+    console.log("Tabla añadida al contenido del modal", modalContent);
+  
+    // Botón de cierre
+    var closeButton = document.createElement('span');
+    closeButton.style.color = '#aaa';
+    closeButton.style.float = 'right';
+    closeButton.style.fontSize = '28px';
+    closeButton.style.fontWeight = 'bold';
+    closeButton.textContent = '×'; // Usa el carácter directamente
+    closeButton.onclick = function() {
+      modal.style.display = 'none';
+    };
+  
+    console.log("Botón de cierre creado", closeButton);
+  
+    modalContent.insertBefore(closeButton, modalContent.firstChild);
+    modal.appendChild(modalContent);
+  
+    console.log("Modal completo", modal);
+  
+    // Asegúrate de que el body está listo
+    if (document.body) {
+    //   document.body.appendChild(modal);
+      GetCanvas().getDocObject().parentNode.appendChild(modal);
+      console.log("Modal añadido al body");
+    } else {
+      console.error("document.body no está disponible");
+    }
+  
+    window.onclick = function(event) {
+      if (event.target.id === 'custom-modal') {
+        document.getElementById('custom-modal').style.display = 'none';
+      }
+    };
+  };
+  
+  
+
+
+
+        
+      
+        
+          
+    var zoomNavegador = function() {
+        const zoomLevel = 2; // Define el nivel de zoom deseado
+        const zoomFactor = zoomLevel / 100; // Convierte el nivel de zoom a un factor de escala
+    
+        // Aplica la transformación al elemento HTML (el cual representa el documento completo)
+        document.documentElement.style.setProperty("transform", `scale(${zoomFactor})`, "important");
+        document.documentElement.style.setProperty("transformOrigin", "0 0", "important");
+        
+    }
+    
 
 
     var SetDocEvalExpression = function(_n) {
@@ -1160,21 +1366,20 @@ var EnsayoInput = function () {
 		var o = me.f(_O);
 		o.deleteAlpha();};
 		
-	// var iman=function(punto1,punto2,exp) {
-		// punto1 es el punto a imantar
-		// punto2 es el objeto que atrae
-		// exp es la fuerza de imantación
-		// p1=Find(punto1);
-		// obj=Find(punto2);
-		// p1.addMagnet(obj,exp);
-	// }
+	
 	
 	var imantar = function(_punto, _objeto, num) {
 		punto=Find(_punto);
 		objeto=Find(_objeto);
-		if (punto.getMagnet(objeto)==undefined){punto.addMagnet(objeto,num)}
+       
+        // Verifica si objeto es una instancia de Expression (asumiendo que Expression es la clase/constructor)
+    if (objeto.getCode()=="area"||objeto.getCode()=="circle1"||objeto.getCode()=="list"||objeto.getCode()=="point"||objeto.getCode()=="line"||objeto.getCode()=="arc3pts"||objeto.getCode()=="circle3"||objeto.getCode()=="circle"||objeto.getCode()=="ray"||objeto.getCode()=="segment"||objeto.getCode()=="circle3pts") {
+        if (punto.getMagnet(objeto)==undefined){punto.addMagnet(objeto,num)}
 		else {var fuerza = punto.getMagnet(objeto); 
 		fuerza[1] = num;}
+         // Si es un tipo 'expression', no hacer nada
+    }else {return}
+		
 	}
 
 	
@@ -1507,22 +1712,7 @@ var EnsayoInput = function () {
         return me.o("AngleObject", _n, A, B, C);
     };
 
-    //    var Angle180 = function (_a, _o, _c) {
-    //
-    //
-    //    };
-    //
-    //    var Angle360 = function (_a, _o, _c) {
-    //        console.log("Angle360");
-    //        var A = me.f(_a);
-    //        var O = me.f(_o);
-    //        var C = me.f(_c);
-    //        var xOA = A.getX() - O.getX(), yOA = A.getY() - O.getY();
-    //        var xOC = C.getX() - O.getX(), yOC = C.getY() - O.getY();
-    //        var start = Math.angleH(xOA, yOA);
-    //        var end = Math.angleH(xOC, yOC);
-    //        return (end - start)
-    //    };
+    
 
 
 
@@ -1683,10 +1873,8 @@ var EnsayoInput = function () {
     var Polygon = function(_n, _pts) {
         if (me.t(2))
             return me.a("A");
-        //        console.log(_pts);
-        var pts = _pts.split(",");
+            var pts = _pts.split(",");
         for (var i = 0; i < pts.length; i++) {
-            //            console.log((me.p(pts[i])));
             pts[i] = me.f(me.p(pts[i]));
         }
         pts.push(pts[0]);
@@ -1861,7 +2049,6 @@ var EnsayoInput = function () {
 
     var BLK = function(_n, _s) {
         var o = me.f(_n);
-        // console.log(_s);
         o.blocks.setSource(_s);
     }
 	
@@ -2215,7 +2402,7 @@ var EnsayoInput = function () {
                         return tabOp[d];
                     });
                 }
-                // console.log("***tab[" + i + "]=" + tab[i]);
+                
             }
 
             while (_st.indexOf(mask) > -1) {
@@ -2287,22 +2474,21 @@ var EnsayoInput = function () {
         // Remplaza expresiones sin variable : E1 -> ___EXPR___n
         // y pone el contenido en memoria tabExpr[n]="funcValue(E1)()"
         // _s = _s.replace(/\b(\w+)\b([^\(]|$)/g, function(m, _n, _e) {
-        // console.log("before : " + _s);
+        
         _s = _s.replace(/([àáâãäåæçèéêëìíîïñòóôõöœùúûüýÿÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖŒÙÚÛÜÝŸΆΈ-ώἀ-ῼa-zA-Z0-9_]+)([^\(]|$)/g, function(m, _n, _e) {
             var o = (window[_n] === undefined) ? me.fv(window["$locvar_" + _n]) : me.fv(window[_n]);
             if (o === undefined)
                 o = me.fv(_n);
             if (o === undefined)
                 return (_n + _e);
-            //            console.log("trouvé !!!");
-            //            if ((o === undefined) || (o.getCode() !== "expression")) return (_n + _e);
+            
             if ("." === _e.charAt(0))
                 tabExpr.push("getObj(" + _n + ")");
             else
                 tabExpr.push("funcValue(" + _n + ")__()");
             return (maskExpr + (tabExpr.length - 1) + _e);
         });
-        // console.log("after : " + _s);
+        
 
         // Remplacement des fonctions d'une variable : f1(<param>) -> funcValue(f1)(<param>)
         // Voir explications dans caretReplace :
@@ -2511,14 +2697,6 @@ var EnsayoInput = function () {
             return "";
         });
 
-
-
-        // if ((s2 !== "") && ((isValidParenthesis(s2)))) {
-        //     console.log("***user result = " + s);
-        //     console.log("pseudo result = " + s3);
-        //     console.log("main result = " + s2);
-        //     console.log("name : " + _o.getName());
-        // }
 
 
         return {
@@ -2813,11 +2991,7 @@ var EnsayoInput = function () {
         return (a)
     };
 
-    // Math.Angle180 = function(_a, _o, _c) {
-    //     console.log("Math.Angle180");
-    //     var a = Math.Angle360(_a, _o, _c);
-    //     return ((a < Math.simplePI) ? a : Math.doublePI - a)
-    // };
+    
 
 
     Math.Angle180 = function(_a, _b, _c) {
@@ -2840,36 +3014,7 @@ var EnsayoInput = function () {
         return NaN;
     };
 
-    // Math.Angle360 = function(_a, _b, _c) {
-    //     if ((isArray(_a)) && (isArray(_b)) && (isArray(_c)) && (_a.length === _b.length) && (_a.length === _c.length)) {
-    //         var u = Math.minus(_a, _b);
-    //         var v = Math.minus(_c, _b);
-    //         var ps = 0,
-    //             n1 = 0,
-    //             n2 = 0;
-    //         for (var i = 0; i < u.length; i++) {
-    //             ps += u[i] * v[i];
-    //             n1 += u[i] * u[i];
-    //             n2 += v[i] * v[i];
-    //         }
-    //         var a = ps / (Math.sqrt(n1) * Math.sqrt(n2));
-
-    //         if (Math.abs(a - 1) < 1e-13) a=1;
-    //         else if (Math.abs(a + 1) < 1e-13) a=-1;
-
-    //         a=Math.acos(a);
-    //         var zpv=u[0]*v[1]-u[1]*v[0];
-    //         if (Math.abs(zpv) < 1e-11) zpv=0;
-
-    //         console.log(zpv);
-
-    //         if (zpv<0) a=Math.doublePI-a;
-
-
-    //         return a;
-    //     }
-    //     return NaN;
-    // };
+    
 
 
 
