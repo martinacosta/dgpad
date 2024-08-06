@@ -23,6 +23,19 @@ function Canvas(_id) {
         return docObject;
     };
 
+    me.getInputs=function(){
+        
+        return $U.inputs;
+    }
+
+    me.setInputs=function(list){
+        $U.inputs=list;
+    }
+
+    me.getEscala=function(){
+        return $U.escala;
+    }
+
     me.prefs = $P.clone();
 
     var width = 0;
@@ -129,7 +142,7 @@ function Canvas(_id) {
         s += '<div style="height:40px;line-height:40px;vertical-align: baseline;">';
         s += '<input type="submit" value="' + $L.export_button + '" style="display: inline-block;zoom: 1;*display: inline;vertical-align: baseline;margin: 0 2px;outline: none;cursor: pointer;text-align: center;text-decoration: none;font: 14px/100% Arial, Helvetica, sans-serif;padding: .5em 2em .55em;text-shadow: 0 1px 1px rgba(0,0,0,.3);-webkit-border-radius: .5em;-moz-border-radius: .5em;border-radius: .5em;-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);box-shadow: 0 1px 2px rgba(0,0,0,.2);color: #d7d7d7;border: solid 1px #333;background: #333;background: -webkit-gradient(linear, left top, left bottom, from(#666), to(#000));background: -moz-linear-gradient(top,  #666,  #000);">';
         s += '</div>';
-        s += '<iframe name="' + _frm + '" width="100%" height="100%" src="about:blank" scrolling="no" frameborder="no"></iframe>';
+        s += '<iframe name="' + _frm + '" width="' + _w + '" height="' + _h + '" src="about:blank" scrolling="no" frameborder="no"></iframe>';
         s += '</div>';
         s += '</form>';
         return s;
@@ -185,7 +198,7 @@ function Canvas(_id) {
         s += '<input type="hidden" name="file_content" value="' + _src + '">';
         // if (hide_ctrl_panel)
             // s += '<input type="hidden" name="hide_ctrlpanel" value="true">';
-        s += '<iframe name="' + _frm + '" width="100%" height="100%" src="about:blank" scrolling="no" frameborder="no" oNlOAd="if (!this.parentNode.num) {this.parentNode.submit();this.parentNode.num=true}"></iframe>';
+        s += '<iframe name="' + _frm + '" width="' + _w + '" height="' + _h + '" src="about:blank" scrolling="no" frameborder="no" oNlOAd="if (!this.parentNode.num) {this.parentNode.submit();this.parentNode.num=true}"></iframe>';
         s += '</form>';
         return s;
     };
