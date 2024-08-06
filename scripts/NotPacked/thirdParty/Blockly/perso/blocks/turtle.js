@@ -1,5 +1,9 @@
+
+
 Blockly.Blocks['turtle_angle_input'] = {
+    
     init: function() {
+        
         this.appendDummyInput()
             .appendField(new Blockly.FieldAngle(90), "ANGLE");
         this.setOutput(true, null);
@@ -455,10 +459,7 @@ Blockly.Blocks['turtle_length'] = {
         this.appendDummyInput()
             .appendField($L.blockly.turtle.input);
 		
-		this.appendValueInput("name")
-            .setCheck(null)
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField($L.blockly.turtleInput_name);
+		
 		this.appendValueInput("width")
             .setCheck(null)
             .setAlign(Blockly.ALIGN_RIGHT)
@@ -468,14 +469,7 @@ Blockly.Blocks['turtle_length'] = {
             .setCheck(null)
             .setAlign(Blockly.ALIGN_RIGHT)
             .appendField($L.blockly.turtleInput_FontSize);
-		this.appendValueInput("Display")
-            .setCheck(null)
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField($L.blockly.turtleInput_Display);
-		this.appendValueInput("target")
-            .setCheck(null)
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField($L.blockly.turtleInput_target);
+		
         this.setInputsInline(false);
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
@@ -491,10 +485,7 @@ Blockly.Blocks['turtle_input_number'] = {
         this.appendDummyInput()
             .appendField($L.blockly.turtle.inputNumber);
 		
-		this.appendValueInput("name")
-            .setCheck(null)
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField($L.blockly.turtleInput_name);
+		
 		this.appendValueInput("min")
             .setCheck(null)
             .setAlign(Blockly.ALIGN_RIGHT)
@@ -516,14 +507,11 @@ Blockly.Blocks['turtle_input_number'] = {
             .setCheck(null)
             .setAlign(Blockly.ALIGN_RIGHT)
             .appendField($L.blockly.turtleInput_FontSize);
-		this.appendValueInput("Display")
-            .setCheck(null)
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField($L.blockly.turtleInput_Display);
-		this.appendValueInput("target")
+        this.appendValueInput("target")
             .setCheck(null)
             .setAlign(Blockly.ALIGN_RIGHT)
             .appendField($L.blockly.turtleInput_target);
+		
         this.setInputsInline(false);
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
@@ -533,3 +521,55 @@ Blockly.Blocks['turtle_input_number'] = {
     }
 };
 
+Blockly.Blocks['dynamic_dropdown'] = {
+    init: function() {
+      this.appendDummyInput('DUMMY')
+          .appendField("Selecciona una opción:");
+      this.appendDummyInput('OPTIONS')
+          .appendField(new Blockly.FieldDropdown([
+              ["Opción 1", "OPTION1"],
+              ["Opción 2", "OPTION2"]
+          ]), "DROPDOWN");
+      this.appendDummyInput()
+          .appendField(new Blockly.FieldImage("https://www.gstatic.com/images/icons/material/system/1x/add_circle_outline_black_24dp.png", 24, 24, "Agregar opción", this.addOption.bind(this)));
+      this.setOutput(true, "String");
+      this.setColour(230);
+      this.setTooltip("Este es un bloque con un menú desplegable dinámico.");
+      this.setHelpUrl("");
+    },
+  
+    mutationToDom: function() {
+      var container = document.createElement('mutation');
+      var options = this.optionCount();
+      container.setAttribute('options', options);
+      return container;
+    },
+  
+    domToMutation: function(xmlElement) {
+      var options = parseInt(xmlElement.getAttribute('options'), 10);
+      this.updateShape_(options);
+    },
+  
+    optionCount: function() {
+      return this.inputList.length - 2; // Excluye DUMMY y el botón de agregar
+    },
+  
+    addOption: function() {
+      var options = this.optionCount();
+      this.updateShape_(options + 1);
+    },
+  
+    updateShape_: function(numOptions) {
+      while (this.getInput('OPTIONS' + numOptions)) {
+        this.removeInput('OPTIONS' + numOptions);
+      }
+      for (var i = 1; i <= numOptions; i++) {
+        if (!this.getInput('OPTIONS' + i)) {
+          this.appendDummyInput('OPTIONS' + i)
+              .appendField("Opción " + i + ":")
+              .appendField(new Blockly.FieldTextInput("Opción " + i), "OPTION" + i);
+        }
+      }
+    }
+  };
+  

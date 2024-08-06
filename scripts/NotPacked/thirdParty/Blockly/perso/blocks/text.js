@@ -481,3 +481,4 @@ Blockly.Blocks['text_join'] = {
   },
   newQuote_: Blockly.Blocks['text'].newQuote_
 };
+
