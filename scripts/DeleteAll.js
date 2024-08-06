@@ -20,11 +20,24 @@ function DeleteAll(_canvas) {
         //        canvas.macrosManager.clearTools();
         canvas.textManager.clear();
 		//para borrar las casillas creadas con la tortuga
-        inpsnames=Object.getOwnPropertyNames( canvas['TURTLE_INPUTS']);
-		for (var i = 0;  i < inpsnames.length; i++) {
-            canvas['TURTLE_INPUTS'][inpsnames[i]].remove();
+        Expression.deleteAll();
+        inpsnames=canvas.getInputs;
+        // inpsnames=Object.getOwnPropertyNames( canvas['TURTLE_INPUTS']);
+		for (var i = 0;  i < Object.keys(inpsnames).length; i++) {
+            let inpBorrar=Object.keys(inpsnames)[i];
+            let inpBorrarId=inpBorrar.split("-")[1];
+            const selector = `#${CSS.escape(inpBorrarId)}`;
+            
+            const input = canvas.getDocObject().parentNode.querySelector(selector);
+            if (input) {
+                input.remove();
+            }
         }
-        canvas['TURTLE_INPUTS'] = [];
+        
+            //     canvas['TURTLE_INPUTS'][inpsnames[i]].remove();
+        // }
+        canvas.setInputs({});
+        // canvas['TURTLE_INPUTS'] = [];
         canvas.getDocObject().style.visibility = "visible";
         canvas.paint();
     }
