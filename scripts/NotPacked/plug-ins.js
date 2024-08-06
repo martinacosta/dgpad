@@ -105,6 +105,91 @@ $macros[$L.macros.coords3D] = {
     }
 };
 
+// $macros[$L.macros.area3D] = {
+// 	id: "area3D",
+//     name: $L.macros.area3D,
+//     parameters: ["area"],
+// 	exec: function(pol) {
+//         function crossProduct(v1, v2) {
+//             return [
+//                 v1[1] * v2[2] - v1[2] * v2[1],
+//                 v1[2] * v2[0] - v1[0] * v2[2],
+//                 v1[0] * v2[1] - v1[1] * v2[0]
+//             ];
+//         }
+
+//         function magnitude(vector) {
+//             return Math.sqrt(vector[0]**2 + vector[1]**2 + vector[2]**2);
+//         }
+
+//         function calculatePolygonArea(vertices) {
+//             const n = vertices.length;
+            
+//             if (n < 3) return 0;
+
+//             let referencePoint = vertices[0];
+//             let sumCrossProducts = [0, 0, 0];
+
+//             for (let i = 1; i < n - 1; i++) {
+//                 const v1 = [
+//                     vertices[i][0] - referencePoint[0],
+//                     vertices[i][1] - referencePoint[1],
+//                     vertices[i][2] - referencePoint[2]
+//                 ];
+
+//                 const v2 = [
+//                     vertices[i + 1][0] - referencePoint[0],
+//                     vertices[i + 1][1] - referencePoint[1],
+//                     vertices[i + 1][2] - referencePoint[2]
+//                 ];
+
+//                 const crossProd = crossProduct(v1, v2);
+//                 sumCrossProducts = sumCrossProducts.map((val, idx) => val + crossProd[idx]);
+//             }
+
+//             return 0.5 * magnitude(sumCrossProducts);
+//         }
+//         vertPol=Expression("vertPol","","","","tab=[];\nlet poli="+pol+".getPtab();\nfor(i=0;i<poli.length;i++){\ntab.push(poli[i].getXYZ())\n};\ntab","-4.764705882352941","-1.5");
+        
+//         let poligono = GetExpressionValue("vertPol");
+//         console.log(poligono)
+//         barycenter3D = function(Ptab) {
+//             var len = Ptab.length;
+//             var xg = 0,
+//               yg = 0,
+//               zg = 0;
+//             for (var i = 0; i < len; i++) {
+//               var t = Ptab[i];
+//               console.log(t)
+//               xg += t[0];
+              
+//               yg += t[1];
+              
+//               zg += t[2];
+              
+//             }
+            
+//             return [xg / len, yg / len, zg / len];
+//           };
+          
+//         console.log(barycenter3D(poligono));
+//         const area = calculatePolygonArea(poligono);
+        
+        
+        
+//         E5=Expression("E5","","","",\"barycenter3D(poligono)\","-4.5588235294117645","-1.4558823529411764");
+//         blk_turtle_exp_P2=Expression("blk_turtle_exp_P2","","","","var bl_bidfbdffd=function(){\nTURTLE_INIT(\"P2\",P2);\nTURTLE_UP(true);\n\nTURTLE_JOIN_PT((E5));\nTURTLE_RESET();\nTURTLE_PRINT(("+area+"));\nreturn TURTLE_RESULT()\n};\nbl_bidfbdffd()","-4.5588235294117645","-0.4264705882352941");
+//         blk_turtle_list_P2=List("blk_turtle_list_P2",blk_turtle_exp_P2);
+//         STL(blk_turtle_exp_P2,"c:#780013;h:2;s:7;f:24;p:2;cL:200;cPT:YzojNzgwMDEzO2g6MjtzOjEwO2Y6MzA=");
+//         STL(blk_turtle_list_P2,"c:#0000b2;s:0;f:30;p:0;nmi:true;sg:1");
+       
+           
+
+//         return [blk_turtle_list_P2];
+//     }
+// };
+
+
 $macros[$L.macros.dist3D] = {
 	id:"dist3D",
     name: $L.macros.dist3D,
