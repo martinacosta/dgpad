@@ -28,8 +28,7 @@ function MacrosManager(_canvas) {
 		
         for (var i = 0, len = plugins.length; i < len; i++) {
 			pos= canvas.gethidePlugins().indexOf(plugins[i].id);
-            console.log(plugins[i].id);
-            console.log(pos)
+            
 			if (pos===-1) {
 				macroPanel.addPlugins(plugins[i]);
 			}
@@ -127,7 +126,7 @@ function MacrosManager(_canvas) {
         tools.push(m);
         return m;
     };
-    console.log(this);
+    
     me.addPlugin = function(_n, _p, _e, _id) {
         var m = new Macro(canvas, _n, _p, _e, _id);
         plugins.push(m);

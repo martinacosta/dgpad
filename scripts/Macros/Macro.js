@@ -54,6 +54,7 @@ function Macro(_canvas, _name, _p, _proc, _id) {
             return;
         }
         if (params.length < paramTypes.length) {
+            
             me.tagPossibleInitials();
             // Curiosité : le innerHTML semble prendre beaucoup de temps sur touchpad
             // D'où l'execution par setTimeout dans un autre Thread...
