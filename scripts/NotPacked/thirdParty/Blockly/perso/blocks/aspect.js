@@ -162,9 +162,135 @@ Blockly.Blocks['dgpad_style_arrow'] = {
     this.appendValueInput("h")
         .setCheck(null);
     this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
     this.setOutput(true, "style");
     this.setColour(65);
     this.setTooltip('');
     this.setHelpUrl('');
   }
 };
+
+Blockly.Blocks['dgpad_inputs_deleteValue'] = {
+  init: function() {
+      this.appendDummyInput()
+          .appendField($L.blockly.aspect_deleteValue1)
+          .appendField(new Blockly.FieldDropdown(this.updateDropdownOptions.bind(this)), "NAME");
+
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setOutput(false);
+      this.setColour(47);
+      this.setTooltip('Borra el valor de una casilla disponible');
+      this.setHelpUrl('');
+
+      this.listaInputs = [];
+      this.listaIds = [];
+      this.listaNumerados = [];
+      this.updateDropdownOptions();
+  },
+
+  updateDropdownOptions: function() {
+      if (parent.$U.inputs && Object.keys(parent.$U.inputs).length > 0) {
+          let nombreInput = Object.keys(parent.$U.inputs);
+          this.listaInputs = [];
+          this.listaIds = [];
+          for (let i = 0; i < nombreInput.length; i++) {
+              let nom = nombreInput[i];
+              this.listaInputs.push(nom.split("-")[0]);
+              this.listaIds.push(nom.split("-")[1]);
+          }
+          
+          let listaInputsNumerados = this.listaInputs.map((item, index) => {
+              let count = this.listaInputs.slice(0, index).filter(x => x === item).length;
+              return count > 0 ? `${item}_${count}` : item;
+          });
+                      
+          this.listaNumerados=listaInputsNumerados;
+          return listaInputsNumerados.map(function(inputName) {
+              return [inputName, inputName];
+          });
+      } else {
+          return [[$L.blockly.aspect_deleteValue2, $L.blockly.aspect_deleteValue2]];
+      }
+  },
+  getSelectedId: function() {
+    let selectedValue = this.getFieldValue("NAME");
+    let index = this.listaNumerados.indexOf(selectedValue);
+    if (index !== -1) {
+        return this.listaIds[index];
+    } else {
+        return null;
+    }
+}
+};
+  
+
+  
+
+
+
+Blockly.Blocks['dgpad_inputs_showHide'] = {
+  init: function() {
+      this.appendDummyInput()
+          .appendField($L.blockly.aspect_ShowHide)
+          .appendField(new Blockly.FieldDropdown(this.updateDropdownOptions.bind(this)), "NAME");
+
+      this.appendValueInput("VISIBLE")
+          .setCheck(null);
+
+      this.setInputsInline(true);
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setOutput(false);
+      this.setColour(47);
+      this.setTooltip('');
+      this.setHelpUrl('');
+      this.listaInputs = [];
+      this.listaIds = [];
+      this.listaNumerados = [];
+      this.updateDropdownOptions();
+  },
+  updateDropdownOptions: function() {
+      if (parent.$U.inputs && Object.keys(parent.$U.inputs).length > 0) {
+          let nombreInput = Object.keys(parent.$U.inputs);
+          this.listaInputs = [];
+          this.listaIds = [];
+          for (let i = 0; i < nombreInput.length; i++) {
+              let nom = nombreInput[i];
+              this.listaInputs.push(nom.split("-")[0]);
+              this.listaIds.push(nom.split("-")[1]);
+          }
+
+          let listaInputsNumerados = this.listaInputs.map((item, index) => {
+              let count = this.listaInputs.slice(0, index).filter(x => x === item).length;
+              return count > 0 ? `${item}_${count}` : item;
+          });
+
+          this.listaNumerados = listaInputsNumerados;
+          return listaInputsNumerados.map(function(inputName) {
+              return [inputName, inputName];
+          });
+      } else {
+          return [[$L.blockly.aspect_deleteValue2, $L.blockly.aspect_deleteValue2]];
+      }
+  },
+  getSelectedId: function() {
+      let selectedValue = this.getFieldValue("NAME");
+      let index = this.listaNumerados.indexOf(selectedValue);
+      
+      if (index !== -1) {
+          return this.listaIds[index];
+      } else {
+          return null;
+      }
+  }
+};
+
+
+
+
+  
+
+ 
