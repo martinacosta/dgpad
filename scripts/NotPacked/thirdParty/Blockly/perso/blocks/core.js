@@ -158,59 +158,19 @@ Blockly.Blocks['procedures_defnoreturn'] = {
 };
 
 
-// Blockly.Msg.TEXT_PROMPT_TYPE_NUMBER
+Blockly.Blocks['mostrar_tabla'] = {
+    init: function() {
+      this.appendValueInput("ARRAY")
+          .setCheck("Array")
+          .appendField("mostrar los datos de")
+      this.appendDummyInput()
+          .appendField("en una tabla");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(20);
+      this.setTooltip("Muestra el array en un modal.");
+      this.setHelpUrl("");
+    }
+  };
 
-// Blockly.Blocks['text_prompt_ext'] = {
-//     /**
-//      * Block for prompt function (external message).
-//      * @this Blockly.Block
-//      */
-//     init: function() {
-//         var TYPES = [
-//             [Blockly.Msg.TEXT_PROMPT_TYPE_NUMBER, 'NUMBER'],
-//             [Blockly.Msg.TEXT_PROMPT_TYPE_TEXT, 'TEXT']
-//         ];
-//         this.setHelpUrl(Blockly.Msg.TEXT_PROMPT_HELPURL);
-//         this.setColour(Blockly.Blocks.math.HUE);
-//         // Assign 'this' to a variable for use in the closures below.
-//         var thisBlock = this;
-//         var dropdown = new Blockly.FieldDropdown(TYPES, function(newOp) {
-//             thisBlock.updateType_(newOp);
-//         });
-//         this.appendValueInput('TEXT')
-//             .appendField(dropdown, 'TYPE');
-//         this.setOutput(true, 'String');
-//         this.setTooltip(function() {
-//             return (thisBlock.getFieldValue('TYPE') == 'TEXT') ?
-//                 Blockly.Msg.TEXT_PROMPT_TOOLTIP_TEXT :
-//                 Blockly.Msg.TEXT_PROMPT_TOOLTIP_NUMBER;
-//         });
-//     },
-//     /**
-//      * Modify this block to have the correct output type.
-//      * @param {string} newOp Either 'TEXT' or 'NUMBER'.
-//      * @private
-//      * @this Blockly.Block
-//      */
-//     updateType_: function(newOp) {
-//         this.outputConnection.setCheck(newOp == 'NUMBER' ? 'Number' : 'String');
-//     },
-//     /**
-//      * Create XML to represent the output type.
-//      * @return {!Element} XML storage element.
-//      * @this Blockly.Block
-//      */
-//     mutationToDom: function() {
-//         var container = document.createElement('mutation');
-//         container.setAttribute('type', this.getFieldValue('TYPE'));
-//         return container;
-//     },
-//     /**
-//      * Parse XML to restore the output type.
-//      * @param {!Element} xmlElement XML storage element.
-//      * @this Blockly.Block
-//      */
-//     domToMutation: function(xmlElement) {
-//         this.updateType_(xmlElement.getAttribute('type'));
-//     }
-// };
+  
