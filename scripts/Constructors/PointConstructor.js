@@ -56,7 +56,7 @@ function PointConstructor() {
                 break;
         }
         o.setFillStyle();
-        Expression.fixAll();
+        // Expression.fixAll();
         o.compute();
 
 
