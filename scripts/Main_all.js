@@ -27647,6 +27647,7 @@ function NamesPanel(_owner, _l, _t, _w, _h, _observerproc, _closeproc) {
                me.popupArray = function(_t) {
                    // console.log("objectPopup :"+_t);
                    var props = me.CN.getObjectsFromType(_t);
+                   
                    var tab = [];
                    var mod = OBJ.blocks.getMode()[panel.getMode()];
                    for (var i = 0; i < props.length; i++) {

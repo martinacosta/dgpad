@@ -1240,6 +1240,7 @@ $U.confirm = function(_mess,  _w, _h) {
     });
 }
 //MEAG
+$U.inputs={};
 
 $U.clearOneLocalStorage = function() {
     // On parcours le localstorage tant qu'on rencontre un élément verrouillé :

@@ -281,7 +281,9 @@ function Expression(_obj, _s) {
 
     me.fix = function() {
         // console.log("FIX : "+f(1, 2, 3, 4));
+        
         if (f(1, 2, 3, 4) === undefined) {
+            
             me.setText(_s);
             //            init = interpreter.ExpressionInit(obj, _s + "");
             //            f = interpreter.CreateFunctionFromExpression(init.js, vnames);
@@ -332,4 +334,10 @@ Expression.delete = function(_ex) {
         }
     }
     return null;
+}
+
+Expression.deleteAll = function(){
+    for (var i = 0; i < Expression.ALL.length; i++) {
+        Expression.delete(Expression.ALL[i]);
+    }
 }
