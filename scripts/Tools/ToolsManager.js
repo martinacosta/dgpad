@@ -1,9 +1,3 @@
-/*
- * To change me template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-
 function ToolsManager(_canvas) {
     var me = this;
     var canvas = _canvas;
@@ -82,6 +76,11 @@ function ToolsManager(_canvas) {
         var ts = 3 * toolsize / 4;
         var w = pxy.length * ts + (pxy.length - 1) * toolgap;
         startx += (W - w) / 2;
+        if (startx < toolgap) {
+            startx = toolgap;
+        } else if (startx + w > canvas.getWidth()) {
+            startx = canvas.getWidth() - w - toolgap;
+        }
         if ((cY - H - toolmarginV) > 0) {
             starty = cY + toolmarginV ;
         } else if ((cY - toolmarginV - ts)<0){
@@ -113,7 +112,7 @@ function ToolsManager(_canvas) {
                 var t = myTools[i];
                 if (t.startsWith("@")) {
                     // MEAG start
-                    var hideST = ["@magnet", "@anchor", "@pushpin", "@blockly"];
+                    var hideST = ["@magnet", "@anchor", "@pushpin", "@blockly", "@callEditWidget"];
                     if (!(canvas.version() == "estudiantes" && hideST.indexOf(t) != -1)) {
                       if (canvas.gethideTools().indexOf(t) < 0) {
                         pxy.push({

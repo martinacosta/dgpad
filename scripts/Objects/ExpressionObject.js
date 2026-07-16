@@ -23,12 +23,7 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
   this.blocks.setMode(["oncompute", "onchange", "oninit"], "oncompute");
 
 
-  // this.getMe = function() {
-  //     return me;
-  // };
-
-
-  //    cPT.setParent(me);
+  
   cPT.getCode = function() {
     return "expression_cursor";
   };
@@ -82,21 +77,44 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
       }
     }
   };
+  // var initCursorPos = function() {
+  //   var cmin = min.value();
+  //   var cmax = max.value();
+  //   var ce = E1.value();
+  //   if (ce < cmin)
+  //     ce = cmin;
+  //   if (ce > cmax)
+  //     ce = cmax;
+  //   cPT.setXY(X + cLength * (ce - cmin) / (cmax - cmin), Y + cOffsetY);
+  // };
+
   var initCursorPos = function() {
-    var cmin = min.value();
-    var cmax = max.value();
-    var ce = E1.value();
-    if (ce < cmin)
-      ce = cmin;
-    if (ce > cmax)
-      ce = cmax;
+  var cmin = min.value();
+  var cmax = max.value();
+  var ce = E1.value();
+
+  if (ce < cmin) ce = cmin;
+  if (ce > cmax) ce = cmax;
+
+  E1.setValue(ce);
+
+  if (cmax === cmin) {
+    cPT.setXY(X, Y + cOffsetY);
+  } else {
     cPT.setXY(X + cLength * (ce - cmin) / (cmax - cmin), Y + cOffsetY);
-  };
+  }
+
+  if (Cn.is3D()) {
+    Cn.computeAll();
+  } else {
+    cPT.computeChilds();
+  }
+};
 
   cPT.setDefaults("expression_cursor");
   Cn.add(cPT);
   // Cuidado, dependencia circular! :
-  //    me.setParent(cPT);
+  
   me.setIncrement = function(_i) {
     cPT.setIncrement(_i);
   };
@@ -192,66 +210,10 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
     }
   }
 
-  // me.incrementAlpha = function(anim) {
-  //     if (hashtab[anim.loopnum]) {
-  //         var v = anim.speed;
-  //         var s = anim.direction;
-  //         var ar = anim.ar;
-  //         var d = new Date();
-  //         anim.delay = d.getTime() - anim.timestamp;
-  //         anim.timestamp = d.getTime();
-  //         var inc = s * 1;
-
-  //         // var inc = 0.1 * s;
-  //         // console.log(me.isCursor());
-  //         if (me.isCursor()) {
-  //             inc = s * (max.value() - min.value()) / 50;
-  //             var e1 = E1.value();
-  //             e1 += inc;
-
-  //             if (e1 < min.value()) {
-  //                 if (ar) {
-  //                     anim.direction *= -1;
-  //                     e1 = 2 * min.value() - e1;
-  //                 } else {
-  //                     e1 = max.value() + e1 - min.value();
-  //                 }
-  //             }
-  //             if (e1 > max.value()) {
-  //                 if (ar) {
-  //                     anim.direction *= -1;
-  //                     e1 = 2 * max.value() - e1;
-  //                 } else {
-  //                     e1 = min.value() + e1 - max.value();
-  //                 }
-  //             }
-  //             if (e1 < min.value()) e1 = min.value();
-  //             if (e1 > max.value()) e1 = max.value();
-  //             if (Math.abs(e1) < 1e-13) e1 = 0;
-
-  //             // if (cPT.increment) {
-  //             //     var inc = 1 / cPT.increment;
-  //             //     e1 = min.value() + Math.round((e1 - min.value()) * inc) / inc;
-  //             // }
-
-  //             initCursorPos();
-  //             E1.setValue(e1);
-
-  //             // initCursorPos();
-  //             // E1.setValue(e1);
-  //         } else {
-  //             var val = E1.value() + inc;
-  //             if (Math.abs(val) < 1e-13) val = 0;
-  //             E1.setValue(val);
-  //         }
-  //     }
-  //     anim.loopnum = (anim.loopnum + 1) % 100;
-
-  //     // console.log(E1.value())
-  // };
+  
 
   me.incrementAlpha = function(anim) {
-    // console.log(anim);
+    
     var v = anim.speed;
     var s = anim.direction;
     var ar = anim.ar;
@@ -259,8 +221,7 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
     anim.delay = d.getTime() - anim.timestamp;
     anim.timestamp = d.getTime();
     var inc = s * (v * anim.delay / 1000);
-    // var inc=s*v;
-    // console.log(me.isCursor());
+    
     if (me.isCursor()) {
       inc = inc * (max.value() - min.value()) / 50;
 
@@ -273,7 +234,7 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
         inc = s * inc2 * Math.floor(Math.abs(anim.incsum) / inc2);
         anim.incsum = 0;
       }
-      // console.log(inc);
+     
       var e1 = E1.value();
       e1 += inc;
 
@@ -297,24 +258,20 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
       if (e1 > max.value()) e1 = max.value();
       if (Math.abs(e1) < 1e-13) e1 = 0;
 
-      // if (cPT.increment) {
-      //     var inc2 = 1 / cPT.increment;
-      //     e1 = min.value() + Math.round((e1 - min.value()) * inc2) / inc2;
-      // }
+      
 
 
 
       initCursorPos();
       E1.setValue(e1);
 
-      // initCursorPos();
-      // E1.setValue(e1);
+      
     } else {
       var val = E1.value() + inc;
       if (Math.abs(val) < 1e-13) val = 0;
       E1.setValue(val);
     }
-    // console.log(E1.value())
+    
   };
 
   // ****************************************
@@ -328,7 +285,7 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
       anchor = _o;
       this.addParent(anchor);
       this.setXY(anchor.getX() + Alpha[0], anchor.getY() + Alpha[1]);
-      //            _o.setAlpha(this);
+      
     }
   };
   this.setAlpha = function(_a) {
@@ -367,10 +324,10 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
   };
 
   this.getAssociatedTools = function() {
-    var s = "@callproperty,@calltrash,@objectmover,@anchor,@callcalc,@doceval,rot,homotecia";
+    var s = "@callproperty,@calltrash,@objectmover,@anchor,@callcalc,@doceval,@calleditw,rot,homotecia";
     if (anchor)
       s = "@callproperty,@calltrash,@objectmover,@noanchor,@callcalc,@doceval,rot,homotecia";
-    // if (me.isCursor())
+    
     if ((E1 !== null) && (E1.isNum())) s += ",@spring";
     s += ",@blockly";
     return s;
@@ -404,10 +361,7 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
     dragY = _y;
     OldX = X;
     OldY = Y;
-    //        dragX = 10 * Math.round(_x / 10);
-    //        dragY = 10 * Math.round(_y / 10);
-    //        OldX = 10 * Math.round(X / 10);
-    //        OldY = 10 * Math.round(Y / 10);
+    
   };
 
   this.dragTo = function(_x, _y) {
@@ -417,17 +371,9 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
       var x = X + cLength * bar;
       cPT.setXY(x, cPT.getY());
     } else {
-      //            var oldX = X;
+      
       this.setXY(OldX + Math.round((_x - dragX) / 10) * 10, OldY + Math.round((_y - dragY) / 10) * 10);
-      //            X=OldX+Math.round((_x-dragX)/10)*10;
-      //            Y=OldY+Math.round((_y-dragY)/10)*10;
-      //            cPT.setXY(cPT.getX() + (X - oldX), Y + cOffsetY);
-      //            var oldX = X;
-      //            X = 10 * Math.round(_x / 10);
-      //            Y = 10 * Math.round(_y / 10);
-      //            X = X + (OldX - dragX);
-      //            Y = Y + (OldY - dragY);
-      //            cPT.setXY(cPT.getX() + (X - oldX), Y + cOffsetY);
+      
     }
     this.computeAlpha();
   };
@@ -463,7 +409,7 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
 
     var val = E1.get() + " : " + E1.value().getVars() + " " + arrow + " " + E1.value().get();
 
-    //        var val = this.getVarName() + "(" + E1.value().getVars() + ") = " + E1.value().get();
+    
     W = ctx.measureText(val).width;
     ctx.fillText(val, X, Y);
   };
@@ -472,16 +418,7 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
     ctx.fillStyle = ctx.strokeStyle;
     ctx.textAlign = "left";
     var val = this.getVarName() + "(" + E1.getVars() + ") = " + E1.get() + " = " + E1.getDxyzt();
-    //        var val = E1.get()+" : "+ E1.value().getVars() + " \u27fc " + E1.value().get();
-
-    //        var v=[];
-    //        console.log("****this.depList: ");
-    //        for (var i=0;i<this.getParentLength();i++) {
-    //            console.log("this.depList: "+this.getParentAt(i).getName());
-    //        }
-
-
-    //        var val = this.getVarName() + "(" + E1.value().getVars() + ") = " + E1.value().get();
+    
     W = ctx.measureText(val).width;
     ctx.fillText(val, X, Y);
   };
@@ -496,56 +433,133 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
     return _s;
   };
 
-  // var paintText = function(ctx) {
-    // ctx.fillStyle = ctx.strokeStyle;
-    // ctx.textAlign = "left";
-    // var val = parseText(E1.value());
-    // W = ctx.measureText(val).width;
-    // ctx.fillText(val, X, Y);
-  // };
   
-//al escribir un texto entre comillas puede usarse &n para separar líneas  
   var paintText = function(ctx) {
     ctx.fillStyle = ctx.strokeStyle;
     ctx.textAlign = "left";
-	var texto = Object.is(E1.value(), NaN) ? "NaN" : E1.value();
-	var lineas = texto.split("&n");
-	var y = Y;
-	for (var i = 0; i < lineas.length; i++) {
-      var val = parseText(lineas[i]);
-      W = ctx.measureText(val).width;
-      ctx.fillText(val, X, y);
-	  y += this.getFontSize() + 5;
-	}
+
+    var raw = E1.value();
+    var prec = me.getPrecision();
+
+    // 1) convierte a string seguro (array/num/string)
+    var txt;
+    if (Object.is(raw, NaN)) {
+      txt = "NaN";
+    } else if (typeof raw === "string") {
+      txt = raw; // editable por usuario
+    } else {
+      txt = parseArray(raw, prec); // tu helper para arrays/números
+    }
+
+    // 2) aplica parseText para respetar comillas, etc.
+    var val = parseText(txt);
+
+    // 3) pinta con nombre
+    var label = me.getName() + "=" + val;
+
+    W = ctx.measureText(label).width;
+    ctx.fillText(label, X, Y);
   };
+  
 
 
-  //    var isArray = function(_a) {
-  //        return (Object.prototype.toString.call(_a) === '[object Array]');
-  //    };
-  //
-  //
-  //    var parseArray = function(tab, prec) {
-  //        if (isArray(tab)) {
-  //            var elts = [];
-  //            for (var i = 0, len = tab.length; i < len; i++) {
-  //                elts.push(parseArray(tab[i], prec));
-  //            }
-  //            return "[" + elts.join($L.comma) + "]";
-  //        } else {
-  //            if (isNaN(tab))
-  //                return "???";
-  //            else
-  //                return ($L.number(Math.round(tab * prec) / prec));
-  //        }
-  //    };
+
+    //  var isArray = function(_a) {
+    //      return (Object.prototype.toString.call(_a) === '[object Array]');
+    //  };
+  
+  
+    //  var parseArray = function(tab, prec) {
+    //      if (isArray(tab)) {
+    //          var elts = [];
+    //          for (var i = 0, len = tab.length; i < len; i++) {
+    //              elts.push(parseArray(tab[i], prec));
+    //          }
+    //          return "[" + elts.join($L.comma) + "]";
+    //      } else {
+    //          if (isNaN(tab))
+    //              return "???";
+    //          else
+    //              return ($L.number(Math.round(tab * prec) / prec));
+    //      }
+    //  };
+    // var parseArray = function(tab, prec) {
+    //   if (isArray(tab)) {
+    //     var elts = [];
+    //     for (var i = 0; i < tab.length; i++) elts.push(parseArray(tab[i], prec));
+    //     return "[" + elts.join($L.comma) + "]";
+    //   }
+
+    //   if (typeof tab === "string") {
+    //     return '"' + tab.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+    //   }
+
+    //   if (typeof tab === "number") {
+    //     if (isNaN(tab)) return "NaN";
+    //     return $L.number(Math.round(tab * prec) / prec);
+    //   }
+
+    //   if (tab == null) return "null";
+    //   return String(tab);
+    // };
+
+    var isListLike = function(v) {
+  if (v == null) return false;
+  if (typeof v === "string") return false;
+  if (typeof v === "function") return false;
+
+  // Array real:
+  if (Object.prototype.toString.call(v) === "[object Array]") return true;
+
+  // Array-like (listas internas DGPad suelen caer aquí):
+  return (typeof v.length === "number") && (v.length >= 0) && (Math.floor(v.length) === v.length);
+};
+
+var parseArray = function(tab, prec) {
+  if (isListLike(tab)) {
+    var elts = [];
+    for (var i = 0; i < tab.length; i++) {
+      elts.push(parseArray(tab[i], prec));
+    }
+    return "[" + elts.join($L.comma) + "]";
+  }
+
+  if (typeof tab === "string") {
+    return '"' + tab.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+  }
+
+  if (typeof tab === "number") {
+    if (isNaN(tab)) return "NaN";
+    return $L.number(Math.round(tab * prec) / prec);
+  }
+
+  if (tab == null) return "null";
+  return String(tab);
+};
+
+  
 
   var paintNum = function(ctx) {
     ctx.fillStyle = ctx.strokeStyle;
     ctx.textAlign = "left";
+
     var prec = me.getPrecision();
     var t = (T === "") ? me.getName() + " = " : T;
-    var val = (prec > -1) ? t + $U.parseList(E1.value(), prec) : t;
+    var v = E1.value();
+
+    var val;
+    if (prec > -1) {
+      // ✅ Si es lista (array o array-like), usa nuestro serializer que soporta strings
+      if (isListLike(v)) {
+        val = t + parseArray(v, prec);
+      } else {
+        // ✅ Si no es lista, conserva el comportamiento original
+        val = t + $U.parseList(v, prec);
+      }
+    } else {
+      val = t;
+    }
+
     W = ctx.measureText(val).width;
     ctx.fillText(val, X, Y);
   };
@@ -645,27 +659,25 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
 
 
   var setMethods = function() {
-    //        console.log("curseur :" + me.isCursor());
+    
     me.dx = E1.dx;
     me.dy = E1.dy;
     me.dz = E1.dz;
     me.dt = E1.dt;
 
-    //        me.dx = (function() {
-    //            return E1.dx;
-    //        }());
+    
 
 
     if (E1.isText()) {
       me.paintObject = paintText;
-      //            Cn.remove(cPT);
+      
       cPT.setXY(NaN, NaN);
     } else if (E1.isDxyztFunc()) {
-      //            console.log("func");
+      
       me.paintObject = paintDxyztFunc;
       cPT.setXY(NaN, NaN);
     } else if (E1.isDxyztDef()) {
-      //            console.log("def");
+      
       E1.setDxyzt();
       me.paintObject = paintDxyztDef;
       cPT.setXY(NaN, NaN);
@@ -697,13 +709,13 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
 
   // setExp para los widgets y para blockly :
   me.setExp = me.setE1 = function(_t) {
-    // console.log("before: "+this.getParentLength());
+    
     if (E1.getSource() !== _t) {
       E1 = Expression.delete(E1);
       E1 = new Expression(me, _t);
       setMethods();
     }
-    // console.log("after: "+this.getParentLength());
+    
   };
   me.getExp = function() {
     return me.getE1().getSource();
@@ -718,20 +730,38 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
   me.getText = function() {
     return T;
   };
+  // me.setMin = function(_t) {
+  //   min = Expression.delete(min);
+  //   min = new Expression(me, _t);
+  //   setMethods();
+  // };
   me.setMin = function(_t) {
     min = Expression.delete(min);
     min = new Expression(me, _t);
     setMethods();
+
+    if (me.isCursor()) {
+      initCursorPos();
+    }
   };
   me.getMinSource = function() {
     if (min)
       return min.getSource();
     return "";
   };
+  // me.setMax = function(_t) {
+  //   max = Expression.delete(max);
+  //   max = new Expression(me, _t);
+  //   setMethods();
+  // };
   me.setMax = function(_t) {
     max = Expression.delete(max);
     max = new Expression(me, _t);
     setMethods();
+
+    if (me.isCursor()) {
+      initCursorPos();
+    }
   };
   me.getMaxSource = function() {
     if (max)
@@ -752,7 +782,7 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
 
   // Reconstruye la lista de parents :
   me.refresh = function() {
-    // console.log("before:"+me.getParent().length);
+    
     me.setParentList((me.isCursor()) ? [cPT] : []);
     if (E1)
       E1.refresh();
@@ -761,7 +791,7 @@ function ExpressionObject(_construction, _name, _txt, _min, _max, _exp, _x, _y) 
     if (max)
       max.refresh();
     if (anchor !== null) me.addParent(anchor);
-    // console.log("after:"+me.getParent().length);
+    
   };
 
 

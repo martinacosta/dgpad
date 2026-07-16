@@ -1,8 +1,11 @@
+let autosaveIntervalId = null;
+let autosaveLastMinutes = null;
+
 function HistoryPanel(_canvas, _closeProc) {
     var me = this;
     var canvas = _canvas;
     var width = canvas.getWidth() - 50;
-    var height = $P.localstorage.iconwidth + 110;
+    var height = $P.localstorage.iconwidth + 240;
     $U.extend(this, new CenterPanel(canvas, width, height));
 
     var closePanel = function() {
@@ -16,7 +19,7 @@ function HistoryPanel(_canvas, _closeProc) {
     var wout = new GUIElement(me, "div");
     wout.setAbsolute();
     wout.setColor("rgba(0,0,0,0)");
-    wout.setBounds(10, height - $P.localstorage.iconwidth - 90, width - 20, $P.localstorage.iconwidth + 50);
+    wout.setBounds(10, height - $P.localstorage.iconwidth - 180, width - 20, $P.localstorage.iconwidth + 50);
     wout.setStyle("overflow-x", "scroll");
     var d = wout.getDocObject();
     var mwheel = function(ev) {
@@ -29,7 +32,6 @@ function HistoryPanel(_canvas, _closeProc) {
     var win = new GUIElement(me, "div");
     win.setAbsolute();
     win.setColor("rgba(0,0,0,0)");
-
 
     var winW = 0;
     for (var i = 1; i < ($P.localstorage.max + 1); i++) {
@@ -56,9 +58,91 @@ function HistoryPanel(_canvas, _closeProc) {
 
     var add = new Button(me);
     add.setText("<span style='font-size:15px'>" + $L.history_save + "</span>");
-    add.setBounds((width - 400) / 2, height - 35, 400, 30);
+    add.setBounds((width - 400) / 2, height - 125, 400, 30);
     add.addDownEvent(exe);
     me.addContent(add);
+
+    var clear = new Button(me);
+    clear.setText("<span style='font-size:14px'>🗑️ Borrar histórico</span>");
+    clear.setBounds((width - 400) / 2, height - 90, 400, 30);
+    clear.addDownEvent(function() {
+        for (let i = 1; i <= $P.localstorage.max; i++) {
+            const key = $P.localstorage.base + i;
+            const val = localStorage.getItem(key);
+            if (val) {
+                try {
+                    const obj = JSON.parse(val);
+                    if (!obj.lock) localStorage.removeItem(key);
+                } catch(e) {
+                    localStorage.removeItem(key);
+                }
+            }
+        }
+        closePanel();
+    });
+    me.addContent(clear);
+
+    var autosavePanel = new GUIElement(me, "div");
+    autosavePanel.setAbsolute();
+    autosavePanel.setBounds((width - 400) / 2, height - 55, 400, 25);
+
+    var localKey = "dgpad_autosave_interval";
+    var savedVal = localStorage.getItem(localKey) || 0;
+
+    var wrapper = autosavePanel.getDocObject();
+    wrapper.innerHTML = `
+      <span style="font-size:14px">
+        Guardar automáticamente cada 
+        <input type="number" id="autosaveInput" style="width: 50px; margin: 0 6px; font-size:14px;" value="${savedVal}" /> 
+        minutos
+      </span>
+    `;
+
+    me.addContent(autosavePanel);
+
+    function setAutoSave(mins) {
+        mins = parseInt(mins);
+        
+
+        // if (isNaN(mins) || mins <= 0) {
+        //     console.log("DEBUG: Valor inválido, cancelando auto-guardado");
+        //     return;
+        // }
+
+        // if (Number(mins) === Number(autosaveLastMinutes)) {
+        //     console.log("DEBUG: Misma cantidad de minutos, no se reinicia.");
+        //     return;
+        // }
+
+        if (autosaveIntervalId) {
+            clearInterval(autosaveIntervalId);
+            
+        }
+
+        autosaveLastMinutes = mins;
+        const delay = mins * 60 * 1000;
+        
+
+        autosaveIntervalId = setInterval(() => {
+            
+            canvas.saveToLocalStorage();
+
+            
+                canvas.getConstruction().computeAll();
+                canvas.paint();
+           
+        }, delay);
+    }
+
+    setAutoSave(parseInt(savedVal));
+
+    document.getElementById("autosaveInput").addEventListener("change", function() {
+        var mins = parseInt(this.value);
+        if (!isNaN(mins)) {
+            localStorage.setItem(localKey, mins);
+            setAutoSave(mins);
+        }
+    });
 }
 
 function HistoryPanel_Elt(_owner, _canvas, _i, _closeProc) {
@@ -86,11 +170,9 @@ function HistoryPanel_Elt(_owner, _canvas, _i, _closeProc) {
 
     var cloneBtn = new Button(me);
     cloneBtn.setStyles("line-height:27px;vertical-align: middle;padding: 2px;text-align: center;font: 14px Arial, Helvetica, sans-serif;border-radius: 5px;color: #252525;border: 1px solid #b4b4b4;background-color: #EEEEEE");
-    //    cloneBtn.setStyles("display: inline-block;zoom: 1;*display: inline;vertical-align: baseline;margin: 0 2px;outline: none;cursor: pointer;text-align: center;text-decoration: none;font: 12px/100% Arial, Helvetica, sans-serif;padding: .5em 2em .55em;text-shadow: 0 1px 1px rgba(0,0,0,.3);-webkit-border-radius: .5em;-moz-border-radius: .5em;border-radius: .5em;-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);box-shadow: 0 1px 2px rgba(0,0,0,.2);color: #d7d7d7;border: solid 1px #333;background: #333;background: -webkit-gradient(linear, left top, left bottom, from(#666), to(#000));background: -moz-linear-gradient(top,  #666,  #000)");
     cloneBtn.setText($L.history_open);
     cloneBtn.setBounds(($P.localstorage.iconwidth - 100) / 2, $P.localstorage.iconwidth - 35, 100, 27);
     cloneBtn.addUpEvent(load);
-
 
     var dateLbl = new Label(me);
     dateLbl.setText(c.date);
@@ -118,12 +200,14 @@ function HistoryPanel_Elt(_owner, _canvas, _i, _closeProc) {
     };
     imgwp.addDownEvent(changeLock);
 
-
     me.addContent(dateLbl);
     me.addContent(cloneBtn);
     me.addContent(imgwp);
     _owner.addContent(me);
-
-
-
 }
+
+
+
+
+
+

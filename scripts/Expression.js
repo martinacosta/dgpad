@@ -25,6 +25,7 @@ function Expression(_obj, _s) {
             if (_e2 === undefined)
                 _e2 = "";
             var ex = new Expression(obj, "" + _e1 + _e2 + _e5 + "()");
+            
             return ex.value().js();
         });
 
@@ -51,6 +52,7 @@ function Expression(_obj, _s) {
                 return g1 + "(" + g4 + ")";
             }
         });
+        
 
         // Si la chaine contient des dx (exemple : EX_getObj(0).dx().dy(x,y,z)), on réactualise les variables
         // comme étant celles de l'expression ciblée (EX_getObj(0) dans l'exemple) :
@@ -63,7 +65,7 @@ function Expression(_obj, _s) {
                 return g1 + "(" + g6 + ")";
             }
         });
-
+        
 
         //        console.log("init.js="+init.js+"  init.pseudo="+init.pseudo);
         lastInstruction = (function() {
@@ -82,7 +84,9 @@ function Expression(_obj, _s) {
                 vn.push("t");
             return vn.join(",");
         })();
+        
         f = interpreter.CreateFunctionFromExpression(init.js, vnames);
+        
         VALUE = null;
     };
 

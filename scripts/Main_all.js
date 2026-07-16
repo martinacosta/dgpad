@@ -292,6 +292,43 @@ $U.katexLoaded.loaded = false;
 $U.katexLoaded.callbacks = [];
 $U.katexLoaded.args = [];
 
+$U.mathLiveLoaded = function(_callback, _args) {
+    if (typeof MathfieldElement === 'undefined') {
+        if ((_callback) && ($U.mathLiveLoaded.callbacks.indexOf(_callback) === -1)) {
+            $U.mathLiveLoaded.callbacks.push(_callback);
+            $U.mathLiveLoaded.args.push(_args);
+        }
+
+        if (!$U.mathLiveLoaded.loaded) {
+            var parent = document.getElementsByTagName("head")[0];
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = $APP_PATH + "NotPacked/thirdParty/mathlive.min.js";
+
+            script.onload = function() {
+                if (typeof MathfieldElement !== "undefined") {
+                    MathfieldElement.fontsDirectory =
+                        $APP_PATH + "NotPacked/thirdParty/fonts";
+                }
+
+                for (var i = 0; i < $U.mathLiveLoaded.callbacks.length; i++) {
+                    if ($U.mathLiveLoaded.callbacks[i]) {
+                        $U.mathLiveLoaded.callbacks[i].apply(null, $U.mathLiveLoaded.args[i] || []);
+                    }
+                }
+            };
+
+            parent.appendChild(script);
+            $U.mathLiveLoaded.loaded = true;
+        }
+        return false;
+    }
+    return true;
+};
+
+$U.mathLiveLoaded.loaded = false;
+$U.mathLiveLoaded.callbacks = [];
+$U.mathLiveLoaded.args = [];
 
 // $U.loadKaTeX = function(_callback) {
 //     if (!$U.loadKaTeX.loaded) {
@@ -1393,25 +1430,25 @@ $U.shiftLocalStorages = function() {
     }
 };
 
-$U.setFilePickerDefaultBox = function(_s) {
-    localStorage.setItem("FilePickerDefaultBox", _s);
-};
+// $U.setFilePickerDefaultBox = function(_s) {
+//     localStorage.setItem("FilePickerDefaultBox", _s);
+// };
 
-$U.getFilePickerDefaultBox = function() {
-    var box = localStorage.getItem("FilePickerDefaultBox");
-    if (box)
-        return box;
-    else
-        return "";
-};
+// $U.getFilePickerDefaultBox = function() {
+//     var box = localStorage.getItem("FilePickerDefaultBox");
+//     if (box)
+//         return box;
+//     else
+//         return "";
+// };
 
-$U.set$FPICKERFRAME = function(_p) {
-    $FPICKERFRAME = _p
-}
+// $U.set$FPICKERFRAME = function(_p) {
+//     $FPICKERFRAME = _p
+// }
 
-$U.get$FPICKERFRAME = function() {
-    return $FPICKERFRAME
-}
+// $U.get$FPICKERFRAME = function() {
+//     return $FPICKERFRAME
+// }
 
 
 
@@ -5036,7 +5073,7 @@ function Construction(_canvas) {
 
 
     me.createTurtleExpression = function(_startpt) {
-        var name = "blk_turtle_exp_" + _startpt;
+        var name = "blk_turtle_exp__" + _startpt;
         var o = me.find(name);
         if (!o) {
             o = new ExpressionObject(me, name, "", "", "", "NaN", 50, 50);
@@ -5053,7 +5090,7 @@ function Construction(_canvas) {
     };
 
     me.removeTurtleExpression = function(_startpt) {
-        var exp = me.find("blk_turtle_exp_" + _startpt);
+        var exp = me.find("blk_turtle_exp__" + _startpt);
         var lst = me.find("blk_turtle_list_" + _startpt);
         if (exp) {
             me.remove(lst);
@@ -5062,7 +5099,7 @@ function Construction(_canvas) {
     };
 
     me.getTurtleExpression = function(_startpt) {
-        var name = "blk_turtle_exp_" + _startpt;
+        var name = "blk_turtle_exp__" + _startpt;
         var o = me.find(name);
         return o;
     };
@@ -5668,12 +5705,12 @@ function Construction(_canvas) {
             // console.log("old=" + _old + "  new=" + _new);
             var o = me.findVar(_new);
             if ((o) && (!o.blocks.isEmpty())) {
-                var old_exp = me.find("blk_turtle_exp_" + _old);
+                var old_exp = me.find("blk_turtle_exp__" + _old);
                 var old_lst = me.find("blk_turtle_list_" + _old);
                 // console.log("old=" + _old + "  new=" + _new);
                 // console.log("old_exp=" + old_exp + "  old_lst=" + old_lst);
                 if ((old_exp) && (old_lst)) {
-                    old_exp.setNameOnly("blk_turtle_exp_" + _new);
+                    old_exp.setNameOnly("blk_turtle_exp__" + _new);
                     old_lst.setNameOnly("blk_turtle_list_" + _new);
                 }
             }
@@ -27757,6 +27794,20 @@ function NamesPanel(_owner, _l, _t, _w, _h, _observerproc, _closeproc) {
        var onload = function() {
            setTimeout(function() {
                // Blockly.FieldTextInput.FONTSIZE = 36;
+               //creacion de un div para los alert y las casillas
+               if (!document.getElementById("dgpad-overlay")) {
+                const overlay = document.createElement("div");
+                overlay.id = "dgpad-overlay";
+                overlay.style.position = "absolute";
+                overlay.style.top = "0";
+                overlay.style.left = "0";
+                overlay.style.width = "100%";
+                overlay.style.height = "100%";
+                overlay.style.zIndex = "9998";
+                overlay.style.pointerEvents = "none"; // evita bloquear clics
+                document.body.appendChild(overlay);
+            }
+            //fin creacion div
                workspace = Blockly.inject(panel.DIV, {
                    media: $APP_PATH + "NotPacked/thirdParty/Blockly/media/",
                    toolbox: panel.XML.firstChild,

@@ -58,8 +58,8 @@ function CoordsSystem(_C) {
 
     me.zoom = function(_xz, _yz, _h) {
         Cn.getTrackManager().clear();
-        _xz = ((centerZoom) || (me.islockOy())) ? x0 : _xz;
-        _yz = ((centerZoom) || (me.islockOx())) ? y0 : _yz;
+        _xz = ((centerZoom) || (me.isLockOy())) ? x0 : _xz;
+        _yz = ((centerZoom) || (me.isLockOx())) ? y0 : _yz;
         _h = ((Unit * _h) > maxInt) ? 1 : _h;
         var V = Cn.elements();
         for (var i = 0, len = V.length; i < len; i++) {
@@ -79,8 +79,8 @@ function CoordsSystem(_C) {
     //se eliminó parámetro no_clear_track
     me.translate = function(_xt, _yt) {
         Cn.getTrackManager().clear();
-        _yt = (me.islockOx()) ? 0 : _yt;
-        _xt = (me.islockOy()) ? 0 : _xt;
+        _yt = (me.isLockOx()) ? 0 : _yt;
+        _xt = (me.isLockOy()) ? 0 : _xt;
         var V = Cn.elements();
         for (var i = 0, len = V.length; i < len; i++) {
             if ((V[i].isInstanceType("point")) && V[i].free()) {
@@ -95,10 +95,10 @@ function CoordsSystem(_C) {
 
     me.translateANDzoom = function(_xt, _yt, _xz, _yz, _h) {
         Cn.getTrackManager().clear();
-        _yt = (me.islockOx()) ? 0 : _yt;
-        _xt = (me.islockOy()) ? 0 : _xt;
-        _xz = ((centerZoom) || (me.islockOy())) ? x0 : _xz;
-        _yz = ((centerZoom) || (me.islockOx())) ? y0 : _yz;
+        _yt = (me.isLockOx()) ? 0 : _yt;
+        _xt = (me.isLockOy()) ? 0 : _xt;
+        _xz = ((centerZoom) || (me.isLockOy())) ? x0 : _xz;
+        _yz = ((centerZoom) || (me.isLockOx())) ? y0 : _yz;
         _h = ((Unit * _h) > maxInt) ? 1 : _h;
         var V = Cn.elements();
         for (var i = 0, len = V.length; i < len; i++) {
@@ -452,16 +452,16 @@ function CoordsSystem(_C) {
     me.setGridWidth = function(_s) {
         P.grid.grid_linewidth = _s;
     };
-    me.setlockOx = function(_l) {
+    me.setLockOx = function(_l) {
         lockOx = _l;
     };
-    me.islockOx = function() {
+    me.isLockOx = function() {
         return lockOx;
     };
-    me.setlockOy = function(_l) {
+    me.setLockOy = function(_l) {
         lockOy = _l;
     };
-    me.islockOy = function() {
+    me.isLockOy = function() {
         return lockOy;
     };
     me.setCenterZoom = function(_b) {
@@ -477,6 +477,8 @@ function CoordsSystem(_C) {
         return onlypos;
     };
 //MEAG >Modificación para que las figuras salgan proporcionales en todas las pantallas
+    
+
     me.getSource = function() {
 		
 		var centerx=x0;
@@ -484,9 +486,10 @@ function CoordsSystem(_C) {
 		var txt="var lastWindoww="+window.innerWidth+";\n var lastWindowh="+window.innerHeight+";\n "
 		
 		unid=Unit;
-		txt+= "me.$U.escala=Math.min(widthWindow()/lastWindoww,heightWindow()/lastWindowh);\n ";
-		txt+= "if (me.$U.escala==0){me.$U.escala=1};\n";
-        txt+= "SetCoords(me.$U.escala*" + centerx + ",me.$U.escala*" + centery + ",me.$U.escala*"+unid+"," + Cn.is3D() + "," + window.innerWidth + "," + window.innerHeight + ");\n";
+		txt+= "escala=Math.min(widthWindow()/lastWindoww,heightWindow()/lastWindowh);\n ";
+        txt+= "me.$U.escala=escala;\n ";
+		txt+= "if (escala==0){escala=1};\n";
+        txt+= "SetCoords(escala*" + centerx + ",escala*" + centery + ",escala*"+unid+"," + Cn.is3D() + "," + window.innerWidth + "," + window.innerHeight + ");\n";
 		
         return txt;
     };
@@ -516,8 +519,8 @@ function CoordsSystem(_C) {
         t += ";isGrid:" + me.isGrid();
         t += ";isOx:" + me.isOx();
         t += ";isOy:" + me.isOy();
-        t += ";isLockOx:" + me.islockOx();
-        t += ";isLockOy:" + me.islockOy();
+        t += ";isLockOx:" + me.isLockOx();
+        t += ";isLockOy:" + me.isLockOy();
         t += ";centerZoom:" + me.isCenterZoom();
         t += ";onlyPositive:" + me.isOnlyPos();
         t += ";color:" + me.getColor();

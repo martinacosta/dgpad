@@ -170,13 +170,13 @@ Blockly.Blocks['turtle_colour'] = {
             return (inp === null) ? 0 : parseInt(inp);
         };
         this.fixColorMenu = function() {
-            var h = me.getInputTargetBlock('N').getFieldValue('NUM');
+            var h = me.getInputTargetBlock('ColorCode').getFieldValue('NUM');
             if (h) {
                 if (!me.getInput('rgb')) {
                     me.appendDummyInput("rgb")
                         .appendField(new Blockly.FieldColour("#ff0000", function(option) {
                             var i = Blockly.FieldColour.COLOURS.indexOf(option);
-                            me.getInputTargetBlock('N').setFieldValue(i + 1, 'NUM');
+                            me.getInputTargetBlock('ColorCode').setFieldValue(i + 1, 'NUM');
                         }), "RGB_col");
                 }
                 // Ne surtout pas utiliser de "me.setFieldValue(c, "RGB_col")"
@@ -192,12 +192,12 @@ Blockly.Blocks['turtle_colour'] = {
         };
         this.appendDummyInput()
             .appendField($L.blockly.turtle.setColour);
-        this.appendValueInput("N")
+        this.appendValueInput("ColorCode")
             .setCheck("Number");
         this.appendDummyInput("rgb")
             .appendField(new Blockly.FieldColour("#ff0000", function(option) {
                 var i = Blockly.FieldColour.COLOURS.indexOf(option);
-                me.getInputTargetBlock('N').setFieldValue(i + 1, 'NUM');
+                me.getInputTargetBlock('ColorCode').setFieldValue(i + 1, 'NUM');
             }), "RGB_col");
         this.setInputsInline(true);
         this.setPreviousStatement(true);
@@ -476,50 +476,55 @@ Blockly.Blocks['turtle_length'] = {
         this.setColour(180);
         this.setTooltip('');
         this.setHelpUrl('');
+        // 🔹 Eliminar la opción "Duplicar" del menú contextual solo en este bloque
+        this.customContextMenu = function(options) {
+            console.log("customContextMenu ejecutado para turtle_input"); // Debug
+            for (let i = options.length - 1; i >= 0; i--) {
+                if (options[i].text === Blockly.Msg.DUPLICATE_BLOCK || options[i].text === "Duplicar") {
+                    options.splice(i, 1);
+                }
+            }
+        };
     }
 };
 
+
 Blockly.Blocks['turtle_input_number'] = {
-    init: function() {
-		
+    init: function () {
         this.appendDummyInput()
-            .appendField($L.blockly.turtle.inputNumber);
-		
-		
-		this.appendValueInput("min")
-            .setCheck(null)
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField("min");
-		this.appendValueInput("max")
-            .setCheck(null)
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField("max");
-		this.appendValueInput("step")
-            .setCheck(null)
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField("step");
-		this.appendValueInput("width")
-            .setCheck(null)
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField($L.blockly.turtleInput_width);
-        
-        this.appendValueInput("FontSize")
-            .setCheck(null)
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField($L.blockly.turtleInput_FontSize);
-        this.appendValueInput("target")
-            .setCheck(null)
-            .setAlign(Blockly.ALIGN_RIGHT)
-            .appendField($L.blockly.turtleInput_target);
-		
-        this.setInputsInline(false);
-        this.setPreviousStatement(true, null);
-        this.setNextStatement(true, null);
-        this.setColour(180);
-        this.setTooltip('');
-        this.setHelpUrl('');
+                    .appendField($L.blockly.turtle.inputNumber);
+                
+                
+        		this.appendValueInput("min")
+                    .setCheck(null)
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField("min");
+        		this.appendValueInput("max")
+                    .setCheck(null)
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField("max");
+        		this.appendValueInput("step")
+                    .setCheck(null)
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField("step");
+        		this.appendValueInput("width")
+                    .setCheck(null)
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField($L.blockly.turtleInput_width);
+                
+                this.appendValueInput("FontSize")
+                    .setCheck(null)
+                    .setAlign(Blockly.ALIGN_RIGHT)
+                    .appendField($L.blockly.turtleInput_FontSize);
+  
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(180);
+      this.setTooltip("Crea una casilla numérica con lista desplegable");
+      this.setHelpUrl("");
     }
-};
+  };
+  
 
 Blockly.Blocks['dynamic_dropdown'] = {
     init: function() {
@@ -572,4 +577,176 @@ Blockly.Blocks['dynamic_dropdown'] = {
       }
     }
   };
+
+
+
+Blockly.Blocks['dgpad_cronometro_create'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField($L.blockly.turtle.cronometer)
+      .appendField(new Blockly.FieldNumber(20, 10, 100), "FONTSIZE"); // valor por defecto 20
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(180);
+    this.setTooltip("Crea un cronómetro sincronizado con el punto");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks["turtle_speaker_tts"] = {
+  init: function () {
+    this.setColour(180);
+
+    this.appendDummyInput()
+      .appendField($L.blockly.turtle.Loudspeaker)
+      
+
+    this.appendValueInput("TEXT")
+      .setCheck(null)
+      .appendField("texto");
+
+    this.appendDummyInput()
+      .appendField($L.blockly.turtle.Loudspeaker1)
+      .appendField(
+        new Blockly.FieldDropdown([
+          ["auto", "auto"],
+          ["es-CO", "es-CO"],
+          ["es-ES", "es-ES"],
+          ["en-US", "en-US"],
+        ]),
+        "LANG"
+      );
+
+    this.appendDummyInput()
+      .appendField($L.blockly.turtle.Loudspeaker2)
+      .appendField(new Blockly.FieldNumber(1, 0.1, 10, 0.1), "RATE")
+      .appendField($L.blockly.turtle.Loudspeaker4)
+      .appendField(new Blockly.FieldNumber(1, 0, 2, 0.1), "PITCH")
+      .appendField($L.blockly.turtle.Loudspeaker5)
+      .appendField(new Blockly.FieldNumber(1, 0, 1, 0.1), "VOLUME");
+
+    this.appendValueInput("SIZE")
+      .setCheck(null)
+      .appendField($L.blockly.turtle.Loudspeaker3);
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setTooltip("Crea un altoparlante en la posición de la tortuga; al tocarlo lee el texto.");
+    this.setHelpUrl("");
+  },
+};
+
+Blockly.Blocks['dgpad_input_ref'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("casilla")
+      .appendField(new Blockly.FieldDropdown(() => DG.expressions.buildInputOptions()), "ID");
+
+    this.setOutput(true, null);
+    this.setColour(180);
+    this.setTooltip("Devuelve una referencia a una casilla ya creada");
+    this.setHelpUrl('');
+  }
+};
+
+Blockly.Blocks["turtle_fraction_mixed_ref"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("fracción");
+
+    this.appendValueInput("NUMERATOR")
+      .setCheck(null)
+      .setAlign(Blockly.ALIGN_RIGHT)
+      .appendField("numerador");
+
+    this.appendValueInput("DENOMINATOR")
+      .setCheck(null)
+      .setAlign(Blockly.ALIGN_RIGHT)
+      .appendField("denominador");
+
+    this.appendValueInput("barPadding")
+      .setCheck(null)
+      .setAlign(Blockly.ALIGN_RIGHT)
+      .appendField("longitud barra");
+
+    this.appendValueInput("gap")
+      .setCheck(null)
+      .setAlign(Blockly.ALIGN_RIGHT)
+      .appendField("separación");
+
+    this.setInputsInline(false);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(180);
+    this.setTooltip("Dibuja una fracción con casillas existentes o texto");
+    this.setHelpUrl("");
+
+    this.customContextMenu = function (options) {
+      for (let i = options.length - 1; i >= 0; i--) {
+        if (
+          options[i].text === Blockly.Msg.DUPLICATE_BLOCK ||
+          options[i].text === "Duplicar"
+        ) {
+          options.splice(i, 1);
+        }
+      }
+    };
+  }
+};
+
+Blockly.Blocks["dgpad_content_obj"] = {
+  init: function () {
+    this.appendValueInput("VALUE")
+      .setCheck(null)
+      .appendField("contenido");
+
+    this.setOutput(true, null);
+    this.setColour(180);
+    this.setTooltip("Envuelve texto, número, valor o expresión como contenido reutilizable");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks["turtle_mathlive"] = {
+  init: function () {
+    this.appendValueInput("latex")
+      .setCheck("String")
+      .appendField($L.blockly.turtle_mathlive);
+
+    this.appendValueInput("width")
+      .setCheck("Number")
+      .appendField($L.blockly.turtleInput_width);
+
+    this.appendValueInput("height")
+      .setCheck("Number")
+      .appendField($L.blockly.turtleInput_height);
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(180);
+    this.setTooltip("Crea una fórmula MathLive en la posición actual de la tortuga.");
+    this.setHelpUrl("");
+  }
+};
+
+
+
+Blockly.Blocks["mathlive_placeholder"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField($L.blockly.turtle_placeholder);
+
+    this.appendValueInput("VALUE")
+      .setCheck("String")
+      .appendField($L.blockly.turtle_placeholder2);
+
+    this.setOutput(true, "String");
+    this.setColour(180);
+    this.setTooltip("Devuelve un placeholder de MathLive con nombre interno automático.");
+    this.setHelpUrl("");
+  }
+};
+
+
   

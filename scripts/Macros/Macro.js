@@ -89,7 +89,7 @@ function Macro(_canvas, _name, _p, _proc, _id) {
         var s = "myexecutefunc=" + exec.toString();
         s += '\n$macroFinals=myexecutefunc("' + params.join('","') + '")';
         canvas.undoManager.beginAdd();
-        canvas.InterpretMacro(s);
+        canvas.InterpretMacro(s, _name);
         canvas.undoManager.endAdd();
     };
 

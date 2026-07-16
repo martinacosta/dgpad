@@ -8,9 +8,9 @@ and open the template in the editor.
 <head>
     <title>DGPad</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel='stylesheet' href='accueil/homecss.css' type='text/css' media='all' />
+    <!-- <link rel='stylesheet' href='accueil/homecss.css' type='text/css' media='all' /> -->
     <link rel="icon" type="image/png" href="favicon.png" />
-    <script src="accueil/scripts/LocalStrings.js"></script>
+    <!-- <script src="accueil/scripts/LocalStrings.js"></script> -->
     <script>
     //            document.body.style.setProperty("-webkit-overflow-scrolling","touch");
     //            document.ontouchmove = function(event) {
@@ -19,187 +19,187 @@ and open the template in the editor.
 
 
 
-    window.panels = [];
+    // window.panels = [];
 
-    (function(win) {
-        var t = location.search.substring(1).split('&');
-        var f = {};
-        for (var i = 0; i < t.length; i++) {
-            var x = t[i].split('=');
-            f[x[0]] = x[1];
-        };
-        win.$PARAMS = f;
-    })(window);
+    // (function(win) {
+    //     var t = location.search.substring(1).split('&');
+    //     var f = {};
+    //     for (var i = 0; i < t.length; i++) {
+    //         var x = t[i].split('=');
+    //         f[x[0]] = x[1];
+    //     };
+    //     win.$PARAMS = f;
+    // })(window);
 
-    function setPanel(_d, _open, _type, _speed, _x) {
-        var d = document.getElementById("page" + _d);
+    // function setPanel(_d, _open, _type, _speed, _x) {
+    //     var d = document.getElementById("page" + _d);
 
-        panels.push(d);
-        d.num = _d;
-        d.effect = _type;
-        d.speed = _speed;
-        d.effect_var1 = 0;
-        d.isOpen = false;
-        d.link = document.getElementById("link" + _d);
+    //     panels.push(d);
+    //     d.num = _d;
+    //     d.effect = _type;
+    //     d.speed = _speed;
+    //     d.effect_var1 = 0;
+    //     d.isOpen = false;
+    //     d.link = document.getElementById("link" + _d);
 
-        d.linkOn = function() {
-            setTimeout(function() {
-                d.link.style.setProperty("padding", "0 2px 1px 30px");
-                d.link.style.setProperty("background", "url('accueil/images/bullet.png') left no-repeat");
-                d.link.style.setProperty("font-weight", "bold");
-            }, 1);
+    //     d.linkOn = function() {
+    //         setTimeout(function() {
+    //             d.link.style.setProperty("padding", "0 2px 1px 30px");
+    //             d.link.style.setProperty("background", "url('accueil/images/bullet.png') left no-repeat");
+    //             d.link.style.setProperty("font-weight", "bold");
+    //         }, 1);
 
-        }
-        d.linkOff = function() {
-            d.link.style.removeProperty("padding");
-            d.link.style.removeProperty("background");
-            d.link.style.removeProperty("font-weight");
-        }
+    //     }
+    //     d.linkOff = function() {
+    //         d.link.style.removeProperty("padding");
+    //         d.link.style.removeProperty("background");
+    //         d.link.style.removeProperty("font-weight");
+    //     }
 
-        if (_open) d.linkOn();
+    //     if (_open) d.linkOn();
 
-        var ST = function(key, val) {
-            d.style.setProperty(key, val);
-        }
+    //     var ST = function(key, val) {
+    //         d.style.setProperty(key, val);
+    //     }
 
-        if (_open) ST("visibility", "visible");
-        setTimeout(function() {
-            ST("visibility", "visible");
-        }, _speed * 2000);
+    //     if (_open) ST("visibility", "visible");
+    //     setTimeout(function() {
+    //         ST("visibility", "visible");
+    //     }, _speed * 2000);
 
-        switch (d.effect) {
-            case "translate_x":
-                ST("transition", "transform " + d.speed + "s linear");
-                ST("-webkit-transition", "-webkit-transform " + d.speed + "s linear");
-                ST("-moz-transition", "-moz-transform " + d.speed + "s linear");
-                ST("-o-transition", "-o-transform " + d.speed + "s linear");
-                d.effect_var1 = _x;
-                if (!_open) {
-                    ST("transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
-                    ST("-webkit-transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
-                    ST("-moz-transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
-                    ST("-o-transform", "translate(" + d.effect_var1 + "px,0)");
-                }
-                break;
-            case "translate_y":
-                ST("transition", "transform " + d.speed + "s linear");
-                ST("-webkit-transition", "-webkit-transform " + d.speed + "s linear");
-                ST("-moz-transition", "-moz-transform " + d.speed + "s linear");
-                ST("-o-transition", "-o-transform " + d.speed + "s linear");
-                d.effect_var1 = _x;
-                if (!_open) {
-                    ST("transform", "translate3d(0," + d.effect_var1 + "px, 0)");
-                    ST("-webkit-transform", "translate3d(0," + d.effect_var1 + "px, 0)");
-                    ST("-moz-transform", "translate3d(0," + d.effect_var1 + "px, 0)");
-                    ST("-o-transform", "translate(0," + d.effect_var1 + "px)");
-                }
-                break;
-            case "scale":
-                ST("transition", "transform " + d.speed + "s linear");
-                ST("-webkit-transition", "-webkit-transform " + d.speed + "s linear");
-                ST("-moz-transition", "-moz-transform " + d.speed + "s linear");
-                ST("-o-transition", "-o-transform " + d.speed + "s linear");
-                if (!_open) {
-                    ST("transform", "scale(0)");
-                    ST("-webkit-transform", "scale(0)");
-                    ST("-moz-transform", "scale(0)");
-                    ST("-o-transform", "scale(0)");
-                }
-                break;
-        }
+    //     switch (d.effect) {
+    //         case "translate_x":
+    //             ST("transition", "transform " + d.speed + "s linear");
+    //             ST("-webkit-transition", "-webkit-transform " + d.speed + "s linear");
+    //             ST("-moz-transition", "-moz-transform " + d.speed + "s linear");
+    //             ST("-o-transition", "-o-transform " + d.speed + "s linear");
+    //             d.effect_var1 = _x;
+    //             if (!_open) {
+    //                 ST("transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
+    //                 ST("-webkit-transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
+    //                 ST("-moz-transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
+    //                 ST("-o-transform", "translate(" + d.effect_var1 + "px,0)");
+    //             }
+    //             break;
+    //         case "translate_y":
+    //             ST("transition", "transform " + d.speed + "s linear");
+    //             ST("-webkit-transition", "-webkit-transform " + d.speed + "s linear");
+    //             ST("-moz-transition", "-moz-transform " + d.speed + "s linear");
+    //             ST("-o-transition", "-o-transform " + d.speed + "s linear");
+    //             d.effect_var1 = _x;
+    //             if (!_open) {
+    //                 ST("transform", "translate3d(0," + d.effect_var1 + "px, 0)");
+    //                 ST("-webkit-transform", "translate3d(0," + d.effect_var1 + "px, 0)");
+    //                 ST("-moz-transform", "translate3d(0," + d.effect_var1 + "px, 0)");
+    //                 ST("-o-transform", "translate(0," + d.effect_var1 + "px)");
+    //             }
+    //             break;
+    //         case "scale":
+    //             ST("transition", "transform " + d.speed + "s linear");
+    //             ST("-webkit-transition", "-webkit-transform " + d.speed + "s linear");
+    //             ST("-moz-transition", "-moz-transform " + d.speed + "s linear");
+    //             ST("-o-transition", "-o-transform " + d.speed + "s linear");
+    //             if (!_open) {
+    //                 ST("transform", "scale(0)");
+    //                 ST("-webkit-transform", "scale(0)");
+    //                 ST("-moz-transform", "scale(0)");
+    //                 ST("-o-transform", "scale(0)");
+    //             }
+    //             break;
+    //     }
 
-        d.openPanel = function() {
-            d.linkOn();
-            if (d.num === 2) d.style.setProperty("-webkit-overflow-scrolling", "touch");
-            switch (d.effect) {
-                case "translate_x":
-                    ST("transform", "translateX(" + d.effect_var1 + "px)");
-                    ST("-webkit-transform", "translateX(" + d.effect_var1 + "px)");
-                    ST("-moz-transform", "translateX(" + d.effect_var1 + "px)");
-                    ST("-o-transform", "translateX(" + d.effect_var1 + "px)");
-                    setTimeout(function() {
-                        ST("transform", "translate3d(0,0,0)");
-                        ST("-webkit-transform", "translate3d(0,0,0)");
-                        ST("-moz-transform", "translate3d(0,0,0)");
-                        ST("-o-transform", "translate(0,0)");
-                    }, 1);
-                    break;
-                case "translate_y":
-                    ST("transform", "translateY(" + d.effect_var1 + "px)");
-                    ST("-webkit-transform", "translateY(" + d.effect_var1 + "px)");
-                    ST("-moz-transform", "translateY(" + d.effect_var1 + "px)");
-                    ST("-o-transform", "translateY(" + d.effect_var1 + "px)");
-                    setTimeout(function() {
-                        ST("transform", "translate3d(0,0,0)");
-                        ST("-webkit-transform", "translate3d(0,0,0)");
-                        ST("-moz-transform", "translate3d(0,0,0)");
-                        ST("-o-transform", "translate(0,0)");
-                    }, 1);
-                    break;
-                case "scale":
-                    ST("transform", "scale(0)");
-                    ST("-webkit-transform", "scale(0)");
-                    ST("-moz-transform", "scale(0)");
-                    ST("-o-transform", "scale(0)");
-                    setTimeout(function() {
-                        ST("transform", "scale(1)");
-                        ST("-webkit-transform", "scale(1)");
-                        ST("-moz-transform", "scale(1)");
-                        ST("-o-transform", "scale(1)");
-                    }, 1);
-                    break;
-            }
-            d.isOpen = true;
-        }
+    //     d.openPanel = function() {
+    //         d.linkOn();
+    //         if (d.num === 2) d.style.setProperty("-webkit-overflow-scrolling", "touch");
+    //         switch (d.effect) {
+    //             case "translate_x":
+    //                 ST("transform", "translateX(" + d.effect_var1 + "px)");
+    //                 ST("-webkit-transform", "translateX(" + d.effect_var1 + "px)");
+    //                 ST("-moz-transform", "translateX(" + d.effect_var1 + "px)");
+    //                 ST("-o-transform", "translateX(" + d.effect_var1 + "px)");
+    //                 setTimeout(function() {
+    //                     ST("transform", "translate3d(0,0,0)");
+    //                     ST("-webkit-transform", "translate3d(0,0,0)");
+    //                     ST("-moz-transform", "translate3d(0,0,0)");
+    //                     ST("-o-transform", "translate(0,0)");
+    //                 }, 1);
+    //                 break;
+    //             case "translate_y":
+    //                 ST("transform", "translateY(" + d.effect_var1 + "px)");
+    //                 ST("-webkit-transform", "translateY(" + d.effect_var1 + "px)");
+    //                 ST("-moz-transform", "translateY(" + d.effect_var1 + "px)");
+    //                 ST("-o-transform", "translateY(" + d.effect_var1 + "px)");
+    //                 setTimeout(function() {
+    //                     ST("transform", "translate3d(0,0,0)");
+    //                     ST("-webkit-transform", "translate3d(0,0,0)");
+    //                     ST("-moz-transform", "translate3d(0,0,0)");
+    //                     ST("-o-transform", "translate(0,0)");
+    //                 }, 1);
+    //                 break;
+    //             case "scale":
+    //                 ST("transform", "scale(0)");
+    //                 ST("-webkit-transform", "scale(0)");
+    //                 ST("-moz-transform", "scale(0)");
+    //                 ST("-o-transform", "scale(0)");
+    //                 setTimeout(function() {
+    //                     ST("transform", "scale(1)");
+    //                     ST("-webkit-transform", "scale(1)");
+    //                     ST("-moz-transform", "scale(1)");
+    //                     ST("-o-transform", "scale(1)");
+    //                 }, 1);
+    //                 break;
+    //         }
+    //         d.isOpen = true;
+    //     }
 
-        d.closePanel = function() {
-            OpenVid('');
-            d.linkOff();
-            switch (d.effect) {
-                case "translate_x":
-                    setTimeout(function() {
-                        ST("transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
-                        ST("-webkit-transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
-                        ST("-moz-transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
-                        ST("-o-transform", "translate(" + d.effect_var1 + "px,0)");
-                    }, 1);
-                    break;
-                case "translate_y":
-                    setTimeout(function() {
-                        ST("transform", "translate3d(0," + d.effect_var1 + "px, 0)");
-                        ST("-webkit-transform", "translate3d(0," + d.effect_var1 + "px, 0)");
-                        ST("-moz-transform", "translate3d(0," + d.effect_var1 + "px, 0)");
-                        ST("-o-transform", "translate(0," + d.effect_var1 + "px)");
-                    }, 1);
-                    break;
-                case "scale":
-                    setTimeout(function() {
-                        ST("transform", "scale(0)");
-                        ST("-webkit-transform", "scale(0)");
-                        ST("-moz-transform", "scale(0)");
-                        ST("-o-transform", "scale(0)");
-                    }, 1);
-                    break;
-            }
-            d.isOpen = false;
-        }
-    }
+    //     d.closePanel = function() {
+    //         OpenVid('');
+    //         d.linkOff();
+    //         switch (d.effect) {
+    //             case "translate_x":
+    //                 setTimeout(function() {
+    //                     ST("transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
+    //                     ST("-webkit-transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
+    //                     ST("-moz-transform", "translate3d(" + d.effect_var1 + "px,0, 0)");
+    //                     ST("-o-transform", "translate(" + d.effect_var1 + "px,0)");
+    //                 }, 1);
+    //                 break;
+    //             case "translate_y":
+    //                 setTimeout(function() {
+    //                     ST("transform", "translate3d(0," + d.effect_var1 + "px, 0)");
+    //                     ST("-webkit-transform", "translate3d(0," + d.effect_var1 + "px, 0)");
+    //                     ST("-moz-transform", "translate3d(0," + d.effect_var1 + "px, 0)");
+    //                     ST("-o-transform", "translate(0," + d.effect_var1 + "px)");
+    //                 }, 1);
+    //                 break;
+    //             case "scale":
+    //                 setTimeout(function() {
+    //                     ST("transform", "scale(0)");
+    //                     ST("-webkit-transform", "scale(0)");
+    //                     ST("-moz-transform", "scale(0)");
+    //                     ST("-o-transform", "scale(0)");
+    //                 }, 1);
+    //                 break;
+    //         }
+    //         d.isOpen = false;
+    //     }
+    // }
 
-    window.onload = function() {
-        setPanel(0, true, "scale", 0.3);
-        setPanel(1, false, "translate_x", 0.3, 700);
-        setPanel(2, false, "translate_y", 0.3, 450);
-        setPanel(3, false, "scale", 0.3);
-        setPanel(4, false, "translate_x", 0.3, 700);
-        setPanel(5, false, "translate_y", 0.3, 450);
-    }
+    // window.onload = function() {
+    //     setPanel(0, true, "scale", 0.3);
+    //     setPanel(1, false, "translate_x", 0.3, 700);
+    //     setPanel(2, false, "translate_y", 0.3, 450);
+    //     setPanel(3, false, "scale", 0.3);
+    //     setPanel(4, false, "translate_x", 0.3, 700);
+    //     setPanel(5, false, "translate_y", 0.3, 450);
+    // }
 
-    OpenPanel = function(k) {
-        for (var i = 0, len = panels.length; i < len; i++) {
-            if (i !== k) panels[i].closePanel();
-        }
-        panels[k].openPanel();
-    }
+    // OpenPanel = function(k) {
+    //     for (var i = 0, len = panels.length; i < len; i++) {
+    //         if (i !== k) panels[i].closePanel();
+    //     }
+    //     panels[k].openPanel();
+    // }
 
     var $LOADLANGUAGE = function() {
         var language_Code = navigator.language || navigator.userLanguage;
@@ -218,56 +218,56 @@ and open the template in the editor.
 
 
 
-    var $LastLink = null;
-    var OpenVid = function(_s) {
-        (($LastLink) && ($LastLink.style.setProperty("font-weight", "normal")));
-        var v = document.getElementById("vidframe");
-        var c = document.getElementById("videocomment");
-        var a = document.getElementById("videolink");
-        if (_s === "") {
-            v.src = "";
-            v.style.setProperty("left", "-500px");
-            v.style.setProperty("top", "-500px");
-            $LastLink = null;
-        } else {
-            v.src = "http://www.youtube.com/embed/" + _s;
-            v.style.setProperty("left", "245px");
-            v.style.setProperty("top", "200px");
-            if (typeof Touch === "object") {
-                a.setAttribute("href", "http://m.youtube.com/#/watch?v=" + _s);
-                c.style.setProperty("left", "245px");
-                c.style.setProperty("top", "570px");
-            }
-            $LastLink = document.getElementById(_s);
-            $LastLink.style.setProperty("font-weight", "bold");
-        }
-    }
+    // var $LastLink = null;
+    // var OpenVid = function(_s) {
+    //     (($LastLink) && ($LastLink.style.setProperty("font-weight", "normal")));
+    //     var v = document.getElementById("vidframe");
+    //     var c = document.getElementById("videocomment");
+    //     var a = document.getElementById("videolink");
+    //     if (_s === "") {
+    //         v.src = "";
+    //         v.style.setProperty("left", "-500px");
+    //         v.style.setProperty("top", "-500px");
+    //         $LastLink = null;
+    //     } else {
+    //         v.src = "http://www.youtube.com/embed/" + _s;
+    //         v.style.setProperty("left", "245px");
+    //         v.style.setProperty("top", "200px");
+    //         if (typeof Touch === "object") {
+    //             a.setAttribute("href", "http://m.youtube.com/#/watch?v=" + _s);
+    //             c.style.setProperty("left", "245px");
+    //             c.style.setProperty("top", "570px");
+    //         }
+    //         $LastLink = document.getElementById(_s);
+    //         $LastLink.style.setProperty("font-weight", "bold");
+    //     }
+    // }
 
-    var $W = function(_k) {
-        document.write($L[_k].replace("\n", "<br>"));
-    }
+    // var $W = function(_k) {
+    //     document.write($L[_k].replace("\n", "<br>"));
+    // }
 
-    var $WN = function() {
-        var i = 0;
-        var n = [];
-        while ($L["news_content_" + i]) {
-            var o = {};
-            o.date = "<br><br><h2>" + $L["news_date_" + i] + "</h2>";
-            var c = $L["news_content_" + i].split("\n");
-            var t = "<ul>";
-            for (var k = 0, len = c.length; k < len; k++) {
-                t += "<li>" + c[k] + "</li>";
-            }
-            t += "</ul>";
-            o.content = t;
-            n.push(o);
-            i++;
-        }
-        for (var k = n.length - 1; k >= 0; k--) {
-            document.write(n[k].date);
-            document.write(n[k].content);
-        }
-    }
+    // var $WN = function() {
+    //     var i = 0;
+    //     var n = [];
+    //     while ($L["news_content_" + i]) {
+    //         var o = {};
+    //         o.date = "<br><br><h2>" + $L["news_date_" + i] + "</h2>";
+    //         var c = $L["news_content_" + i].split("\n");
+    //         var t = "<ul>";
+    //         for (var k = 0, len = c.length; k < len; k++) {
+    //             t += "<li>" + c[k] + "</li>";
+    //         }
+    //         t += "</ul>";
+    //         o.content = t;
+    //         n.push(o);
+    //         i++;
+    //     }
+    //     for (var k = n.length - 1; k >= 0; k--) {
+    //         document.write(n[k].date);
+    //         document.write(n[k].content);
+    //     }
+    // }
 
     var launchDGPad = function() {
         var language_Code = "";

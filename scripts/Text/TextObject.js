@@ -4,653 +4,721 @@
  */
 
 function TextObject(_canvas, _m, _l, _t, _w, _h) {
-    $U.extend(this, new Panel(_canvas.getDocObject()));
-	var _name="_wid";
-    var me = this;
-    var Cn = _canvas.getConstruction();
-	var name = Cn.getUnusedName(_name, this);
-	//_canvas.addObject(this);
-	//_canvas.undoManager.record(this, true);
-        //o.newTimeStamp();
-    //    Cn.add(this);
-    //_canvas.namesManager.setName(this);
-    me.setAttr("className", "textPanel");
-    me.transition("scale", 0.2);
-	var X=_l;
-	var Y=_t;
-	var width=_w;
-	var height=_h;
+  $U.extend(this, new Panel(_canvas.getDocObject()));
+  var _name = "_wid";
+  var me = this;
+  var Cn = _canvas.getConstruction();
+  var name = Cn.getUnusedName(_name, this);
+  //_canvas.addObject(this);
+  //_canvas.undoManager.record(this, true);
+  //o.newTimeStamp();
+  //    Cn.add(this);
+  //_canvas.namesManager.setName(this);
+  me.setAttr("className", "textPanel");
+  me.transition("scale", 0.2);
+  var X = _l;
+  var Y = _t;
+  var width = _w;
+  var height = _h;
 
-    var txt = _m;
-    var EXPs = [];
-    var SCPs = [];
-    var bgcolor = new Color();
-    var borderSize = 3;
-    var borderRadius = 5;
-    var numPrec = 1e4;
-	var widgetFont = 16;
-    var closebox = null;
-    var jsbox = null,
-        txbox = null,
-        exbox = null;
-    var printPanel = null;
-	var fixPosition= false;
-	var fixSize=false;
-	
-	// me.getName = function() {
-    // return name;
+  var txt = _m;
+  var EXPs = [];
+  var SCPs = [];
+  var bgcolor = new Color();
+  var borderSize = 3;
+  var borderRadius = 5;
+  var numPrec = 1e4;
+  var widgetFont = 16;
+  var closebox = null;
+  var jsbox = null,
+    txbox = null,
+    exbox = null;
+  var printPanel = null;
+  var fixPosition = false;
+  var fixSize = false;
+
+  // me.getName = function() {
+  // return name;
   // };
-	
-    me.parseExpressions = function() {
-        EXPs = [];
-        SCPs = [];
-        var t = txt.split("%");
-        for (var i = 1, len = t.length; i < len; i += 2) {
-            EXPs.push(_canvas.getExpression(t[i]));
+
+  me.parseExpressions = function () {
+    EXPs = [];
+    SCPs = [];
+    var t = txt.split("%");
+    for (var i = 1, len = t.length; i < len; i += 2) {
+      EXPs.push(_canvas.getExpression(t[i]));
+    }
+    t = txt.split("§");
+    for (var i = 1, len = t.length; i < len; i += 2) {
+      t[i] = t[i].replace(/^[^\n]*name\s*=\s*\"([^\"]*)\"/, "");
+      t[i] = t[i].replace(/^[^\n]*style\s*=\s*\"([^\"]*)\"/, "");
+      SCPs.push({
+        src: t[i],
+      });
+    }
+  };
+  me.parseExpressions();
+
+  var styles = null;
+
+  me.exec = function (_i) {
+    var src = SCPs[_i].src;
+    var t = src.split("%");
+    for (var i = 1, len = t.length; i < len; i += 2) {
+      var exp = _canvas.getExpression(t[i]);
+      //            exp.compute();
+      t[i] = "" + $U.parseArrayEnglish(exp.value(), numPrec, true);
+    }
+    _canvas.InterpretScript(me, t.join(""));
+  };
+
+  var closePrint = function () {
+    if (printPanel) printPanel.close();
+    printPanel = null;
+  };
+
+  me.print = function (_m) {
+    if (!printPanel) printPanel = new PrintPanel(_canvas, closePrint);
+    printPanel.setText(_m);
+  };
+
+  me.refreshInputs = function () {
+    // convert HTMLCollection to Array :
+    var inps = [].slice.call(
+      container.getDocObject().getElementsByTagName("input"),
+    );
+    var sels = container.getDocObject().getElementsByTagName("select");
+    for (var n = 0; n < sels.length; n++) {
+      inps.push(sels[n]);
+    }
+    var tas = container.getDocObject().getElementsByTagName("textarea");
+    for (var n = 0; n < tas.length; n++) {
+      inps.push(tas[n]);
+    }
+    for (var n = 0; n < inps.length; n++) {
+      inps[n].ontouchstart = inps[n].onmousedown = function (ev) {
+        ev.stopPropagation();
+      };
+      if (inps[n].hasAttribute("editable")) {
+        var o = Cn.find(inps[n].getAttribute("editable"));
+        inps[n].readOnly = o.getExp() === "0";
+      }
+      if (inps[n].hasAttribute("populate") && inps[n].type === "select-one") {
+        var o = Cn.find(inps[n].getAttribute("populate"));
+        var tab = JSON.parse(o.getExp().replace(/'/g, '"'));
+        inps[n].innerHTML = "";
+        for (var i = 0; i < tab.length; i++) {
+          var elt = tab[i];
+          if (!$U.isArray(elt)) elt = [tab[i], tab[i]];
+          var opt = document.createElement("option");
+          opt.value = elt[0];
+          opt.innerHTML = elt[1];
+          inps[n].appendChild(opt);
         }
-        t = txt.split("§");
-        for (var i = 1, len = t.length; i < len; i += 2) {
-            t[i] = t[i].replace(/^[^\n]*name\s*=\s*\"([^\"]*)\"/, "");
-            t[i] = t[i].replace(/^[^\n]*style\s*=\s*\"([^\"]*)\"/, "");
-            SCPs.push({
-                src: t[i]
-            });
+      }
+      if (inps[n].hasAttribute("target")) {
+        var o = (inps[n].targetObject = Cn.find(
+          inps[n].getAttribute("target"),
+        ));
+
+        if (o) {
+          var evtpe = "oninput";
+          switch (inps[n].type) {
+            case "select-one":
+              evtpe = "onchange";
+              var ex = o.getExp();
+              if (ex === "NaN") ex = "";
+              inps[n].value = ex;
+              break;
+            case "checkbox":
+              evtpe = "onchange";
+              inps[n].checked = o.getValue();
+              break;
+            case "button":
+              evtpe = "onmouseup";
+              break;
+            default:
+              var ex = o.getExp();
+              if (ex === "NaN") ex = "";
+              inps[n].value = ex.replace(/\\"/g, '"');
+          }
+
+          inps[n][evtpe] = function (ev) {
+            var obj = ev.target.targetObject;
+            if (obj) {
+              var val = ev.target.value;
+              switch (ev.target.type) {
+                case "checkbox":
+                  val = ev.target.checked;
+                  break;
+                case "button":
+                  val = !obj.getValue();
+                  break;
+              }
+              obj.setExp(val);
+              obj.compute();
+              obj.computeChilds();
+              _canvas.paint();
+            }
+          };
         }
-    };
+      }
+    }
+  };
+
+  var setHTML = function (_t) {
+    // On enlève tous les scripts injectés précédemment dans
+    // ce widget :
+    // Quitamos todos los scripts inyectados anteriormente
+    // en este widget
+    var scps = me.getDocObject().getElementsByTagName("script");
+    for (var n = 0; n < scps.length; n++) {
+      scps[n].parentNode.removeChild(scps[n]);
+    }
+
+    var tab = _t.split("§");
+    for (var i = 1, len = tab.length; i < len; i += 2) {
+      var k = (i - 1) / 2;
+      var match = tab[i].match(/^[^\n]*name\s*=\s*\"([^\"]*)\"/);
+      var nm = ' value="' + (match ? match[1] : "RUN") + '" ';
+      match = tab[i].match(/^[^\n]*style\s*=\s*\"([^\"]*)\"/);
+      var st =
+        ' style="-webkit-appearance: button;' + (match ? match[1] : "") + '" ';
+      match = tab[i].match(/^[^\n]*id\s*=\s*\"([^\"]*)\"/);
+      var id = match ? ' id="' + match[1] + '"' : "";
+      tab[i] =
+        '<input type="button"  ontouchend="$CANVAS.textManager.executeScript(' +
+        _canvas.textManager.getPosition(me) +
+        "," +
+        k +
+        ');this.blur()" onmouseup="$CANVAS.textManager.executeScript(' +
+        _canvas.textManager.getPosition(me) +
+        "," +
+        k +
+        ');this.blur()" ' +
+        nm +
+        st +
+        id +
+        ">";
+    }
+    _t = tab.join("");
+
+    // Le tag pre est là pour conserver les espaces multiples
+    // et les retours à la ligne :
+    // el tag 'pre' sirve para conservar los espacios múltiples
+    // y los cambios de línea
+    // container.setAttr("innerHTML", "<pre class=\"TeXDisplay\" >" + _t + "</pre>");
+    container.setAttr(
+      "innerHTML",
+      '<pre style="font-family: Helvetica, Arial, sans-serif;' +
+        "text-shadow: 1px 1px 5px #777;" +
+        "text-align: center;vertical-align:middle;" +
+        "white-space: pre-wrap;" +
+        'margin: 0px;" >' +
+        _t +
+        "</pre>",
+    );
+
+    // Interprétation des balises scripts éventuellement injectées dans
+    // le source (le innerHTML ne suffit pas) :
+    // Interpretación de etiquetas script eventualmente inyectadas en
+    // el source (el innerHTML no es suficiente):
+    scps = container.getDocObject().getElementsByTagName("script");
+    for (var n = 0; n < scps.length; n++) {
+      var scp = document.createElement("script");
+      scp.src = scps[n].src;
+      scp.type = scps[n].type;
+      scp.appendChild(document.createTextNode(scps[n].innerHTML));
+      me.getDocObject().insertBefore(scp, container.getDocObject());
+    }
+
+    me.refreshInputs();
+  };
+
+  var container = new GUIElement(_canvas, "div");
+  me.addContent(container);
+  container.setAbsolute();
+  container.setStyle("cursor", "move");
+  setHTML(txt);
+
+  var editBox = new GUIElement(_canvas, "textarea");
+  editBox.setStyles(
+    "position:absolute;font-family:'Lucida Console';font-size:20px;line-height:20px",
+  );
+  var el = editBox.getDocObject();
+  el.autocorrect = el.autocomplete = el.autocapitalize = el.spellcheck = false;
+  // editBox.setAttr("autocomplete","off");
+  // editBox.setAttr("autocorrect","off");
+  // editBox.setAttr("autocapitalize","off");
+  // editBox.setAttr("spellcheck",false);
+
+  // var endInput = function() {
+  //     txt = editBox.getDocObject().value;
+  //     me.parseExpressions();
+  //     setHTML(txt);
+  //     _canvas.getConstruction().computeAll();
+  //     me.evaluateString();
+  // };
+
+  var endInput = function () {
+    txt = editBox.getDocObject().value;
     me.parseExpressions();
-
-    var styles = null;
-
-    me.exec = function(_i) {
-        var src = SCPs[_i].src;
-        var t = src.split("%");
-        for (var i = 1, len = t.length; i < len; i += 2) {
-            var exp = _canvas.getExpression(t[i]);
-            //            exp.compute();
-            t[i] = "" + $U.parseArrayEnglish(exp.value(), numPrec, true);
-        }
-        _canvas.InterpretScript(me, t.join(""));
-    };
-
-    var closePrint = function() {
-        if (printPanel)
-            printPanel.close();
-        printPanel = null;
-    };
-
-    me.print = function(_m) {
-        if (!printPanel)
-            printPanel = new PrintPanel(_canvas, closePrint);
-        printPanel.setText(_m);
-    };
-
-    me.refreshInputs = function() {
-        // convert HTMLCollection to Array :
-        var inps = [].slice.call(container.getDocObject().getElementsByTagName('input'));
-        var sels = container.getDocObject().getElementsByTagName('select');
-        for (var n = 0; n < sels.length; n++) {
-            inps.push(sels[n]);
-        }
-        var tas = container.getDocObject().getElementsByTagName('textarea');
-        for (var n = 0; n < tas.length; n++) {
-            inps.push(tas[n]);
-        }
-        for (var n = 0; n < inps.length; n++) {
-            inps[n].ontouchstart = inps[n].onmousedown = function(ev) {
-                ev.stopPropagation();
-            };
-            if (inps[n].hasAttribute("editable")) {
-                var o = Cn.find(inps[n].getAttribute("editable"));
-                inps[n].readOnly = (o.getExp() === "0");
-            };
-            if ((inps[n].hasAttribute("populate")) && (inps[n].type === "select-one")) {
-                var o = Cn.find(inps[n].getAttribute("populate"));
-                var tab = JSON.parse(o.getExp().replace(/'/g,"\""));
-                inps[n].innerHTML = "";
-                for (var i = 0; i < tab.length; i++) {
-                    var elt = tab[i];
-                    if (!$U.isArray(elt)) elt = [tab[i], tab[i]];
-                    var opt = document.createElement('option');
-                    opt.value = elt[0];
-                    opt.innerHTML = elt[1];
-                    inps[n].appendChild(opt);
-                }
-            };
-            if (inps[n].hasAttribute("target")) {
-                var o = inps[n].targetObject = Cn.find(inps[n].getAttribute("target"));
-                if (o) {
-                    var evtpe = "oninput";
-                    switch (inps[n].type) {
-                        case "select-one":
-                            evtpe = "onchange";
-                            var ex = o.getExp();
-                            if (ex === "NaN") ex = "";
-                            inps[n].value = ex;
-                            break;
-                        case "checkbox":
-                            evtpe = "onchange";
-                            inps[n].checked = o.getValue();
-                            break;
-                        case "button":
-                            evtpe = "onmouseup";
-                            break;
-                        default:
-                            var ex = o.getExp();
-                            if (ex === "NaN") ex = "";
-                            inps[n].value = ex;
-                    }
-
-
-
-                    inps[n][evtpe] = function(ev) {
-                        var obj = ev.target.targetObject;
-                        if (obj) {
-                            var val = ev.target.value;
-                            switch (ev.target.type) {
-                                case "checkbox":
-                                    val = ev.target.checked;
-                                    break;
-                                case "button":
-                                    val = !obj.getValue();
-                                    break;
-                            }
-                            obj.setExp(val);
-                            obj.compute();
-                            obj.computeChilds();
-                            _canvas.paint();
-                        }
-                    }
-                }
-            }
-        }
-    };
-
-    var setHTML = function(_t) {
-        // On enlève tous les scripts injectés précédemment dans
-        // ce widget :
-		// Quitamos todos los scripts inyectados anteriormente
-		// en este widget
-        var scps = me.getDocObject().getElementsByTagName('script');
-        for (var n = 0; n < scps.length; n++) {
-            scps[n].parentNode.removeChild(scps[n]);
-        }
-
-        var tab = _t.split("§");
-        for (var i = 1, len = tab.length; i < len; i += 2) {
-            var k = (i - 1) / 2;
-            var match = tab[i].match(/^[^\n]*name\s*=\s*\"([^\"]*)\"/);
-            var nm = " value=\"" + ((match) ? match[1] : "RUN") + "\" ";
-            match = tab[i].match(/^[^\n]*style\s*=\s*\"([^\"]*)\"/);
-            var st = " style=\"-webkit-appearance: button;" + ((match) ? match[1] : "") + "\" ";
-            match = tab[i].match(/^[^\n]*id\s*=\s*\"([^\"]*)\"/);
-            var id = (match) ? " id=\"" + match[1] + "\"" : "";
-            tab[i] = "<input type=\"button\"  ontouchend=\"$CANVAS.textManager.executeScript(" + _canvas.textManager.getPosition(me) + "," + k + ");this.blur()\" onmouseup=\"$CANVAS.textManager.executeScript(" + _canvas.textManager.getPosition(me) + "," + k + ");this.blur()\" " + nm + st + id + ">";
-        }
-        _t = tab.join("");
-
-        // Le tag pre est là pour conserver les espaces multiples
-        // et les retours à la ligne :
-		// el tag 'pre' sirve para conservar los espacios múltiples
-		// y los cambios de línea
-        // container.setAttr("innerHTML", "<pre class=\"TeXDisplay\" >" + _t + "</pre>");
-		container.setAttr("innerHTML", "<pre style=\"font-family: Helvetica, Arial, sans-serif;"+
-		"text-shadow: 1px 1px 5px #777;"+
-		"text-align: center;vertical-align:middle;"+
-		"white-space: pre-wrap;"+
-		"margin: 0px;\" >" + _t + "</pre>");
-
-        // Interprétation des balises scripts éventuellement injectées dans
-        // le source (le innerHTML ne suffit pas) :
-		// Interpretación de etiquetas script eventualmente inyectadas en
-		// el source (el innerHTML no es suficiente):
-        scps = container.getDocObject().getElementsByTagName('script');
-        for (var n = 0; n < scps.length; n++) {
-            var scp = document.createElement('script');
-            scp.src = scps[n].src;
-            scp.type = scps[n].type;
-            scp.appendChild(document.createTextNode(scps[n].innerHTML));
-            me.getDocObject().insertBefore(scp, container.getDocObject());
-        }
-
-        me.refreshInputs();
-    };
-
-
-    var container = new GUIElement(_canvas, "div");
-    me.addContent(container);
-    container.setAbsolute();
-    container.setStyle("cursor", "move");
     setHTML(txt);
+    me.updateSizeToFitText(); // Ajusta el tamaño aquí también
+    _canvas.getConstruction().computeAll();
+    me.evaluateString();
+  };
 
+  editBox.getDocObject().oninput = function (ev) {
+    endInput();
+  };
+  editBox.setStyle("width", _w - 33 + "px");
+  editBox.setStyle("height", 114 + "px");
 
-    var editBox = new GUIElement(_canvas, "textarea");
-    editBox.setStyles("position:absolute;font-family:'Lucida Console';font-size:20px;line-height:20px");
-    var el = editBox.getDocObject();
-    el.autocorrect = el.autocomplete = el.autocapitalize = el.spellcheck = false;
-    // editBox.setAttr("autocomplete","off");
-    // editBox.setAttr("autocorrect","off");
-    // editBox.setAttr("autocapitalize","off");
-    // editBox.setAttr("spellcheck",false);
+  var deleteTeX = function () {
+    _canvas.undoManager.swap(me);
+    _canvas.textManager.deleteTeX(me);
+  };
 
-    var endInput = function() {
-        txt = editBox.getDocObject().value;
-        me.parseExpressions();
-        setHTML(txt);
-        _canvas.getConstruction().computeAll();
-        me.evaluateString();
-    };
+  var insertJS = function () {
+    var js =
+      '§ name="' + $L.props_text_js + '" style="font-size:24px;color:blue"\n';
+    js += "for (var i=0;i<100;i++){\n";
+    js += "\tA=Point(Math.random()*16-8,Math.random()*16-8)\n";
+    js += "}\n";
+    js += "§";
+    me.addName(js);
+  };
+  var insertTeX = function () {
+    var tx = "$\\frac{6+1}{3}\\approx2.3$";
+    me.addName(tx);
+  };
+  var insertEXP = function () {
+    var ex = "%5*2^2+9%";
+    me.addName(ex);
+  };
 
-    editBox.getDocObject().oninput = function(ev) {
-        endInput();
-    };
-    editBox.setStyle("width", (_w - 33) + "px");
-    editBox.setStyle("height", (114) + "px");
+  me.noedit = function () {
+    me.removeContent(editBox);
+    me.removeContent(closebox);
+    me.removeContent(jsbox);
+    me.removeContent(txbox);
+    me.removeContent(exbox);
+    me.setStyle("z-index", 0);
+  };
 
-
-    var deleteTeX = function() {
-        _canvas.undoManager.swap(me);
-        _canvas.textManager.deleteTeX(me);
-    };
-
-    var insertJS = function() {
-        var js = "§ name=\"" + $L.props_text_js + "\" style=\"font-size:24px;color:blue\"\n";
-        js += "for (var i=0;i<100;i++){\n";
-        js += "\tA=Point(Math.random()*16-8,Math.random()*16-8)\n";
-        js += "}\n"
-        js += "§";
-        me.addName(js);
-    };
-    var insertTeX = function() {
-        var tx = "$\\frac{6+1}{3}\\approx2.3$";
-        me.addName(tx);
-    };
-    var insertEXP = function() {
-        var ex = "%5*2^2+9%";
-        me.addName(ex);
-    };
-
-    me.noedit = function() {
-        me.removeContent(editBox);
-        me.removeContent(closebox);
-        me.removeContent(jsbox);
-        me.removeContent(txbox);
-        me.removeContent(exbox);
-        me.setStyle("z-index", 0);
+  var moveStyles = function () {
+    editBox.setStyle("left", 35 + "px");
+    editBox.setStyle("top", _h + 4 + "px");
+    //        editBox.setStyle("width", (_w - 33) + "px");
+    //        editBox.setStyle("height", (114) + "px");
+    if (jsbox) {
+      jsbox.setStyle("left", 0 + "px");
+      jsbox.setStyle("top", _h + 4 + "px");
+      txbox.setStyle("left", 0 + "px");
+      txbox.setStyle("top", _h + 44 + "px");
+      exbox.setStyle("left", 0 + "px");
+      exbox.setStyle("top", _h + 84 + "px");
     }
+  };
 
-    var moveStyles = function() {
-        editBox.setStyle("left", (35) + "px");
-        editBox.setStyle("top", (_h + 4) + "px");
-        //        editBox.setStyle("width", (_w - 33) + "px");
-        //        editBox.setStyle("height", (114) + "px");
-        if (jsbox) {
-            jsbox.setStyle("left", (0) + "px");
-            jsbox.setStyle("top", (_h + 4) + "px");
-            txbox.setStyle("left", (0) + "px");
-            txbox.setStyle("top", (_h + 44) + "px");
-            exbox.setStyle("left", (0) + "px");
-            exbox.setStyle("top", (_h + 84) + "px");
-        }
+  me.setEditFocus = function () {
+    setTimeout(function () {
+      editBox.getDocObject().focus();
+      editBox.getDocObject().setSelectionRange(0, 9999);
+    }, 100);
+  };
 
+  me.doedit = function () {
+    if (!me.hasContent(editBox) && _canvas.getMode() === 10) {
+      me.setStyle("z-index", 3);
+      editBox.setAttr("innerHTML", txt);
+      me.addContent(editBox);
+      closebox = new CloseBox(me, deleteTeX);
+      jsbox = new ImageBox(
+        me,
+        $APP_PATH + "NotPacked/images/tex/js.svg",
+        30,
+        30,
+        insertJS,
+      );
+
+      txbox = new ImageBox(
+        me,
+        $APP_PATH + "NotPacked/images/tex/tex.svg",
+        30,
+        30,
+        insertTeX,
+      );
+
+      exbox = new ImageBox(
+        me,
+        $APP_PATH + "NotPacked/images/tex/exp.svg",
+        30,
+        30,
+        insertEXP,
+      );
+
+      moveStyles();
     }
+  };
 
-    me.setEditFocus = function() {
-        setTimeout(function() {
-            editBox.getDocObject().focus();
-            editBox.getDocObject().setSelectionRange(0, 9999);
-        }, 100);
-    };
+  me.edit = function () {
+    _canvas.textManager.edit(me);
+  };
 
-    me.doedit = function() {
-        if ((!me.hasContent(editBox)) && (_canvas.getMode() === 10)) {
+  //    container.addClickEvent(me.edit);
 
-            me.setStyle("z-index", 3);
-            editBox.setAttr("innerHTML", txt);
-            me.addContent(editBox);
-            closebox = new CloseBox(me, deleteTeX);
-            jsbox = new ImageBox(me, $APP_PATH + "NotPacked/images/tex/js.svg", 30, 30, insertJS);
+  var growbox = new GUIElement(_canvas, "div");
+  growbox.setAbsolute();
+  growbox.setStyles(
+    "width:30px;height:30px;right:0px;bottom:0px;cursor:se-resize",
+  );
+  me.addContent(growbox);
 
-            txbox = new ImageBox(me, $APP_PATH + "NotPacked/images/tex/tex.svg", 30, 30, insertTeX);
+  var xx = 0,
+    yy = 0;
 
-            exbox = new ImageBox(me, $APP_PATH + "NotPacked/images/tex/exp.svg", 30, 30, insertEXP);
+  var getPageCoords = function (ev) {
+    if (ev.touches && ev.touches.length > 0)
+      return { x: ev.touches[0].pageX, y: ev.touches[0].pageY };
+    if (ev.changedTouches && ev.changedTouches.length > 0)
+      return { x: ev.changedTouches[0].pageX, y: ev.changedTouches[0].pageY };
+    return { x: ev.pageX, y: ev.pageY };
+  };
 
-            moveStyles();
-        }
-    };
+  var dragmove = function (ev) {
+    var coords = getPageCoords(ev);
+    _l += coords.x - xx;
+    _t += coords.y - yy;
+    me.setStyle("left", _l + "px");
+    me.setStyle("top", _t + "px");
+    xx = coords.x;
+    yy = coords.y;
+  };
 
-    me.edit = function() {
-        _canvas.textManager.edit(me);
-    };
+  var dragdown = function (ev) {
+    //        me.removeContent(editBox);
+    var coords = getPageCoords(ev);
+    xx = coords.x;
+    yy = coords.y;
+    window.addEventListener("touchmove", dragmove, false);
+    window.addEventListener("touchend", dragup, false);
+    window.addEventListener("mousemove", dragmove, false);
+    window.addEventListener("mouseup", dragup, false);
+  };
 
+  var dragup = function (ev) {
+    window.removeEventListener("touchmove", dragmove, false);
+    window.removeEventListener("touchend", dragup, false);
+    window.removeEventListener("mousemove", dragmove, false);
+    window.removeEventListener("mouseup", dragup, false);
+  };
 
-    //    container.addClickEvent(me.edit);
+  //MEAG esto hace al contenedor arrastable---aquí podría añadirse un if con una variable para fijar el widget?
+  container.addDownEvent(dragdown);
+  //    container.getDocObject().addEventListener('touchstart', dragdown, false);
+  //    container.getDocObject().addEventListener('mousedown', dragdown, false);
+  container.getDocObject().addEventListener("touchstart", me.edit, false);
+  container.getDocObject().addEventListener("click", me.edit, false);
 
+  var sizemove = function (ev) {
+    var coords = getPageCoords(ev);
+    _w += coords.x - xx;
+    _h += coords.y - yy;
+    me.setStyle("width", _w + "px");
+    me.setStyle("height", _h + "px");
+    container.setStyle("width", _w - 20 + "px");
+    container.setStyle("height", _h - 20 + "px");
+    xx = coords.x;
+    yy = coords.y;
+    moveStyles();
+    if (closebox) closebox.setStyle("left", _w - 15 + "px");
+  };
 
+  var sizedown = function (ev) {
+    var coords = getPageCoords(ev);
+    xx = coords.x;
+    yy = coords.y;
+    window.addEventListener("touchmove", sizemove, false);
+    window.addEventListener("touchend", sizeup, false);
+    window.addEventListener("mousemove", sizemove, false);
+    window.addEventListener("mouseup", sizeup, false);
+  };
 
+  var sizeup = function (ev) {
+    window.removeEventListener("touchmove", sizemove, false);
+    window.removeEventListener("touchend", sizeup, false);
+    window.removeEventListener("mousemove", sizemove, false);
+    window.removeEventListener("mouseup", sizeup, false);
+  };
 
-    var growbox = new GUIElement(_canvas, "div");
-    growbox.setAbsolute();
-    growbox.setStyles("width:30px;height:30px;right:0px;bottom:0px;cursor:se-resize");
-    me.addContent(growbox);
+  growbox.addDownEvent(sizedown); //---aquí podría añadirse un if con una variable para fijar el widget?
+  //inserta widget en canvas
+  _canvas.getDocObject().parentNode.appendChild(me.getDocObject());
+  me.applyTransitionIN();
 
-    var xx = 0,
-        yy = 0;
-
-    var dragmove = function(ev) {
-		
-        
-		_l += (ev.pageX - xx);
-        _t += (ev.pageY - yy);
-        me.setStyle("left", _l + "px");
-        me.setStyle("top", _t + "px");
-        xx = ev.pageX;
-        yy = ev.pageY;
-		
+  me.compute = function () {
+    for (var i = 0; i < EXPs.length; i++) {
+      EXPs[i].compute();
     }
+  };
 
-    var dragdown = function(ev) {
-        //        me.removeContent(editBox);
-        xx = ev.pageX;
-        yy = ev.pageY;
-        window.addEventListener('touchmove', dragmove, false);
-        window.addEventListener('touchend', dragup, false);
-        window.addEventListener('mousemove', dragmove, false);
-        window.addEventListener('mouseup', dragup, false);
+  me.evaluateString = function () {
+    var t = txt.split("%");
+    var changed = t.length > 1;
+    for (var i = 1, len = t.length; i < len; i += 2) {
+      try {
+        var k = (i - 1) / 2;
+        EXPs[k].compute();
+        t[i] = $U.parseArray(EXPs[k].value(), numPrec);
+      } catch (e) {}
     }
-
-    var dragup = function(ev) {
-        window.removeEventListener('touchmove', dragmove, false);
-        window.removeEventListener('touchend', dragup, false);
-        window.removeEventListener('mousemove', dragmove, false);
-        window.removeEventListener('mouseup', dragup, false);
+    t = t.join("").split("$");
+    changed = changed || t.length > 1;
+    for (var i = 1, len = t.length; i < len; i += 2) {
+      try {
+        t[i] = katex.renderToString(t[i]);
+      } catch (e) {}
     }
+    if (changed) setHTML(t.join(""));
+  };
 
-    //MEAG esto hace al contenedor arrastable---aquí podría añadirse un if con una variable para fijar el widget?
-    container.addDownEvent(dragdown);
-    //    container.getDocObject().addEventListener('touchstart', dragdown, false);
-    //    container.getDocObject().addEventListener('mousedown', dragdown, false);
-    container.getDocObject().addEventListener('touchstart', me.edit, false);
-    container.getDocObject().addEventListener('click', me.edit, false);
-	
-	
-		
+  me.getBounds = function () {
+    return {
+      left: _l,
+      top: _t,
+      width: _w,
+      height: _h,
+    };
+  };
 
-    var sizemove = function(ev) {
-        _w += (ev.pageX - xx);
-        _h += (ev.pageY - yy);
-        me.setStyle("width", _w + "px");
-        me.setStyle("height", _h + "px");
-        container.setStyle("width", (_w - 20) + "px");
-        container.setStyle("height", (_h - 20) + "px");
-        xx = ev.pageX;
-        yy = ev.pageY;
-        moveStyles();
-        if (closebox)
-            closebox.setStyle("left", (_w - 15) + "px");
+  me.getColor = function () {
+    return bgcolor.getHEX();
+  };
+  me.setColor = function (val) {
+    var op = bgcolor.getOpacity();
+    bgcolor.set(val);
+    bgcolor.setOpacity(op);
+    me.setStyle("background-color", bgcolor.getRGBA());
+    me.setStyle("border-color", bgcolor.getRGBA());
+  };
+  me.getOpacity = function () {
+    return bgcolor.getOpacity();
+  };
+  me.setOpacity = function (val) {
+    bgcolor.setOpacity(val);
+    me.setStyle("background-color", bgcolor.getRGBA());
+    me.setStyle("border-color", bgcolor.getRGBA());
+  };
+  me.getBorderSize = function () {
+    return borderSize;
+  };
+  me.setBorderSize = function (val) {
+    borderSize = val;
+    me.setStyle("border-width", borderSize + "px");
+  };
+
+  me.getWidgetFont = function () {
+    return widgetFont;
+  };
+
+  me.setWidgetFont = function (val) {
+    widgetFont = val;
+    me.setStyle("font-size", widgetFont + "pt");
+    me.setStyle("vertical-align", "middle");
+  };
+
+  me.getFixPosition = function () {
+    return fixPosition;
+  };
+
+  me.setFixPosition = function (bool) {
+    fixPosition = bool;
+    if (fixPosition) {
+      container.addDownEvent(dragup);
+    } else {
+      container.addDownEvent(dragdown);
     }
+  };
 
-    var sizedown = function(ev) {
-        xx = ev.pageX;
-        yy = ev.pageY;
-        window.addEventListener('touchmove', sizemove, false);
-        window.addEventListener('touchend', sizeup, false);
-        window.addEventListener('mousemove', sizemove, false);
-        window.addEventListener('mouseup', sizeup, false);
+  me.getFixSize = function () {
+    return fixSize;
+  };
+
+  me.setFixSize = function (bool) {
+    fixSize = bool;
+    if (fixSize) {
+      growbox.addDownEvent(sizeup);
+    } else {
+      growbox.addDownEvent(sizedown);
     }
+  };
 
-    var sizeup = function(ev) {
-        window.removeEventListener('touchmove', sizemove, false);
-        window.removeEventListener('touchend', sizeup, false);
-        window.removeEventListener('mousemove', sizemove, false);
-        window.removeEventListener('mouseup', sizeup, false);
+  me.getBorderRadius = function () {
+    return borderRadius;
+  };
+  me.setBorderRadius = function (val) {
+    borderRadius = val;
+    me.setStyle("border-radius", borderRadius + "px");
+  };
+  me.setNumPrec = function (val) {
+    numPrec = Math.pow(10, val);
+    me.evaluateString();
+  };
+  me.getNumPrec = function () {
+    return Math.round(Math.log(numPrec) / Math.LN10);
+  };
+  me.addName = function (_n) {
+    if (me.hasContent(editBox)) {
+      $U.addTextToInput(editBox.getDocObject(), _n, "add");
+      endInput();
     }
+  };
 
-    growbox.addDownEvent(sizedown); //---aquí podría añadirse un if con una variable para fijar el widget?
-    //inserta widget en canvas 
-    _canvas.getDocObject().parentNode.appendChild(me.getDocObject());
-    me.applyTransitionIN();
+  me.setStyles = function (_s) {
+    styles = _s;
+    _s = _s.split(";");
+    for (var i = 0, len = _s.length; i < len; i++) {
+      var e = _s[i].split(":");
+      switch (e[0]) {
+        case "c": // Color
+          bgcolor.set(e[1]);
+          me.setStyle("background-color", bgcolor.getRGBA());
+          me.setStyle("border-color", bgcolor.getRGBA());
+          break;
+        case "s": // Border size
+          borderSize = parseFloat(e[1]);
+          me.setStyle("border-width", borderSize + "px");
+          break;
+        case "r": //Border radius
+          borderRadius = parseInt(e[1]);
+          me.setStyle("border-radius", borderRadius + "px");
+          break;
+        case "p": //Number precision
+          numPrec = Math.pow(10, parseInt(e[1]));
+          break;
 
-    me.compute = function() {
-        for (var i = 0; i < EXPs.length; i++) {
-            EXPs[i].compute();
-        }
-    };
-
-
-    me.evaluateString = function() {
-
-        var t = txt.split("%");
-        var changed = (t.length > 1);
-        for (var i = 1, len = t.length; i < len; i += 2) {
-            try {
-                var k = (i - 1) / 2;
-                EXPs[k].compute();
-                t[i] = $U.parseArray(EXPs[k].value(), numPrec);
-            } catch (e) {}
-        }
-        t = t.join("").split("$");
-        changed = changed || (t.length > 1);
-        for (var i = 1, len = t.length; i < len; i += 2) {
-            try {
-                t[i] = katex.renderToString(t[i]);
-            } catch (e) {}
-        }
-        if (changed)
-            setHTML(t.join(""));
-    };
-
-
-    me.getBounds = function() {
-        return {
-            "left": _l,
-            "top": _t,
-            "width": _w,
-            "height": _h
-        };
-    };
-
-    me.getColor = function() {
-        return (bgcolor.getHEX());
-    };
-    me.setColor = function(val) {
-        var op = bgcolor.getOpacity();
-        bgcolor.set(val);
-        bgcolor.setOpacity(op);
-        me.setStyle("background-color", bgcolor.getRGBA());
-        me.setStyle("border-color", bgcolor.getRGBA());
-    };
-    me.getOpacity = function() {
-        return (bgcolor.getOpacity());
-    };
-    me.setOpacity = function(val) {
-        bgcolor.setOpacity(val);
-        me.setStyle("background-color", bgcolor.getRGBA());
-        me.setStyle("border-color", bgcolor.getRGBA());
-    };
-    me.getBorderSize = function() {
-        return borderSize;
-    };
-    me.setBorderSize = function(val) {
-        borderSize = val;
-        me.setStyle("border-width", borderSize + "px");
-
-    };
-	
-	me.getWidgetFont = function () {
-		return widgetFont;
-	};
-	
-	me.setWidgetFont = function (val) {
-		widgetFont=val;
-		me.setStyle("font-size",widgetFont+"pt");
-		me.setStyle("vertical-align","middle");
-	};
-	
-	me.getFixPosition = function () {
-		return fixPosition;
-	};
-	
-	me.setFixPosition= function (bool) {
-		fixPosition=bool;
-		if (fixPosition) {
-            container.addDownEvent(dragup);
-            
-		}
-		else {
-			container.addDownEvent(dragdown);
-		}
-		
-	};
-	
-	me.getFixSize = function () {
-		return fixSize;
-	};
-	
-	me.setFixSize= function (bool) {
-		fixSize=bool;
-		if (fixSize) {
-			growbox.addDownEvent(sizeup);
-			
-		}
-		else {
-			growbox.addDownEvent(sizedown);
-		}
-	};
-	
-	
-    me.getBorderRadius = function() {
-        return borderRadius;
-    };
-    me.setBorderRadius = function(val) {
-        borderRadius = val;
-        me.setStyle("border-radius", borderRadius + "px");
-    };
-    me.setNumPrec = function(val) {
-        numPrec = Math.pow(10, val);
-        me.evaluateString();
-    };
-    me.getNumPrec = function() {
-        return Math.round(Math.log(numPrec) / Math.LN10);
-    };
-    me.addName = function(_n) {
-        if (me.hasContent(editBox)) {
-            $U.addTextToInput(editBox.getDocObject(), _n, "add");
-            endInput();
-        }
-    };
-
-    me.setStyles = function(_s) {
-        styles = _s;
-        _s = _s.split(";");
-        for (var i = 0, len = _s.length; i < len; i++) {
-            var e = _s[i].split(":");
-            switch (e[0]) {
-                case "c": // Color
-                    bgcolor.set(e[1]);
-                    me.setStyle("background-color", bgcolor.getRGBA());
-                    me.setStyle("border-color", bgcolor.getRGBA());
-                    break;
-                case "s": // Border size
-                    borderSize = parseFloat(e[1]);
-                    me.setStyle("border-width", borderSize + "px");
-                    break;
-                case "r": //Border radius
-                    borderRadius = parseInt(e[1]);
-                    me.setStyle("border-radius", borderRadius + "px");
-                    break;
-                case "p": //Number precision
-                    numPrec = Math.pow(10, parseInt(e[1]));
-                    break;
-					
-				case "t": //font size
-                    me.setStyle("font-size", parseInt(e[1]) + "pt");
-                    break;
-				case "fp": //fix position
-					var fixPosition="true"==e[1];
-					me.setFixPosition(fixPosition);
-					break;
-				case "ft": //fix size
-					var fixSize="true"==e[1];
-					me.setFixSize(fixSize);
-					break;	
-            }
-        }
-    };
-
-
-
-    me.getStyles = function() {
-        var stls = "c:" + bgcolor.getRGBA();
-        stls += ";s:" + borderSize;
-        stls += ";r:" + borderRadius;
-        stls += ";p:" + Math.round(Math.log(numPrec) / Math.LN10);
-		stls += ";t:" + widgetFont;
-		stls += ";fp:" + fixPosition;
-		stls += ";ft:" + fixSize;
-        return stls;
-    };
-
-
-    me.setText = function(_t) {
-        txt = _t;
-        //        container.setAttr("innerHTML", _t);
-        //        console.log("set text !");
-    };
-
-    me.getRawText = function() {
-        return txt;
+        case "t": //font size
+          me.setStyle("font-size", parseInt(e[1]) + "pt");
+          break;
+        case "fp": //fix position
+          var fixPosition = "true" == e[1];
+          me.setFixPosition(fixPosition);
+          break;
+        case "ft": //fix size
+          var fixSize = "true" == e[1];
+          me.setFixSize(fixSize);
+          break;
+      }
     }
+  };
 
-    me.getText = function() {
-        var s = txt;
-        if (txt.split("$").length > 1) {
-            s = s.replace(/\\/g, "\\\\");
-        }
-        return s;
+  me.getStyles = function () {
+    var stls = "c:" + bgcolor.getRGBA();
+    stls += ";s:" + borderSize;
+    stls += ";r:" + borderRadius;
+    stls += ";p:" + Math.round(Math.log(numPrec) / Math.LN10);
+    stls += ";t:" + widgetFont;
+    stls += ";fp:" + fixPosition;
+    stls += ";ft:" + fixSize;
+    return stls;
+  };
+
+  // me.setText = function(_t) {
+  //     txt = _t;
+  //     //        container.setAttr("innerHTML", _t);
+  //     //        console.log("set text !");
+  // };
+
+  me.setText = function (_t) {
+    txt = _t;
+    setHTML(txt); // Redibuja el contenido
+    me.updateSizeToFitText(); // Ajusta el tamaño del rectángulo
+  };
+
+  me.updateSizeToFitText = function () {
+    // Obtén el contexto del canvas
+    var ctx = _canvas.getContext();
+    ctx.font = me.getStyle("font-size") || "16px Arial"; // Asegura usar la fuente adecuada
+
+    // Divide el texto en líneas si hay saltos de línea
+    var textLines = txt.split("\n");
+
+    // Mide el ancho de la línea más larga
+    var maxLineWidth = 0;
+    textLines.forEach((line) => {
+      const lineWidth = ctx.measureText(line).width;
+      if (lineWidth > maxLineWidth) maxLineWidth = lineWidth;
+    });
+
+    // Calcula la altura del texto considerando el interlineado
+    var fontSize = parseInt(ctx.font.match(/\d+/)) || 16; // Tamaño de fuente
+    var lineHeight = fontSize * 1.4; // Ajusta el interlineado (1.4x del tamaño de fuente)
+    var textHeight = lineHeight * textLines.length; // Altura total para multilínea
+
+    // Define el padding
+    var padding = 15; // Márgenes ajustables
+
+    // Ajusta las dimensiones del rectángulo
+    _w = maxLineWidth + padding * 2;
+    _h = textHeight + padding * 2;
+
+    // Actualiza los estilos del contenedor y del rectángulo
+    me.setStyle("width", _w + "px");
+    me.setStyle("height", _h + "px");
+    container.setStyle("width", _w - padding * 2 + "px");
+    container.setStyle("height", _h - padding * 2 + "px");
+  };
+
+  me.getRawText = function () {
+    return txt;
+  };
+
+  me.getText = function () {
+    var s = txt;
+    if (txt.split("$").length > 1) {
+      s = s.replace(/\\/g, "\\\\");
     }
+    return s;
+  };
 
-    me.init = function() {
-        me.setBounds(_l, _t, _w, _h);
-        container.setBounds(10, 10, _w - 20, _h - 20);
+  me.init = function () {
+    me.setBounds(_l, _t, _w, _h);
+    container.setBounds(10, 10, _w - 20, _h - 20);
+  };
 
-    };
-
-    me.init();
-this.getX = function() {
+  me.init();
+  this.getX = function () {
     return X;
   };
-  this.getY = function() {
+  this.getY = function () {
     return Y;
   };
 
-  this.setXY = function(x, y) {
+  this.setXY = function (x, y) {
     X = x;
     Y = y;
-	w=this.getStyle("width");
-	h=this.getStyle("height");
-	
-	this.setBounds(X, Y, w, h);
+    w = this.getStyle("width");
+    h = this.getStyle("height");
+
+    this.setBounds(X, Y, w, h);
   };
 
-  this.setxy = function(x, y) {
+  this.setxy = function (x, y) {
     X = Cn.coordsSystem.px(x);
     Y = Cn.coordsSystem.py(y);
-	w=this.getStyle("width");
-	h=this.getStyle("height");
-	
-	this.setBounds(X, Y, w, h);
+    w = this.getStyle("width");
+    h = this.getStyle("height");
+
+    this.setBounds(X, Y, w, h);
   };
-  
-  
-  
-  this.getx = function() {
+
+  this.getx = function () {
     return Cn.coordsSystem.x(X);
   };
-  
-  this.gety = function() {
+
+  this.gety = function () {
     return Cn.coordsSystem.y(Y);
   };
-  
-
-
 }

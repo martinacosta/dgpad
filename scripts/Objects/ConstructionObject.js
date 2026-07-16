@@ -48,6 +48,8 @@ function ConstructionObject(_construction, _name) {
   this.Flag = false; // For various construction process 
   this.Flag2 = false; // For various construction process
   this.Scratch = 0; // For various construction process
+  this.protected = false;//para impedir el borrado de objetos por el usuario
+
 
   var dragPoints = null;
   var dragCoords, freeDragPts, PtsChilds;
@@ -256,9 +258,9 @@ function ConstructionObject(_construction, _name) {
   };
 
   this.logChildList = function() {
-    console.log("** CHILDS of " + this.getName());
+    
     for (var i = 0; i < childList.length; i++) {
-      console.log("childList[" + i + "] = " + childList[i].getName());
+      
     }
   };
 
@@ -290,9 +292,7 @@ function ConstructionObject(_construction, _name) {
   this.clearChildList = function() {
     childList.length = 0;
   };
-  //    this.addChild = function(_o) {
-  //        childList.push(_o);
-  //    };
+  
 
   this.deleteChild = function(_o) {
     var i = childList.indexOf(_o);
@@ -336,9 +336,9 @@ function ConstructionObject(_construction, _name) {
   };
 
   this.logParentList = function() {
-    console.log("** PARENTS of " + this.getName());
+    
     for (var i = 0; i < parentList.length; i++) {
-      console.log("parentList[" + i + "] = " + parentList[i].getName());
+      
     }
   };
 
@@ -404,14 +404,20 @@ function ConstructionObject(_construction, _name) {
     return null;
   };
 
-  this.addMagnet = function(_o, _n) {
-    var m = this.getMagnet(_o);
-    if (m === null) {
-      m = [_o, _n];
-      magnets.push(m);
-    }
-    return m;
-  };
+  
+    this.addMagnet = function(_o, _n) {
+      var m = this.getMagnet(_o);
+      if (m === null) {
+        m = [_o, _n];
+        magnets.push(m);
+      } else {
+        // ✅ clave: permitir updates (MagnetManager depende de esto)
+        m[1] = _n;
+      }
+      return m;
+    };
+
+
 
   this.removeMagnet = function(_o) {
     var m = this.getMagnet(_o);
@@ -566,12 +572,47 @@ function ConstructionObject(_construction, _name) {
   this.getShape = function() {
     return -1;
   };
+  // this.setIndicated = function(_ind) {
+  //   indicated = _ind;
+  //   objMode = objModeTab[1 * _ind];
+  //   return _ind; // Optionnel : voir la methode validate de Construction.js
+	// // Opcional: ver el método validate de Construction.js
+  // };
   this.setIndicated = function(_ind) {
     indicated = _ind;
     objMode = objModeTab[1 * _ind];
-    return _ind; // Optionnel : voir la methode validate de Construction.js
-	// Opcional: ver el método validate de Construction.js
-  };
+
+    // Verificar si el TextFrame de protocolo está disponible
+    if (Cn.getProtocolFrame && Cn.getProtocolFrame()) {
+        var protocolFrame = Cn.getProtocolFrame();  // Obtener el TextFrame del protocolo
+
+        // Verificar qué es lo que devuelve el frame
+       
+
+        // Verificar si el frame es del tipo protocolo y tiene el método highlightItemInProtocol
+        
+        if (protocolFrame && protocolFrame.frameType === "protocol" && typeof protocolFrame.highlightItemInText === "function") {
+          // Verificar que la función existe antes de invocar
+          
+          
+          if (indicated) {
+            // console.log(this.getName())
+            protocolFrame.highlightItemInText(this.getName());  // Llamar a la función de resaltado
+          } else {
+            protocolFrame.clearHighlight(this.getName());  // Limpiar el resaltado
+          }
+      } else {
+          // console.log("El frame de protocolo no está abierto o no tiene los métodos necesarios.");
+      }
+      
+    } else {
+        // console.log("Frame de protocolo no está disponible.");
+    }
+
+    return _ind;
+};
+
+
 
   this.example = function(ev) {
     //ev.preventDefault();
@@ -580,7 +621,7 @@ function ConstructionObject(_construction, _name) {
     //Cn.validate(ev);
     //Cn.computeAll();
     //me.paint(ev);
-    console.log("Example" + ev);
+    
 
   }
 
@@ -594,12 +635,29 @@ function ConstructionObject(_construction, _name) {
   this.isSelected = function() {
     return selected;
   };
+  
+
   this.setHidden = function(_sel) {
     _sel = Math.abs(_sel * 1);
     hidden = (isNaN(_sel)) ? 1 : parseInt(_sel) % 3;
     this.paint = paintTab[hidden];
     this.validate = validTab[hidden];
-  };
+
+    // Después de cambiar la visibilidad, actualizar el protocolo
+    var frame = Cn.getFrame();
+    if (frame) {
+        // Si el objeto está oculto, lo eliminamos del protocolo
+        if (this.isHidden()) {
+            frame.removeTextCons(this);  // Remover el objeto del protocolo si está oculto
+            // console.log("Objeto oculto y removido del protocolo:", this.getName());
+        } else {
+            // Si no está oculto, actualizamos su entrada en el protocolo
+            frame.updateTextCons(this);  // Actualizar el protocolo para este objeto si es visible
+            // console.log("Objeto visible y actualizado en el protocolo:", this.getName());
+        }
+    }
+};
+
   this.isHidden = function() {
     return (hidden);
   };
@@ -1186,13 +1244,45 @@ function ConstructionObject(_construction, _name) {
       s += ";am:" + this.is360();
     if ((this.getArcRay) && (this.getArcRay() != 30))
       s += ";arc:" + this.getArcRay();
+    
     if (magnets.length) {
+      
       var t = [];
+      var seen = {}; // evitar duplicados por lista
+
       for (var k = 0; k < magnets.length; k++) {
-        t.push([magnets[k][0].getVarName(), magnets[k][1]]);
+        var tgt = magnets[k][0];
+        var r = magnets[k][1];
+        var unit = magnets[k][2] || "px";
+
+        if (!tgt) continue;
+
+        // ✅ normal: target serializable
+        if (tgt.getVarName) {
+          var vn = tgt.getVarName();
+          if (!seen[vn]) {
+            // t.push([vn, r]);
+            t.push([vn, r, "'" + unit + "'"]);
+            seen[vn] = true;
+          }
+          continue;
+        }
+
+        // ✅ slotTarget (VirtualPointObject): map to owning list (serializable)
+        var owner = tgt.__magnetSlotOwnerList;
+        if (owner && owner.getVarName) {
+          var ovn = owner.getVarName();
+          if (!seen[ovn]) {
+            // t.push([ovn, r]);
+            t.push([ovn, r, "'" + unit + "'"]);
+            seen[ovn] = true;
+          }
+        }
       }
-      s += ";mg:[" + t.join("],[") + "]";
+
+      if (t.length) s += ";mg:[" + t.join("],[") + "]";
     }
+
     if (dragPoints !== null) {
       var t = [];
       for (var k = 0; k < dragPoints.length; k++) {
@@ -1204,7 +1294,18 @@ function ConstructionObject(_construction, _name) {
     if (an) {
       s += ";an:[" + an.speed + "," + an.direction + "," + an.ar + "]";
     }
+    // Exclusividad de slots (ListObject)
+    if (this.getMagnetSlotsExclusive) {
+      s += ";mx:" + (this.getMagnetSlotsExclusive() ? 1 : 0);
+    } else if (this.isMagnetSlotsExclusive) {
+      s += ";mx:" + (this.isMagnetSlotsExclusive() ? 1 : 0);
+    }
+    // PointObject: exclusive magnet target
+    if (this.isExclusiveMagnetTarget) {
+      s += ";mxt:" + (this.isExclusiveMagnetTarget() ? 1 : 0);
+    }
     return s;
+    
   };
 
   this.getStyle = function(src) {
@@ -1220,7 +1321,48 @@ function ConstructionObject(_construction, _name) {
     return "";
   };
 
+  this.setTextCons = function(string) {
+    TextCons=string;
+  };
+
   this.nameMover = function(ev, zc) {};
   // MEAG end
+  this.setProtected = function(val) {
+    this.protected = !!val;
+  };
+
+  this.isProtected = function() {
+    return this.protected;
+  };
+
+  const originalSetName = this.setName;
+  this.setName = function(_n) {
+    if (this.protected) {
+      $U.alert($L.blockly.restrictions_protect_msg2);
+      return;
+    }
+    originalSetName.call(this, _n);
+  };
+
+  // Para liberar slots en listas exclusivas
+this.releaseExclusiveMagnetLocks = function() {
+  if (!this.getMagnets) return;
+
+  var mags = this.getMagnets();
+  if (!mags || !mags.length) return;
+
+  for (var i = 0; i < mags.length; i++) {
+    var tgt = mags[i][0];
+    if (!tgt) continue;
+
+    // slotTargets / points exclusivos / etc:
+    if (tgt.getMagnetLockOwner && tgt.unlockMagnet) {
+      var owner = tgt.getMagnetLockOwner();
+      if (owner === this) {
+        tgt.unlockMagnet(this);
+      }
+    }
+  }
+};
 
 };

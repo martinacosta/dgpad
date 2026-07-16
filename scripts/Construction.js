@@ -28,6 +28,20 @@ function Construction(_canvas) {
     me.getFrame = function() {
       return frame;
     }
+
+    // Frame de protocolo específico, que será manejado por FrameText
+    var protocolFrame = null;
+
+    // Método para obtener el frame de protocolo
+    me.getProtocolFrame = function() {
+        return protocolFrame;
+    };
+
+    // Método para asignar el frame de protocolo cuando se cree
+    me.setProtocolFrame = function(frame) {
+        protocolFrame = frame;
+    };
+
     me.getListObject = function() {
       return V;
     }
@@ -89,7 +103,7 @@ window.addEventListener("message",function(s){
 	);
 
     me.createTurtleExpression = function(_startpt) {
-        var name = "blk_turtle_exp_" + _startpt;
+        var name = "blk_turtle_exp__" + _startpt;
         var o = me.find(name);
         if (!o) {
             o = new ExpressionObject(me, name, "", "", "", "NaN", 50, 50);
@@ -106,7 +120,7 @@ window.addEventListener("message",function(s){
     };
 
     me.removeTurtleExpression = function(_startpt) {
-        var exp = me.find("blk_turtle_exp_" + _startpt);
+        var exp = me.find("blk_turtle_exp__" + _startpt);
         var lst = me.find("blk_turtle_list_" + _startpt);
         if (exp) {
             me.remove(lst);
@@ -115,7 +129,7 @@ window.addEventListener("message",function(s){
     };
 
     me.getTurtleExpression = function(_startpt) {
-        var name = "blk_turtle_exp_" + _startpt;
+        var name = "blk_turtle_exp__" + _startpt;
         var o = me.find(name);
         return o;
     };
@@ -414,9 +428,17 @@ window.addEventListener("message",function(s){
         switch (mode) {
             case 0:
                 me.paint = standardPaint;
+                var frame = this.getFrame();
+                    if (frame && typeof frame.removeHiddenObjectsFromProtocol === 'function') {
+                        frame.removeHiddenObjectsFromProtocol();  // Eliminar los objetos ocultos del protocolo
+                    }
                 break;
             case 1:
                 me.paint = standardPaint;
+                var frame = this.getFrame();
+                    if (frame && typeof frame.removeHiddenObjectsFromProtocol === 'function') {
+                        frame.removeHiddenObjectsFromProtocol();  // Eliminar los objetos ocultos del protocolo
+                    }
                 break;
             case 2:
                 me.paint = standardPaint;
@@ -488,6 +510,7 @@ window.addEventListener("message",function(s){
         AO[_obj.getName()] = _obj;
         AV[_obj.getName()] = me.getVarName(_obj.getName());
         V.push(_obj);
+        
     };
 
     // Quand on est sûr que le nom correspond au nom de variable :
@@ -521,6 +544,8 @@ window.addEventListener("message",function(s){
         varnames = [];
         canvas.getInterpreter().BLK_GLOB_DELETE();
         Expression.deleteAll();
+        try { $U.__suppressSpeakersUntil = Date.now() + 1500; } catch (_) {}
+
 		//para borrar las casillas de input creadas con la tortuga
         
 		inpsnames=canvas.getInputs;
@@ -539,6 +564,13 @@ window.addEventListener("message",function(s){
             }
         }
         canvas.setInputs({});
+        try { $U.clearCustomSpeakers(); } catch (_) {}
+
+        try { $U.__suppressMathLiveUntil = Date.now() + 1500; } catch (_) {}
+
+        
+        try { $U.deleteAllCustomMathLives(); } catch (e) { console.warn(e); }
+
         
     };
 
@@ -777,12 +809,12 @@ window.addEventListener("message",function(s){
             // console.log("old=" + _old + "  new=" + _new);
             var o = me.findVar(_new);
             if ((o) && (!o.blocks.isEmpty())) {
-                var old_exp = me.find("blk_turtle_exp_" + _old);
+                var old_exp = me.find("blk_turtle_exp__" + _old);
                 var old_lst = me.find("blk_turtle_list_" + _old);
                 // console.log("old=" + _old + "  new=" + _new);
                 // console.log("old_exp=" + old_exp + "  old_lst=" + old_lst);
                 if ((old_exp) && (old_lst)) {
-                    old_exp.setNameOnly("blk_turtle_exp_" + _new);
+                    old_exp.setNameOnly("blk_turtle_exp__" + _new);
                     old_lst.setNameOnly("blk_turtle_list_" + _new);
                 }
             }
@@ -828,11 +860,7 @@ window.addEventListener("message",function(s){
 
 
 
-    //    me.printAV = function() {
-    //        for (var nom_indice in AV) {
-    //            console.log(nom_indice + ":" + AV[nom_indice].getName());
-    //        }
-    //    }
+    
 
     var dependsOnRecursive = function(o, on) {
         o.Flag = true;
@@ -880,56 +908,139 @@ window.addEventListener("message",function(s){
         }
     };
 
-    me.safelyDelete = function(_o) {
-        _o = (_o.objToDelete) ? _o.objToDelete() : _o;
-        var deleteObjs = [];
-        var len = V.length;
-        for (var i = 0; i < len; i++) {
-            if (dependsOn(V[i], _o)) {
-                deleteObjs.push(V[i]);
+    
+    me.cleanupExclusiveMagnetLocks = function() {
+    // Recorre todos los objetos y limpia locks huérfanos en targets exclusivos (slotTargets / puntos)
+    for (var i = 0; i < V.length; i++) {
+        var o = V[i];
+        if (!o || !o.getMagnetSlotTargets || !o.isMagnetSlotsExclusive || !o.isMagnetSlotsExclusive()) continue;
+
+        var slots = o.getMagnetSlotTargets();
+        if (!slots || !slots.length) continue;
+
+        for (var k = 0; k < slots.length; k++) {
+        var s = slots[k];
+        if (!s || !s.getMagnetLockOwner || !s.unlockMagnet) continue;
+
+        var owner = s.getMagnetLockOwner();
+        if (!owner) continue;
+
+        // si el owner ya no está en la construcción, liberar
+        if (V.indexOf(owner) === -1) {
+            s.unlockMagnet(owner);
+        }
+        }
+    }
+    };
+    
+    me.safelyDelete = function (_o) {
+    _o = (_o && _o.objToDelete) ? _o.objToDelete() : _o;
+
+    if (_o && _o.isProtected?.()) {
+        $U.alert($L.blockly.restrictions_protect_msg1);
+        return [];
+    }
+
+    // ✅ 1) liberar locks del objeto principal (si es punto)
+    if (_o && _o.isInstanceType?.("point") && _o.releaseExclusiveMagnetLocks) {
+        _o.releaseExclusiveMagnetLocks();
+    }
+
+    // 2) recolectar dependientes
+    var deleteObjs = [];
+    var len = V.length;
+    for (var i = 0; i < len; i++) {
+        if (dependsOn(V[i], _o)) {
+        deleteObjs.push(V[i]);
+        }
+    }
+
+    // ✅ 3) borrar dependientes liberando locks si son puntos
+    for (var j = 0; j < deleteObjs.length; j++) {
+        var d = deleteObjs[j];
+        if (d && d.isInstanceType?.("point") && d.releaseExclusiveMagnetLocks) {
+        d.releaseExclusiveMagnetLocks();
+        }
+        me.remove(d);
+    }
+
+    // 4) tu lógica específica para puntos (inputs/speakers)
+    if (_o && _o.isInstanceType?.("point")) {
+        me.cleanupExclusiveMagnetLocks();
+        try {
+        const U = window.$U;
+        const pointName = String(_o.getName?.() || "");
+
+        if (pointName && U?.inputMeta) {
+            const idsToDelete = Object.keys(U.inputMeta).filter(
+            (id) => U.inputMeta[id]?.pointName === pointName
+            );
+
+            for (const inputId of idsToDelete) {
+            const meta = U.inputMeta[inputId];
+            const exprKey = meta?.exprKey;
+
+            // 1) borrar input DOM
+            const el = (U.inputs && U.inputs[inputId]) || document.getElementById(inputId);
+            if (el?.parentNode) el.parentNode.removeChild(el);
+
+            // 1b) (opcional) borrar datalist si existe
+            const listEl = document.getElementById(`${inputId}-list`);
+            if (listEl?.parentNode) listEl.parentNode.removeChild(listEl);
+
+            // 2) borrar expresión asociada (si es numérica)
+            // IMPORTANT: usar me.remove para evitar reentrar en safelyDelete (recursión).
+            if (exprKey) {
+                const exprObj = me.find(exprKey);
+                if (exprObj) me.remove(exprObj);
+            }
+
+            // 3) limpiar registries
+            if (U.inputs) delete U.inputs[inputId];
+            delete U.inputMeta[inputId];
+
+            // 4) limpiar cache del iframe
+            const iframe = document.querySelector('iframe[name="DGPad0"]');
+            iframe?.contentWindow?.postMessage({ action: "delete-input", id: inputId }, "*");
             }
         }
-        len = deleteObjs.length;
-        for (var i = 0; i < len; i++) {
-            me.remove(deleteObjs[i]);
+
+        // ✅ borrar altoparlantes asociados al punto
+        if (pointName && U?.speakerMeta) {
+            const speakerIdsToDelete = Object.keys(U.speakerMeta).filter(
+            (id) => U.speakerMeta[id]?.pointName === pointName
+            );
+
+            for (const speakerId of speakerIdsToDelete) {
+            // 1) borrar DOM
+            const el = (U.speakers && U.speakers[speakerId]) || document.getElementById(speakerId);
+            if (el?.parentNode) el.parentNode.removeChild(el);
+
+            // 2) limpiar registries
+            if (U.speakers) delete U.speakers[speakerId];
+            delete U.speakerMeta[speakerId];
+
+            // 3) opcional: limpiar cache iframe (si lo usas)
+            const iframe = document.querySelector('iframe[name="DGPad0"]');
+            iframe?.contentWindow?.postMessage({ action: "delete-speaker", id: speakerId }, "*");
+            }
+        }
+        if (pointName && U?.mathLiveMeta) {
+            const mathLiveIdsToDelete = Object.keys(U.mathLiveMeta).filter(
+                (id) => U.mathLiveMeta[id]?.pointName === pointName
+            );
+
+            for (const mathLiveId of mathLiveIdsToDelete) {
+                U.deleteCustomMathLiveById?.(mathLiveId);
+            }
+        }
+        } catch (e) {
+        console.warn("Error borrando casillas/expresiones del punto:", e);
         }
         
-        if (_o.isInstanceType("point")) {
-            var inputs = canvas.getInputs();
-            var inputEliminado = false; // Bandera para indicar si se ha eliminado algún input
-        
-            for (const key in inputs) {
-                if (inputs.hasOwnProperty(key)) {
-                    // Obtener el valor de la propiedad actual
-                    const input = inputs[key];
-        
-                    // Verificar si la propiedad "name" comienza con la cadena de prefijo
-                    if (input.name.startsWith("input" + _o.getName())||input.name.startsWith("inputNumber" + _o.getName())) {
-                        
-                        const inputId = input.id;
-                        const selector = `#${CSS.escape(inputId)}`;
-                        let inputPorBorrar = canvas.getDocObject().parentNode.querySelector(selector);
-                        
-                        if (inputPorBorrar) {
-                            inputPorBorrar.remove();
-                            inputPorBorrar=null;
-                        }
-        
-                        delete inputs[key];
-                        inputEliminado = true; // Indicar que se ha eliminado un input
-                      
-                    }
-                }
-            }
-        
-            if (inputEliminado) {
-                canvas.setInputs(inputs); // Actualizar los inputs en el canvas si se ha eliminado alguno
-            }
-        
-            
-        }
-        
-        return deleteObjs;
+    }
+
+    return deleteObjs;
     };
 
 
@@ -992,6 +1103,7 @@ window.addEventListener("message",function(s){
 
     me.addSelected = function(obj) {
         obj.setSelected(true);
+        
         selectedObjs.push(obj);
     };
 
@@ -1340,7 +1452,12 @@ window.addEventListener("message",function(s){
             var txt = "// Coordinates System :\n";
             txt += me.coordsSystem.getSource();
 			//comando para ocultar/mostrar barra de herramientas
-            if (hide_ctrl_panel){txt+="GetCanvas().ctrl_show(false);";};
+            if (hide_ctrl_panel) {
+                txt += "GetCanvas().ctrl_show(false);\n";
+                txt += "controlArrastre = Expression('controlArrastre', '', '', '', 'GetCanvas().setMode(0);0', '100', '100');\n";
+                txt += "STL(controlArrastre, 'c:#4c4d73;s:7.192434015274426;sn:true;l:-2;f:23;h:1;p:2;cL:281;cPT:YzojNzgwMDEzO3M6MTAuMjc0OTA1NzM2MTA2MzIzO2w6LTI7ZjoyOQ==');\n";
+            }
+            
 			//comando para habilitar/deshabilitar zoom
 			if (disablezoom) {txt+="\nenableZoom(false);\n";};
             txt += "\n\n// Geometry :\n";
@@ -1363,48 +1480,75 @@ window.addEventListener("message",function(s){
         return "";
     };
 	
-	me.getSource1 = function(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version) {
-        var len = V.length;
-        if (len > 0) {
-            me.doOrder(V);
-            if (ORG3D) {
-                for (var i = 0; i < len; i++) {
-                    if (V[i] === ORG3D) {
-                        V.splice(i, 1);
-                        V.unshift(ORG3D);
-                        break;
-                    }
+	
+me.getSource1 = function (hide_ctrl_panel, fixwidgets, fixdgscripts, disablezoom, local, version) {
+    var len = V.length;
+    if (len > 0) {
+        me.doOrder(V);
+        if (ORG3D) {
+            for (var i = 0; i < len; i++) {
+                if (V[i] === ORG3D) {
+                    V.splice(i, 1);
+                    V.unshift(ORG3D);
+                    break;
                 }
             }
-            var src = new SourceWriter(me);
-            for (var i = 0; i < len; i++) {
-                V[i].getSource(src);
-                V[i].getStyle(src);
-                V[i].getBlock(src);
-            }
-            var txt = "// Coordinates System :\n";
-            txt += me.coordsSystem.getSource1();
-			if (hide_ctrl_panel){txt+="GetCanvas().ctrl_show(false);";};
-			
-			if (disablezoom) {txt+="\nenableZoom(false);\n";};
-            txt += "\n\n// Geometry :\n";
-            txt += src.getGeom();
-            txt += "\n\n// Styles :\n";
-            txt += src.getStyle();
-            txt += me.coordsSystem.getStyle();
-            txt += canvas.getStyle();
-            if (src.getBlock() !== "") {
-                txt += "\n\n// Blockly :\n";
-                txt += src.getBlock();
-            };
-            txt += me.getInterpreter().BLK_GLOB_SRC();
-			if (fixdgscripts) {txt+='var bool=true;\n if ((!GetCanvas().hasOwnProperty("fix_expression"))||(GetCanvas()["fix_expression"]!==bool)){\n names=GetCanvas().getConstruction().getNames();\n for (var i = 0, len = names.length; i < len; i++) {\n obj=names[i];\n obj=GetCanvas().getConstruction().find(obj);\n 	isExp=((obj.getCode()==="expression")||(obj.getCode()==="blockly_button"));\n if (isExp) {\n if (!obj.hasOwnProperty("fix_utility_dragTo")) {\n 				obj["fix_utility_dragTo"]=obj["dragTo"];\n }\n if (bool) {\n obj["dragTo"]=function(){};\n }\n else {obj["dragTo"]=blockly_var_obj["fix_utility_dragTo"]}\n }\n }\n };\n GetCanvas()["fix_expression"]=bool;';};
-
-            //            if (me.isAxisUsed()) txt+=me.coordsSystem.getStyle();
-            return txt;
         }
-        return "";
-    };
+        var src = new SourceWriter(me);
+        for (var i = 0; i < len; i++) {
+            V[i].getSource(src);
+            V[i].getStyle(src);
+            V[i].getBlock(src);
+        }
+        var txt = "// Coordinates System :\n";
+        // txt += me.coordsSystem.getSource1();
+        txt += me.coordsSystem.getSource();
+        if (hide_ctrl_panel) {
+            txt += "GetCanvas().ctrl_show(false);\n";
+            txt += "controlArrastre = Expression('controlArrastre', '', '', '', 'GetCanvas().setMode(0);0', '100', '100');\n";
+            txt += "STL(controlArrastre, 'c:#4c4d73;s:7.192434015274426;sn:true;l:-2;f:23;h:1;p:2;cL:281;cPT:YzojNzgwMDEzO3M6MTAuMjc0OTA1NzM2MTA2MzIzO2w6LTI7ZjoyOQ==');\n";
+        }
+        if (disablezoom) { txt += "\nenableZoom(false);\n"; }
+        txt += "\n\n// Geometry :\n";
+        txt += src.getGeom();
+        txt += "\n\n// Styles :\n";
+        txt += src.getStyle();
+        txt += me.coordsSystem.getStyle();
+        txt += canvas.getStyle();
+        if (src.getBlock() !== "") {
+            txt += "\n\n// Blockly :\n";
+            txt += src.getBlock();
+        }
+        txt += me.getInterpreter().BLK_GLOB_SRC();
+
+        if (fixdgscripts) {
+            txt += 'var bool=true;\n if ((!GetCanvas().hasOwnProperty("fix_expression"))||(GetCanvas()["fix_expression"]!==bool)){\n names=GetCanvas().getConstruction().getNames();\n for (var i = 0, len = names.length; i < len; i++) {\n obj=names[i];\n obj=GetCanvas().getConstruction().find(obj);\n \tisExp=((obj.getCode()==="expression")||(obj.getCode()==="blockly_button"));\n if (isExp) {\n if (!obj.hasOwnProperty("fix_utility_dragTo")) {\n \t\t\t\tobj["fix_utility_dragTo"]=obj["dragTo"];\n }\n if (bool) {\n obj["dragTo"]=function(){};\n }\n else {obj["dragTo"]=blockly_var_obj["fix_utility_dragTo"]}\n }\n }\n };\n GetCanvas()["fix_expression"]=bool;';
+        }
+
+        // --- PATCH: casillas numéricas responsivas (se activa con fixwidgets) ---
+        if (fixwidgets) {
+            txt += "\n\n// Responsive scaling for absolute-positioned numeric inputs\n";
+            txt += "(function(){\n";
+            txt += "  function onReady(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }\n";
+            txt += "  onReady(function(){\n";
+            txt += "    var canvas = document.querySelector('canvas'); if(!canvas) return;\n";
+            txt += "    var baseW = canvas.width || 1024, baseH = canvas.height || 768; // tamaño de diseño del lienzo\n";
+            txt += "    function scale(){ var r = canvas.getBoundingClientRect(); var sx = r.width / baseW; var sy = r.height / baseH; return Math.min(sx||1, sy||1); }\n";
+            txt += "    function pick(){ return Array.prototype.slice.call(document.querySelectorAll('input,textarea')).filter(function(el){ return getComputedStyle(el).position==='absolute'; }); }\n";
+            txt += "    function stash(el, sc){ if(el.dataset._dg_base) return; var cs = getComputedStyle(el); var rect = el.getBoundingClientRect(); var pr = (el.offsetParent||document.body).getBoundingClientRect(); var left = isFinite(parseFloat(cs.left)) ? parseFloat(cs.left) : (rect.left - pr.left); var top = isFinite(parseFloat(cs.top)) ? parseFloat(cs.top) : (rect.top - pr.top); el.dataset._dg_b_left=(left/sc).toFixed(4); el.dataset._dg_b_top=(top/sc).toFixed(4); el.dataset._dg_b_width=(parseFloat(cs.width)/sc).toFixed(4); el.dataset._dg_b_height=(parseFloat(cs.height)/sc).toFixed(4); el.dataset._dg_b_font=(parseFloat(cs.fontSize)/sc).toFixed(4); el.dataset._dg_b_radius=((parseFloat(cs.borderRadius)||0)/sc).toFixed(4); el.dataset._dg_b_pad=((parseFloat(cs.paddingLeft)||0)/sc).toFixed(4); el.dataset._dg_base='1'; }\n";
+            txt += "    function apply(el, sc){ var minFont=16; var b=function(k){ return parseFloat(el.dataset[k]||'0'); }; el.style.left=(b('_dg_b_left')*sc)+'px'; el.style.top=(b('_dg_b_top')*sc)+'px'; el.style.width=(b('_dg_b_width')*sc)+'px'; el.style.height=(b('_dg_b_height')*sc)+'px'; el.style.fontSize=Math.max(minFont,(b('_dg_b_font')*sc))+'px'; el.style.borderRadius=(b('_dg_b_radius')*sc)+'px'; el.style.padding=(b('_dg_b_pad')*sc)+'px'; el.style.lineHeight='normal'; el.style.boxSizing='border-box'; if(!el.style.textAlign) el.style.textAlign='center'; }\n";
+            txt += "    function sync(){ var sc = scale(); pick().forEach(function(el){ if(!el.dataset._dg_base) stash(el, sc); apply(el, sc); }); }\n";
+            txt += "    window.addEventListener('resize', sync, {passive:true}); window.addEventListener('orientationchange', sync, {passive:true}); if(document.fonts && document.fonts.ready){ document.fonts.ready.then(sync).catch(sync); }\n";
+            txt += "    new MutationObserver(sync).observe(document.body, {childList:true, subtree:true});\n";
+            txt += "    sync();\n";
+            txt += "  });\n";
+            txt += "})();\n";
+        }
+        return txt;
+    }
+    return "";
+};
+
 
 
 
@@ -1794,8 +1938,7 @@ window.addEventListener("message",function(s){
         }
         canvas.macrosManager.refreshConstructionPanel(p, t, f);
 
-        //        console.log("*****************");
-        //        console.log(src.getGeom());
+        
 
     };
 

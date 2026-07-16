@@ -4,6 +4,8 @@
 function IntersectionConstructor() {
     $U.extend(this, new ObjectConstructor()); //Héritage
 
+    
+
     this.getCode = function() {
         return "circle_int";
     };
@@ -14,7 +16,7 @@ function IntersectionConstructor() {
     }
 
     this.getInitials = function() {
-        return ["line,circle,circle3pts3D"];
+        return ["line,circle,circle3pts3D,function"];
     };
 
     this.isLastObject = function() {
@@ -36,16 +38,33 @@ function IntersectionConstructor() {
         //NEED TO ADD OBJECT
     };
 
-    this.selectCreatePoint = function(zc, ev) {
-        this.isSelectCreatePoint = true;
-        var cn = zc.getConstruction();
-        var selection = cn.getIndicated();
-        var len = selection.length;
-        
-        if (len > 0 && !selection[0].isInstanceType("point")) {
-            this.addC(selection[0]);
-        }        
+    var _isLine = o => o && o.isInstanceType && o.isInstanceType('line');
+    var _isCircle = o => o && ((o.isInstanceType && o.isInstanceType('circle')) || (o.getR && o.getP1));
+    var _isFunctionObj = o => o && o.isInstanceType && o.isInstanceType('function');
+    this._isAcceptable = o => _isLine(o) || _isCircle(o) || _isFunctionObj(o);
+
+    this.selectCreatePoint = function (zc, ev) {
+    this.isSelectCreatePoint = true;
+    var sel = zc.getConstruction().getIndicated();
+    if (sel.length > 0) {
+        var o = sel[0];
+        if ((!o.isInstanceType || !o.isInstanceType('point')) && this._isAcceptable(o)) {
+        this.addC(o);
+        }
+    }
     };
+
+
+    // this.selectCreatePoint = function(zc, ev) {
+    //     this.isSelectCreatePoint = true;
+    //     var cn = zc.getConstruction();
+    //     var selection = cn.getIndicated();
+    //     var len = selection.length;
+        
+    //     if (len > 0 && !selection[0].isInstanceType("point")) {
+    //         this.addC(selection[0]);
+    //     }        
+    // };
 
     this.preview = function(ev, zc) {
        

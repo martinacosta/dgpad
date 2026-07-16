@@ -4,7 +4,7 @@
 //}
 
 
-CanvasRenderingContext2D.prototype.arc2 = function(x, y, r, a, b, c) {
+CanvasRenderingContext2D.prototype.arc2 = function (x, y, r, a, b, c) {
     // if (r < 1128406) {
     if (r < 1000000) {
         this.arc(x, y, r, a, b, c);
@@ -47,7 +47,9 @@ CanvasRenderingContext2D.prototype.arc2 = function(x, y, r, a, b, c) {
 
 
 var $BODY_SCRIPT = document.getElementsByTagName("script");
+
 $BODY_SCRIPT = $BODY_SCRIPT[$BODY_SCRIPT.length - 1];
+
 
 if (!$APP_PATH) {
     // Si le script est le premier script DGPad trouvé dans la page :
@@ -55,14 +57,14 @@ if (!$APP_PATH) {
     // Désactive toutes les alertes sur cette fenêtre pour éviter que l'uiwebview
     // soit polluée par une alerte "popup" de filepicker :
     window.$ALERT = window.alert;
-    window.alert = function() {}
-        // Indique si DGPad s'ouvre dans l'application iOS/Android ou bien dans le navigateur :
+    window.alert = function () { }
+    // Indique si DGPad s'ouvre dans l'application iOS/Android ou bien dans le navigateur :
     window.$APPLICATION = false;
     window.$iOS_APPLICATION = false;
     try {
         window.$APPLICATION = (window.parent && window.parent.$APPLICATION);
         window.$iOS_APPLICATION = (window.parent && window.parent.$iOS_APPLICATION);
-    } catch (er) {}
+    } catch (er) { }
 
     // Only for standard android keyboard :
     window.$STANDARD_KBD = {};
@@ -85,7 +87,7 @@ if (!$APP_PATH) {
 
     var $INCLUDED_FILES = [];
 
-    var $HEADSCRIPT = function(_path) {
+    var $HEADSCRIPT = function (_path) {
         var script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = _path;
@@ -95,7 +97,7 @@ if (!$APP_PATH) {
     }
 
     // Uniquement utilisé en mode developpement :
-    var $INCLUDE = function(_fname, _external) {
+    var $INCLUDE = function (_fname, _external) {
         var purename = _fname;
         var files = "," + $INCLUDED_FILES.join(",") + ",";
         if (files.indexOf("," + _fname + ",") > -1) {
@@ -121,7 +123,7 @@ if (!$APP_PATH) {
     };
 
 
-    var $LOADMAIN = function() {
+    var $LOADMAIN = function () {
         $HEADSCRIPT($APP_PATH + "Main.js");
     }
 
@@ -129,7 +131,7 @@ if (!$APP_PATH) {
     // le reste (Main.js) doit donc attendre que ces fichiers soient
     // interprétés. _proc est la fonction appelée lorsque ces scripts
     // sont chargés (onload) :
-    var $LOADLANGUAGE = function() {
+    var $LOADLANGUAGE = function () {
         // Charger le module de langue standard (anglais) :
         var scp = $HEADSCRIPT($APP_PATH + "NotPacked/lang/LocalStrings.js");
 
@@ -145,10 +147,11 @@ if (!$APP_PATH) {
         $HEADSCRIPT($APP_PATH + "NotPacked/lang/LocalStrings_" + language_Code + ".js");
     };
 
-    
 
-    var $MAIN_INIT = function() {
+
+    var $MAIN_INIT = function () {
         var tags = document.getElementsByTagName("canvas");
+
         var Elts = [];
         for (var i = 0, len = tags.length; i < len; i++) {
             Elts.push(tags[i]);
@@ -163,14 +166,14 @@ if (!$APP_PATH) {
         }
     };
 
-    var $ECHOSRC = function() {
+    var $ECHOSRC = function () {
         var k = 0;
         for (var i = 0, len = $INCLUDED_FILES.length; i < len; i++) {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", $APP_PATH + $INCLUDED_FILES[i], true);
             xhr.send();
             xhr.order = i;
-            xhr.onload = function(e) {
+            xhr.onload = function (e) {
                 k++;
                 $INCLUDED_FILES[e.target.order] = e.target.responseText;
                 if (k === $INCLUDED_FILES.length) {
@@ -181,7 +184,7 @@ if (!$APP_PATH) {
         }
     };
 
-    var $GETCSS = function(ruleName, deleteFlag) {
+    var $GETCSS = function (ruleName, deleteFlag) {
         ruleName = ruleName.toLowerCase();
         if (document.styleSheets) {
             for (var i = 0; i < document.styleSheets.length; i++) {
@@ -215,7 +218,7 @@ if (!$APP_PATH) {
         return false;
     };
 
-    var $SCALECSS = function(_r, _p) {
+    var $SCALECSS = function (_r, _p) {
         var c = $GETCSS(_r);
         if (c) {
             var props = _p.split(",");
@@ -228,10 +231,10 @@ if (!$APP_PATH) {
 
 
     // Seulement pour l'application Androïd : le java doit gérer les mouse et touch events.
-    (function() {
+    (function () {
         if ($STOP_MOUSE_EVENTS) {
             var orig_addEventListener = Element.prototype.addEventListener;
-            Element.prototype.addEventListener = function(type, listener, useCapture) {
+            Element.prototype.addEventListener = function (type, listener, useCapture) {
                 switch (type) {
                     case "mousedown":
                         break;
@@ -246,7 +249,7 @@ if (!$APP_PATH) {
         }
     }());
 
-    (function() {
+    (function () {
         var head = document.getElementsByTagName('head')[0];
         var style = document.createElement('link');
         style.rel = "stylesheet";
@@ -278,7 +281,7 @@ if (!$APP_PATH) {
         //        img.src=style.href;
         $LOADLANGUAGE();
         $LOADMAIN();
-        
+
         var standalone = window.navigator.standalone;
         var userAgent = window.navigator.userAgent.toLowerCase();
         var safari = /safari/.test(userAgent);
@@ -302,25 +305,21 @@ if (!$APP_PATH) {
         Object.touchpad = true;
     }
 
-    String.prototype.startsWith = function(str) {
+    String.prototype.startsWith = function (str) {
         return (this.indexOf(str) === 0);
     };
 
-    window.onload = function() {
+    window.onload = function () {
         $MAIN_INIT();
         if ($ECHO_SOURCE) {
             $ECHOSRC();
         }
-        //        for (var key in window) {
-        //            if (!$NAMESPACE.hasOwnProperty(key)) {
-        //                console.log(key);
-        //            }
-        //        }
+        
     };
 }
 
 // Création du canvas associé :
-(function() {
+(function () {
 
 
     // Inicio Prueba Google Analytics
@@ -329,7 +328,7 @@ if (!$APP_PATH) {
     document.head.appendChild(imported);
 
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
     gtag('config', 'G-5J95Z4Y54W');
@@ -372,6 +371,7 @@ if (!$APP_PATH) {
         canvas.setAttribute("data-googleid", $BODY_SCRIPT.getAttribute("data-googleid"));
     }
     // MEAG start para diferenciar version profesores/estudiantes
+
     if ($BODY_SCRIPT.hasAttribute("data-version")) {
         canvas.setAttribute("data-version", $BODY_SCRIPT.getAttribute("data-version"));
     }
@@ -384,3 +384,653 @@ if (!$APP_PATH) {
     $BODY_SCRIPT.parentNode.insertBefore(canvas, $BODY_SCRIPT);
 
 })();
+
+window.addEventListener("message", function (e) {
+    
+    const message = e.data;
+   
+
+    switch (message.action) {
+        case "get_SVG":
+            parent.postMessage(window.$CANVAS.exportSVG(), "*");
+            break;
+
+        case "get_PNG":
+            parent.postMessage(window.$CANVAS.exportPNG(), "*");
+            break;
+
+        case "get_Source":
+            parent.postMessage(window.$CANVAS.getSource(), "*");
+            break;
+
+        case "get_Original_Dims":
+            parent.postMessage(window.$CANVAS.getConstruction().getOriginalDims(), "*");
+            break;
+
+        case "set_Full_Screen":
+            window.$CANVAS.setFullScreen();
+            break;
+
+        case "repaint":
+            window.$CANVAS.paint();
+            break;
+
+        // case "dgpad-alert": {
+        //     const cfg = message.content;
+        //     const texto = String(cfg?.text ?? "Mensaje");
+        //     const font = cfg?.font ?? "Arial";
+        //     const size = cfg?.size ?? "16";
+        //     const style = cfg?.style ?? "normal";
+        //     const align = cfg?.align ?? "center";
+
+        //     $U.alert(texto, 350, 165, font, size, style, align);
+        //     break;
+        // }
+
+        // en DGPad: case "dgpad-alert"
+        case "dgpad-alert": {
+        const cfg = message.content;
+        const texto = String(cfg?.text ?? "Mensaje");
+        const font = cfg?.font ?? "Arial";
+        const size = cfg?.size ?? "16";
+        const style = cfg?.style ?? "normal";
+        const align = cfg?.align ?? "center";
+        const speaker = !!cfg?.speaker; // ✅ nuevo
+
+        $U.alert(texto, 350, 165, font, size, style, align, speaker); // ✅ nuevo param
+        break;
+        }
+
+
+        
+        case "dgpad-confirm": {
+            
+        const {
+            message: msg,
+            yes,
+            no,
+            font: dlgFont,
+            size: dlgSize,
+            style: dlgStyle,
+            align: dlgAlign,
+            varName,
+            speaker // ✅ nuevo
+        } = message.content || {};
+
+        $U.confirm(msg, 350, 165, dlgFont, dlgSize, dlgStyle, dlgAlign, yes, no, !!speaker) // ✅ nuevo arg
+            .then((result) => {
+            const iframe = document.querySelector('iframe[name=DGPad0]');
+            iframe.contentWindow.postMessage({
+                action: "set-global-variable",
+                name: varName,
+                value: result
+            }, "*");
+            });
+        break;
+        }
+
+
+        case "create-custom-input": {
+            
+
+            const inputId = message.id;
+            
+            const x = window.$CANVAS.getConstruction().coordsSystem.px(message.xVal)+3;
+            
+            
+            const y = window.$CANVAS.getConstruction().coordsSystem.py(message.yVal) - message.fontSize / 2;
+            
+
+            
+
+            if (!$U.inputs) $U.inputs = {};
+            const inputs = $U.inputs || {};
+            if (!inputs[inputId]) {
+                $U.createCustomInput(inputId, x, y, message.width, message.fs, message.fontSize);
+                $U.inputs[inputId] = document.getElementById(inputId);
+            } else {
+                const inputEl = inputs[inputId];
+                const escala = $U.escala || 1; // o la que realmente uses
+                inputEl.style.width = `${message.width * escala}px`;
+                inputEl.style.fontSize = `${message.fontSize * escala}px`;
+                
+                
+                // inputEl.style.verticalAlign = "middle";
+                inputEl.style.left = `${x}px`;
+                inputEl.style.top = `${y-12}px`;
+                
+                
+                const paddingY = 6;
+                let totalHeight = message.fontSize + paddingY;
+                inputEl.style.height = `${totalHeight}px`;
+            }
+            // Necesario para tener un id único y un nombre comprensible y al renombrar los puntos mantener el nombre
+            if (!$U.inputMeta) $U.inputMeta = Object.create(null);
+            $U.inputMeta[inputId] = { pointName: String(message.pointName || ""), n: Number(message.n) || 0 };
+            const inputEl = document.getElementById(inputId);
+            if (inputEl && !inputEl.dataset.listenerAdded) {
+                inputEl.addEventListener("input", () => {
+                    const iframe = document.querySelector("iframe[name=DGPad0]");
+                    iframe?.contentWindow?.postMessage({
+                        action: "update-input-value",
+                        id: inputEl.id,
+                        value: inputEl.value
+                    }, "*");
+                });
+                inputEl.dataset.listenerAdded = "true";
+            }
+
+            break;
+        }
+
+        case "move-custom-input": {
+            const inputId = message.id;
+            const inputEl =
+                ($U.inputs && $U.inputs[inputId]) ||
+                document.getElementById(inputId);
+
+            if (!inputEl) break;
+
+            const x = window.$CANVAS.getConstruction().coordsSystem.px(message.xVal) + 3;
+            const y = window.$CANVAS.getConstruction().coordsSystem.py(message.yVal);
+
+            const width = inputEl.offsetWidth || parseFloat(inputEl.style.width) || 50;
+            const height = inputEl.offsetHeight || parseFloat(inputEl.style.height) || 31;
+
+            inputEl.style.left = (x - width / 2) + "px";
+            inputEl.style.top = (y - height / 2) + "px";
+
+            break;
+        }
+
+        case "delete-input": {
+            
+
+
+            const target = $U.inputs?.[message.id];
+            if (target) {
+                target.remove(); // Elimina del DOM
+                delete $U.inputs[message.id]; // Elimina del registro interno
+            } else {
+                console.warn("⚠️ No se encontró la casilla a eliminar:", message.id);
+            }
+            
+
+            break;
+        }
+
+
+        case "toggle-custom-input-visibility": {
+            const el = $U.inputs?.[message.id];
+            if (el) {
+                el.style.display = message.visible ? "block" : "none";
+            } else {
+                console.warn("⚠️ Casilla no encontrada:", message.id);
+            }
+            break;
+        }
+
+        
+
+        case "clear-custom-input": {
+            const targetInput = $U.inputs?.[message.id];
+            if (targetInput) {
+                targetInput.value = "";
+        
+                // 🔄 Enviar valor actualizado (vacío) al DGPad interno
+                const iframe = document.querySelector("iframe[name=DGPad0]");
+                iframe?.contentWindow?.postMessage({
+                    action: "update-input-value",
+                    id: targetInput.id,
+                    value: ""
+                }, "*");
+            } else {
+                console.warn("⚠️ Casilla no encontrada:", message.id);
+            }
+            break;
+        }
+        
+
+        
+        
+        case "create-custom-number-input": {
+        const inputId = String(message.id || "");
+        if (!inputId) break;
+
+        // Ensure registries
+        if (!window.$U) window.$U = {};
+        if (!$U.inputs) $U.inputs = {};
+        if (!$U.inputMeta) $U.inputMeta = Object.create(null);
+
+        const inputs = $U.inputs;
+
+        // Coords (px)
+        const cs = window.$CANVAS.getConstruction().coordsSystem;
+        const x = cs.px(message.xVal) + 3;
+        const y = cs.py(message.yVal) - (Number(message.fontSize) || 25) / 2;
+
+        // --- Create/update input (prefer idempotent helper for consistent scale) ---
+        // Your signature: (id, x, y, width, fontSize, min, max, step)
+        $U.createCustomNumberInput(
+            inputId,
+            x,
+            y,
+            Number(message.width) || 50,
+            Number(message.fontSize) || 25,
+            message.min,
+            message.max,
+            message.step
+        );
+
+        // Refresh stored element reference
+        inputs[inputId] = document.getElementById(inputId);
+        const inputEl = inputs[inputId];
+        if (!inputEl) break;
+
+        // Optional: if you still need the vertical tweak
+        inputEl.style.top = `${y - 12}px`;
+        inputEl.style.left = `${x}px`;
+
+        // --- Expression internal key + visible text ---
+        const safeId = inputId.replace(/[^a-zA-Z0-9_]/g, "_");
+        const exprKey = `E_num_${safeId}`; // internal stable name
+        const pointName = String(message.pointName || "");
+        const n = Number(message.n) || 0;
+        const exprText = `ValorListaNumeros${pointName} ${n}=`; // visible text
+
+        // --- Meta (always) ---
+        $U.inputMeta[inputId] = { pointName, n, type: "number", exprKey };
+
+        // --- Ensure ExpressionObject exists + update its visible text ---
+        try {
+            const construction = window.$CANVAS.getConstruction();
+            let exprObj = construction.find(exprKey);
+
+            if (!exprObj) {
+            const initialValue = parseFloat(inputEl.value) || 0;
+            exprObj = new ExpressionObject(
+                construction,
+                exprKey,     // internal name
+                exprText,    // visible text (T)
+                "", "",      // other text fields
+                String(initialValue),
+                x + (Number(message.width) || 50) + 10,
+                y
+            );
+            construction.add(exprObj);
+            } else if (typeof exprObj.setT === "function") {
+            exprObj.setT(exprText);
+            }
+
+            exprObj.setShowName?.(true);
+            exprObj.compute?.();
+        } catch (e) {
+            console.warn("No se pudo crear/actualizar ExpressionObject:", e);
+        }
+
+        // --- Listener (once) -> updates iframe cache + expression value ---
+        if (!inputEl.dataset.listenerAdded) {
+            inputEl.addEventListener("input", () => {
+            const iframe = document.querySelector("iframe[name=DGPad0]");
+            iframe?.contentWindow?.postMessage(
+                {
+                action: "update-input-value",
+                id: inputEl.id,
+                value: inputEl.value,
+                expression: exprKey,
+                },
+                "*"
+            );
+            });
+            inputEl.dataset.listenerAdded = "true";
+        }
+
+        break;
+        }
+
+
+
+            
+    
+
+      
+      
+  
+      case "custom-input-request": {
+        const inputEl = document.getElementById(message.id);
+        const value = inputEl?.value || "";
+        const iframe = document.querySelector("iframe[name=DGPad0]");
+
+        iframe.contentWindow.postMessage({
+            action: "custom-input-response",
+            id: message.id,
+            value: value
+        }, "*");
+        break;
+    }
+  
+      case "get-input-list": {
+        const response = Object.entries($U.inputs || {}).map(([fullKey, obj]) => {
+            const label = fullKey.split("-")[0];
+            return {
+                id: obj.id,
+                label
+            };
+        });
+
+        const sandbox = document.querySelector("iframe[name=DGPad0]");
+        sandbox?.contentWindow?.postMessage({
+            action: "input-list-response",
+            inputs: response
+        }, "*");
+        break;
+    }
+
+    case "create-cronometro": {
+        
+    const id = message.id;
+    const x = window.$CANVAS.getConstruction().coordsSystem.px(message.xVal);
+    const y = window.$CANVAS.getConstruction().coordsSystem.py(message.yVal);
+    
+    $U.createCustomCronometro(id, x, y, message.fontSize);
+    break;
+    }
+
+    
+    case "cronometro-start":{
+            
+            const id = message.id;
+            const action = message.action.split("-")[1];
+            const cron = $U.cronometros?.[id];
+
+            if (cron && typeof cron[action] === "function") {
+                cron[action]();
+            } else {
+                console.warn(`⚠️ Acción '${action}' no disponible para el cronómetro '${id}'`);
+            }
+            break;
+        }
+        case "cronometro-stop":{
+            
+            const id = message.id;
+            const action = message.action.split("-")[1];
+            const cron = $U.cronometros?.[id];
+
+            if (cron && typeof cron[action] === "function") {
+                cron[action]();
+            } else {
+                console.warn(`⚠️ Acción '${action}' no disponible para el cronómetro '${id}'`);
+            }
+            break;
+        }
+        case "cronometro-reset":{
+            
+            const id = message.id;
+            const action = message.action.split("-")[1];
+            const cron = $U.cronometros?.[id];
+
+            if (cron && typeof cron[action] === "function") {
+                cron[action]();
+            } else {
+                console.warn(`⚠️ Acción '${action}' no disponible para el cronómetro '${id}'`);
+            }
+            break;
+        }
+        case "cronometro-show":{
+            
+            const id = message.id;
+            const action = message.action.split("-")[1];
+            const cron = $U.cronometros?.[id];
+
+            if (cron && typeof cron[action] === "function") {
+                cron[action]();
+            } else {
+                console.warn(`⚠️ Acción '${action}' no disponible para el cronómetro '${id}'`);
+            }
+            break;
+        }
+        case "cronometro-hide": {
+            
+            const id = message.id;
+            const action = message.action.split("-")[1];
+            const cron = $U.cronometros?.[id];
+
+            if (cron && typeof cron[action] === "function") {
+                cron[action]();
+            } else {
+                console.warn(`⚠️ Acción '${action}' no disponible para el cronómetro '${id}'`);
+            }
+            break;
+        }
+
+        
+
+            case "create-custom-speaker": {
+            const speakerId = String(message.id || "");
+            if (!speakerId) break;
+
+            const coords = window.$CANVAS.getConstruction().coordsSystem;
+            const x = coords.px(message.xVal) + 3;
+            const size = Number(message.size) || 56;
+            const y = coords.py(message.yVal) - (size / 2);
+
+            const el = $U.createCustomSpeaker(speakerId, x, y, size);
+            if (!el) break;
+
+            el.__ttsState = { text: message.text, opts: message.opts || {} };
+
+            if (!$U.speakerMeta) $U.speakerMeta = Object.create(null);
+            $U.speakerMeta[speakerId] = {
+                pointName: String(message.pointName || ""),
+                n: Number(message.n) || 0
+            };
+
+            break;
+            }
+
+            case "toggle-custom-speaker-visibility": {
+                const el = $U.speakers?.[message.id];
+                if (el) {
+                    // "flex" porque tu speaker usa display:flex en createCustomSpeaker
+                    el.style.display = message.visible ? "flex" : "none";
+                } else {
+                    console.warn("⚠️ Altoparlante no encontrado:", message.id);
+                }
+                break;
+                }
+
+
+            // (opcional) alias si ya lo usaste en otros lados:
+            case "set-custom-speaker-visible": {
+            __setSpeakerVisible(message.id, message.visible);
+            break;
+            }
+
+            case "remove-custom-speaker": {
+            const id = String(message.id || "");
+            $U.removeCustomSpeaker(id);
+            if ($U.speakerMeta) delete $U.speakerMeta[id];
+            break;
+            }
+
+            case "delete-speaker": {
+                const id = String(message.id || message.content?.id || "");
+                if (!id) break;
+
+                const el = document.getElementById(id);
+                if (el) el.remove();
+
+                if ($U?.speakers) delete $U.speakers[id];
+                break;
+            }
+
+            case "clear-speakers": {
+                $U.clearCustomSpeakers();
+                break;
+            }
+
+
+        case "dgpad-tts-speak": {
+            const cfg = message.content || {};
+            const text = String(cfg.text ?? "").replace(/\s+/g, " ").trim();
+            if (!text) break;
+
+            const lang = cfg.lang || "es-CO";
+            const rate = Number(cfg.rate ?? 1);
+            const pitch = Number(cfg.pitch ?? 1);
+            const volume = Number(cfg.volume ?? 1);
+
+            if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) break;
+
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = lang;
+            u.rate = rate;
+            u.pitch = pitch;
+            u.volume = volume;
+
+            window.speechSynthesis.speak(u);
+            break;
+            }
+
+        
+        
+
+        case "create-mathlive": {
+            if ($U.__suppressMathLiveUntil && Date.now() < $U.__suppressMathLiveUntil && !$U.__loadingFile) {
+                console.log("[dgpad] CREATE mathlive suprimido =", message.id);
+                break;
+            }
+
+            if ($U.__loadingFile) {
+                console.log("[dgpad] CREATE mathlive permitido durante carga =", message.id);
+            } else {
+                console.log("[dgpad] CREATE mathlive", message.id, message);
+            }
+
+            const fieldId = String(message.id || "");
+            if (!fieldId) break;
+
+    
+
+
+            function extractMathLivePrompts(latex) {
+                var text = String(latex || "");
+                var re = /\\placeholder\[([^\]]+)\]/g;
+                var prompts = [];
+                var m;
+
+                while ((m = re.exec(text)) !== null) {
+                    if (prompts.indexOf(m[1]) === -1) {
+                        prompts.push(m[1]);
+                    }
+                }
+
+                return prompts;
+            }
+
+            const prompts = extractMathLivePrompts(message.latex);
+
+            const x = window.$CANVAS.getConstruction().coordsSystem.px(message.xVal) + 3;
+            const y = window.$CANVAS.getConstruction().coordsSystem.py(message.yVal) - (Number(message.height) || 40) / 2;
+
+            $U.createCustomMathLive(
+                fieldId,
+                x,
+                y,
+                Number(message.width) || 120,
+                Number(message.height) || 40,
+                String(message.latex || ""),
+                {
+                    readOnly: message.readOnly !== false,
+                    virtualKeyboardMode: "manual",
+                    promptNames: prompts,
+                    colorIndex: Number(message.colorIndex) || 7,
+                    fontFamily: String(message.fontFamily || "Arial"),
+                    fontSize: Number(message.fontSize) || 28,
+                    fontStyle: String(message.fontStyle || "normal"),
+                    fontAlign: String(message.fontAlign || "izquierda"),
+                    visible: message.visible !== false
+                }
+            );
+
+            $U.mathLiveMeta[fieldId] = {
+                pointName: String(message.pointName || ""),
+                n: Number(message.n) || 0,
+                prompts: prompts.slice(),
+                latex: String(message.latex || ""),
+                x: x,
+                y: y,
+                width: Number(message.width) || 120,
+                height: Number(message.height) || 40,
+                readOnly: message.readOnly !== false,
+                colorIndex: Number(message.colorIndex) || 7,
+                fontFamily: String(message.fontFamily || "Arial"),
+                fontSize: Number(message.fontSize) || 28,
+                fontStyle: String(message.fontStyle || "normal"),
+                fontAlign: String(message.fontAlign || "izquierda"),
+                visible: message.visible !== false
+            };
+
+            break;
+        }
+
+        case "delete-mathlive": {
+            $U.deleteCustomMathLiveById(message.id);
+            break;
+        }
+
+        case "clear-mathlive": {
+            $U.resetCustomMathLive(message.id);
+            break;
+        }
+
+        case "show-mathlive": {
+            $U.showCustomMathLive(message.id);
+            break;
+        }
+
+        case "hide-mathlive": {
+            $U.hideCustomMathLive(message.id);
+            break;
+        }
+
+        case "begin-file-load": {
+            $U.__loadingFile = true;
+            console.log("[dgpad] begin-file-load");
+            break;
+        }
+
+        case "end-file-load": {
+            $U.__loadingFile = false;
+            console.log("[dgpad] end-file-load");
+
+            setTimeout(function () {
+                $U.refreshAllCustomMathLives();
+            }, 200);
+
+            break;
+        }
+
+      case "set_Source":
+        if (message.content && typeof message.content === "string") {
+            try {
+                window.$CANVAS.load64(message.content);
+                window.$CANVAS.paint();
+            } catch (err) {
+                console.error("❌ Error en set_Source con load64:", err);
+            }
+        }
+        break;
+    }
+    });
+
+  
+
+
+
+
+
+
+

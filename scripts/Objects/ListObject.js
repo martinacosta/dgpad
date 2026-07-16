@@ -20,7 +20,240 @@ function ListObject(_construction, _name, _EXP) {
         return arrow;
     }
 
-    // me.setArrow(16,5);
+    
+    
+
+    
+
+    // para efecto de repulsión
+
+    
+
+    var segSize = 0; // Taille des segments
+    var shape = 0; // Apparence des points
+
+    // -----------------------------------------------
+    // Exclusive targets per slot (VirtualPointObject)
+    // -----------------------------------------------
+
+    // IMPORTANT: segSize se usa aquí, así que decláralo antes en el archivo
+    // var segSize = -1;  <-- muévelo arriba del bloque si aún no lo hiciste
+
+    var slotTargets = []; // VirtualPointObject[] (1 por posición)
+    var magnetSlotsExclusive = false;
+
+
+    
+
+
+
+    function isDiscretePointList() {
+    return (segSize === 0);
+    }
+
+    function isFiniteNumber(n) {
+    return (typeof n === "number") && isFinite(n);
+    }
+
+    /**
+     * Sincroniza targets con Ptab (1 por slot).
+     */
+    function syncSlotTargets() {
+        if (!isDiscretePointList()) {
+            slotTargets.length = 0;
+            return;
+        }
+
+        var n = Ptab.length;
+
+        while (slotTargets.length < n) slotTargets.push(new VirtualPointObject(0, 0));
+        while (slotTargets.length > n) slotTargets.pop();
+
+        for (var i = 0; i < n; i++) {
+            var p = Ptab[i];
+            var tx = p ? p.x : NaN;
+            var ty = p ? p.y : NaN;
+
+            if (isFiniteNumber(tx) && isFiniteNumber(ty)) slotTargets[i].setXY(tx, ty);
+            // ✅ add backref so magnets to slotTargets can be serialized as magnets to the owning list
+            slotTargets[i].__magnetSlotOwnerList = me;
+            slotTargets[i].__magnetSlotIndex = i;
+            slotTargets[i].__Cn = Cn;
+            slotTargets[i].setExclusiveMagnetTarget(magnetSlotsExclusive);
+        }
+    
+    }
+
+    function getValidSlotTargetsArray() {
+    syncSlotTargets();
+    var targets = [];
+    for (var i = 0; i < Ptab.length; i++) {
+        if (isFiniteNumber(Ptab[i].x) && isFiniteNumber(Ptab[i].y)) targets.push(slotTargets[i]);
+    }
+    return targets;
+    }
+
+    function expandMagnetsFromListToSlotsForObject(obj, listObj, slotTargetsArr) {
+        if (!obj || !obj.getMagnets) return false;
+        
+        var mags = obj.getMagnets();
+        if (!mags || !mags.length) return false;
+
+        var changed = false;
+
+        for (var i = mags.length - 1; i >= 0; i--) {
+            if (mags[i][0] === listObj) {
+            var r = mags[i][1];
+
+            // quitar magnet a la lista
+            mags.splice(i, 1);
+
+            // agregar magnets a TODOS los slots
+            for (var k = 0; k < slotTargetsArr.length; k++) {
+                obj.addMagnet(slotTargetsArr[k], r);
+            }
+
+            changed = true;
+            
+            }
+        }
+
+        return changed;
+    }
+
+    
+
+
+    function migrateAllMagnetsFromListToSlots() {
+    if (!me.isMagnetSlotsExclusive()) return;
+
+    var targets = getValidSlotTargetsArray();
+    if (!targets.length) return;
+
+    // ✅ más eficiente: solo puntos (si tu code/familyCode es "point")
+    var all = Cn.getAllObjectsFromType("point");
+    // fallback por si tu build usa otro code:
+    if (!all || !all.length) all = Cn.getAllObjectsFromType("any");
+    
+    for (var i = 0; i < all.length; i++) {
+        var obj = all[i];
+        if (!obj || obj === me || !obj.getMagnets) continue;
+        expandMagnetsFromListToSlotsForObject(obj, me, targets);
+    }
+    }
+
+    function collapseMagnetsFromSlotsToListForObject(obj, listObj) {
+        if (!obj || typeof obj.getMagnets !== "function") return false;
+
+        var mags = obj.getMagnets();
+        if (!mags || !mags.length) return false;
+
+        var changed = false;
+        var radiusToRestore = null;
+        var hasListMagnet = false;
+
+        // 1) detectar si ya hay magnet a la lista y eliminar magnets a slots de esta lista
+        for (var i = mags.length - 1; i >= 0; i--) {
+            var target = mags[i][0];
+            var r = mags[i][1];
+
+            if (target === listObj) {
+            hasListMagnet = true;
+            continue;
+            }
+
+            if (target && target.__magnetSlotOwnerList === listObj) {
+            radiusToRestore = r;        // guardamos algún radio para restaurar
+            mags.splice(i, 1);
+            changed = true;
+            }
+        }
+
+        // 2) restaurar magnet a la lista si removimos alguno y no existe ya
+        if (changed && !hasListMagnet && radiusToRestore != null && typeof obj.addMagnet === "function") {
+            obj.addMagnet(listObj, radiusToRestore);
+        }
+
+        return changed;
+        }
+
+        function migrateAllMagnetsFromSlotsToList() {
+        // mismo patrón que tu forward
+        var all = Cn.getAllObjectsFromType("point");
+        if (!all || !all.length) all = Cn.getAllObjectsFromType("any");
+
+        for (var i = 0; i < all.length; i++) {
+            var obj = all[i];
+            if (!obj || obj === me || typeof obj.getMagnets !== "function") continue;
+            collapseMagnetsFromSlotsToListForObject(obj, me);
+        }
+        }
+
+    this.expandMagnetForPointIfExclusive = function(pt) {
+        
+        if (!pt || !pt.getMagnets) return false;
+        
+        if (!this.isMagnetSlotsExclusive()) return false;
+
+        var targets = getValidSlotTargetsArray(); // ya lo tienes
+        
+        if (!targets.length) return false;
+
+        // reutiliza tu función existente:
+        return expandMagnetsFromListToSlotsForObject(pt, me, targets);
+    };
+
+
+        this.setMagnetSlotsExclusive = function(b) {
+        magnetSlotsExclusive = !!b;
+
+        if (magnetSlotsExclusive) {
+            migrateAllMagnetsFromListToSlots();
+            return;
+        }
+
+        // ✅ NUEVO: revertir migración (slots -> lista)
+        migrateAllMagnetsFromSlotsToList();
+
+        // apagar: liberar locks de slots
+        for (var i = 0; i < slotTargets.length; i++) {
+            var t = slotTargets[i];
+            if (!t || !t.unlockMagnet || !t.getMagnetLockOwner) continue;
+            var owner = t.getMagnetLockOwner();
+            if (owner) t.unlockMagnet(owner);
+        }
+        };
+
+    
+
+
+    this.isMagnetSlotsExclusive = function() {
+    return magnetSlotsExclusive && isDiscretePointList();
+    };
+
+    this.getSlotTarget = function(idx) {
+    if (!this.isMagnetSlotsExclusive()) return null;
+    syncSlotTargets();
+    if (idx == null || idx < 0 || idx >= slotTargets.length) return null;
+    if (!isFiniteNumber(Ptab[idx].x) || !isFiniteNumber(Ptab[idx].y)) return null;
+    return slotTargets[idx];
+    };
+
+    this.getMagnetTargets = function() {
+    if (!this.isMagnetSlotsExclusive()) return null;
+    return getValidSlotTargetsArray();
+    };
+
+    
+
+
+
+    
+    
+
+    
+
+    
 
     var pushImage = function(_url) {
         var cod = _url.substr(_url.length - 50);
@@ -42,19 +275,22 @@ function ListObject(_construction, _name, _EXP) {
         return null;
     }
 
-
+    
+    
+    
     var initPtab = function() {
-        // var lst = EXP.getValue();
+        
         var lst = EXP.getE1().forcevalue();
-        //         console.log(lst[0]);
-        // console.log("initPtab : " + me.getName() + "  " + lst.length);
+        
         Ptab.length = 0;
 
         var rr = me.getColor().getR();
         var gg = me.getColor().getG();
         var bb = me.getColor().getB();
         var ss = segSize;
-        var ps = me.getRealsize();
+        var ps = 1;
+        
+        
         var ft = ["Arial", 30, "normal", "center"];
         var cn = 54;
         // var points = 0;
@@ -131,7 +367,7 @@ function ListObject(_construction, _name, _EXP) {
             } else if (lst[i].length >= 4) {
                 if (lst[i][0] === 0) {
                     // Un elemento [0,r,g,b] señala un breakpoint de degradado de color:
-                    // console.log("*********** : Ptab.length=" + Ptab.length + "  oldColStop=" + oldColStop);
+                    
                     if (Ptab.length > oldColStop) {
                         var iR = (lst[i][1] - rr) / (Ptab.length - oldColStop);
                         var iG = (lst[i][2] - gg) / (Ptab.length - oldColStop);
@@ -208,25 +444,27 @@ function ListObject(_construction, _name, _EXP) {
                 return;
             }
         }
-        // console.log("*********");
-        // for (var i = 0; i < Ptab.length; i++) {
-        //     console.log("Ptab[" + i + "].r=" + Ptab[i].r);
-        //     console.log("Ptab[" + i + "].g=" + Ptab[i].g);
-        //     console.log("Ptab[" + i + "].b=" + Ptab[i].b);
-        // }
+        
+        
     };
+    
+    
+
     initPtab();
     var fillStyle = this.prefs.color.point_free;
-    var segSize = -1; // Taille des segments
-    var shape = 0; // Apparence des points
+    
 
 
     this.getEXP = function() {
         return EXP;
     }
 
+    // this.setSegmentsSize = function(val) {
+    //     segSize = val;
+    // };
     this.setSegmentsSize = function(val) {
-        segSize = val;
+        var n = (typeof val === "number") ? val : parseFloat(val);
+        segSize = isFinite(n) ? n : 0;
     };
     this.getSegmentsSize = function() {
         return segSize;
@@ -288,7 +526,7 @@ function ListObject(_construction, _name, _EXP) {
 
 
     this.projectXY = function(x, y) {
-        // console.log("Ptab="+Ptab);
+        
         var p = Ptab[0];
         var x1 = p.x,
             y1 = p.y;
@@ -330,38 +568,77 @@ function ListObject(_construction, _name, _EXP) {
         return [xmin, ymin];
     };
 
+    
+
+    this.getClosestSlotIdx = function(x, y) {
+        if (segSize !== 0) return -1;
+
+        var best = -1;
+        var bestD2 = Infinity;
+
+        for (var i = 0; i < Ptab.length; i++) {
+            var px = Ptab[i].x, py = Ptab[i].y;
+            if (!isFinite(px) || !isFinite(py)) continue;
+
+            var dx = x - px;
+            var dy = y - py;
+            var d2 = dx * dx + dy * dy;
+
+            if (d2 < bestD2) {
+            bestD2 = d2;
+            best = i;
+            }
+        }
+        return best;
+        };
+
+        this.getSlotXY = function(slotIdx) {
+        if (segSize !== 0) return null;
+        if (slotIdx < 0 || slotIdx >= Ptab.length) return null;
+        if (!isFinite(Ptab[slotIdx].x) || !isFinite(Ptab[slotIdx].y)) return null;
+        return { x: Ptab[slotIdx].x, y: Ptab[slotIdx].y };
+        };
+
+
+
+
     this.project = function(p) {
         //        console.log("project");
         var coords = this.projectXY(p.getX(), p.getY());
         p.setXY(coords[0], coords[1]);
     };
-    this.projectAlpha = function(p) {
+    
 
-        if ((Ptab.length < 2) || (segSize === -1))
-            return;
+    this.projectAlpha = function(p) {
+        if ((Ptab.length < 2) || (segSize === -1)) return;
+
         var alp = p.getAlpha();
         var nb = alp[0];
-        var k = alp[1];
+        var k  = alp[1];
 
-        // Si hubo cambio de naturaleza del punto sobre, que pasa
-        // de un comportamiento continuo a discreto:
         if ((segSize === 0) && (k !== 0)) {
             this.setAlpha(p);
             alp = p.getAlpha();
             nb = alp[0];
             k = alp[1];
         }
-        if (nb < 0)
-            nb = 0;
-        else if (nb > (Ptab.length - 1))
-            nb = Ptab.length - 1;
-        // console.log("nb=" + nb);
+
+        if (nb < 0) nb = 0;
+        else if (nb > (Ptab.length - 1)) nb = Ptab.length - 1;
+
+        // ✅ CLAVE: sincronizar el alpha con el nb clamp-eado
+        if (p.setAlpha) p.setAlpha([nb, k]);
+
         if (segSize > 0)
-            p.setXY(Ptab[nb].x + k * (Ptab[nb + 1].x - Ptab[nb].x), Ptab[nb].y + k * (Ptab[nb + 1].y - Ptab[nb].y));
+            p.setXY(
+            Ptab[nb].x + k * (Ptab[nb + 1].x - Ptab[nb].x),
+            Ptab[nb].y + k * (Ptab[nb + 1].y - Ptab[nb].y)
+            );
         else
             p.setXY(Ptab[nb].x, Ptab[nb].y);
-        // console.log("projectAlpha :" + Ptab[nb].x + "  " + Ptab[nb].y);
-    };
+        };
+
+
     this.setAlpha = function(p) {
         if (Ptab.length < 2)
             return;
@@ -591,9 +868,7 @@ function ListObject(_construction, _name, _EXP) {
                     if (p.fill) {
                         ctx.fillStyle = "rgba(" + p.r + "," + p.g + "," + p.b + "," + p.fill + ")";
                         ctx.lineTo(p.x, p.y);
-                        // console.log("******break******");
-                        // console.log("aa=" + aa+";lineto(" + Cn.coordsSystem.x(p.x) + "," + Cn.coordsSystem.y(p.y)+")");
-                        // console.log("*****************");
+                        
                         aa--
                     }
                     ctx.fill();
@@ -688,6 +963,74 @@ function ListObject(_construction, _name, _EXP) {
 
         }
 
+    };
+
+    
+    this.getExclusiveSlotOccupants = function() {
+    if (!this.isMagnetSlotsExclusive()) return null;
+
+    syncSlotTargets();
+
+    var occ = new Array(Ptab.length);
+
+    // Puntos reales en la construcción (para fallback por posición)
+    var all = Cn.getAllObjectsFromType("point");
+    if (!all || !all.length) all = Cn.getAllObjectsFromType("any");
+
+    // tolerancia en unidades del sistema (ajústala si hace falta)
+    var EPS = 1e-6;
+    var EPS2 = EPS * EPS;
+
+    for (var i = 0; i < Ptab.length; i++) {
+        var t = slotTargets[i];
+
+        if (!t || !isFiniteNumber(Ptab[i].x) || !isFiniteNumber(Ptab[i].y)) {
+        occ[i] = null;
+        continue;
+        }
+
+        // 1) intento por lock (si está inicializado)
+        var owner = (t.getMagnetLockOwner && t.getMagnetLockOwner()) || null;
+        if (owner && owner.getName) {
+        occ[i] = owner.getName();
+        continue;
+        }
+
+        // 2) fallback: detectar punto por coordenadas (tras reabrir)
+        var sx = Ptab[i].x, sy = Ptab[i].y;
+        var best = null;
+        var bestD2 = Infinity;
+
+        for (var k = 0; k < all.length; k++) {
+        var p = all[k];
+        if (!p || p === me || !p.getX || !p.getY) continue;
+
+        var dx = p.getX() - sx;
+        var dy = p.getY() - sy;
+        var d2 = dx * dx + dy * dy;
+
+        if (d2 < bestD2) {
+            bestD2 = d2;
+            best = p;
+        }
+        }
+
+        occ[i] = (best && bestD2 <= EPS2 && best.getName) ? best.getName() : null;
+    }
+    // Colapsar slots con misma coordenada: cuentan como una sola posición
+    var seenXY = Object.create(null);
+    var PREC = 1e6; // 6 decimales
+
+    for (var i = 0; i < occ.length; i++) {
+    if (occ[i] == null) continue;
+    var x = Ptab[i].x, y = Ptab[i].y;
+    if (!isFiniteNumber(x) || !isFiniteNumber(y)) continue;
+
+    var key = Math.round(x * PREC) + "," + Math.round(y * PREC);
+    if (seenXY[key]) occ[i] = null;   // slot duplicado (misma posición)
+    else seenXY[key] = true;
+    }
+    return occ;
     };
 
     this.getSource = function(src) {

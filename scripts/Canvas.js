@@ -134,7 +134,7 @@ function Canvas(_id) {
         //se modifica el valor de action para definir si busca dgpad local o de internet, profesores/estudiantes
 		if (local){var urldgpad = "http://localhost:8080";if (version){urldgpad=urldgpad+"/profesores";}else {urldgpad=urldgpad+"/estudiantes";};}else {var urldgpad = "https://dgpad-colombia.udistrital.edu.co";if (version){urldgpad=urldgpad+"/profesores.html";}else {urldgpad=urldgpad+"/estudiantes.html";};};
 		
-        var s = '<form action="' + urldgpad + '" target="' + _frm + '" method="post" width="' + _w + '" height="' + (_h + 40) + '">';
+        var s = '<form  action="' + urldgpad + '" target="' + _frm + '" method="post" width="' + _w + '" height="' + (_h + 40) + '">';
         s += '<input type="hidden" name="file_content" value="' + _src + '">';
         if (hide_ctrl_panel)
             s += '<input type="hidden" name="hide_ctrlpanel" value="true">';
@@ -142,7 +142,7 @@ function Canvas(_id) {
         s += '<div style="height:40px;line-height:40px;vertical-align: baseline;">';
         s += '<input type="submit" value="' + $L.export_button + '" style="display: inline-block;zoom: 1;*display: inline;vertical-align: baseline;margin: 0 2px;outline: none;cursor: pointer;text-align: center;text-decoration: none;font: 14px/100% Arial, Helvetica, sans-serif;padding: .5em 2em .55em;text-shadow: 0 1px 1px rgba(0,0,0,.3);-webkit-border-radius: .5em;-moz-border-radius: .5em;border-radius: .5em;-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);box-shadow: 0 1px 2px rgba(0,0,0,.2);color: #d7d7d7;border: solid 1px #333;background: #333;background: -webkit-gradient(linear, left top, left bottom, from(#666), to(#000));background: -moz-linear-gradient(top,  #666,  #000);">';
         s += '</div>';
-        s += '<iframe name="' + _frm + '" width="' + _w + '" height="' + _h + '" src="about:blank" scrolling="no" frameborder="no"></iframe>';
+        s += '<iframe id="geomFrame" name="' + _frm + '" width="' + _w + '" height="' + _h + '"  scrolling="no" frameborder="no"></iframe>';
         s += '</div>';
         s += '</form>';
         return s;
@@ -194,12 +194,19 @@ function Canvas(_id) {
 		if (local){var urldgpad = "http://localhost:8080";}else {var urldgpad = "https://dgpad-colombia.udistrital.edu.co";};
 		if (version){urldgpad=urldgpad+"/profesores.html";}else {urldgpad=urldgpad+"/estudiantes.html";};
 		
-        var s = '<form action="' + urldgpad + '" target="' + _frm + '" method="post" width="' + _w + '" height="' + _h + '">';
+        var s = '<form id="geomForm" action="' + urldgpad + '" target="' + _frm + '" method="post" width="' + _w + '" height="' + _h + '">';
         s += '<input type="hidden" name="file_content" value="' + _src + '">';
         // if (hide_ctrl_panel)
             // s += '<input type="hidden" name="hide_ctrlpanel" value="true">';
-        s += '<iframe name="' + _frm + '" width="' + _w + '" height="' + _h + '" src="about:blank" scrolling="no" frameborder="no" oNlOAd="if (!this.parentNode.num) {this.parentNode.submit();this.parentNode.num=true}"></iframe>';
         s += '</form>';
+        s += '<iframe id="geomFrame" name="' + _frm + '" width="' + _w + '" height="' + _h + '"  scrolling="no" frameborder="no"></iframe>';
+        s += '<script>';
+        s += 'document.addEventListener("DOMContentLoaded", function() {'    // Asigna el src al iframe antes de enviar el formulario
+        s += 'document.getElementById("geomFrame").src = "about:blank";'  // Limpia el iframe si es necesario'
+        s += 'document.getElementById("geomFrame").src ="'+urldgpad+'";';
+        s += 'document.getElementById("geomForm").submit();'
+        s += '});'
+        s += '</script>'
         return s;
     };
 	
@@ -208,20 +215,7 @@ function Canvas(_id) {
         var _h = height;
         var _src = me.getSource1(hide_ctrl_panel,fixwidgets,fixdgscripts,disablezoom,local,version);
         _src = $U.base64_encode(_src);
-        // var d = new Date();
-        // var _frm = "dgpad_frame_" + d.getTime();
-        // MEAG
         
-        // se modifica el valor de action
-		// if (local){var urldgpad = "http://localhost:8080";}else {var urldgpad = "https://dgpad-colombia.udistrital.edu.co";};
-		// if (version){urldgpad=urldgpad+"/profesores";}else {urldgpad=urldgpad+"/estudiantes";};
-		
-        // var s = '<form action="' + urldgpad + '" target="' + _frm + '" method="post" width="' + _w + '" height="' + _h + '">';
-        // s += '<input type="hidden" name="file_content" value="' + _src + '">';
-        // if (hide_ctrl_panel)
-            // s += '<input type="hidden" name="hide_ctrlpanel" value="true">';
-        // s += '<iframe name="' + _frm + '" width="100%" height="100%" src="about:blank" scrolling="no" frameborder="no" oNlOAd="if (!this.parentNode.num) {this.parentNode.submit();this.parentNode.num=true}"></iframe>';
-        // s += '</form>';
         return _src;
     };
 
@@ -357,6 +351,7 @@ function Canvas(_id) {
     var resizeWindow = function() {
         setFullScreen();
         me.trackManager.resize();
+        var mode=me.getMode();
         var ctrl_panel_visible = true;
         me.trackManager.resize();
         if (mainpanel) {
@@ -366,7 +361,7 @@ function Canvas(_id) {
         }
         mainpanel = new ControlPanel(me);
         if (!ctrl_panel_visible) mainpanel.hide();
-        me.setMode(1);
+        if (mode==0) {me.setMode(0)}else{me.setMode(1);}
         if (Cn) Cn.resizeBtn();
 
 
@@ -742,9 +737,51 @@ function Canvas(_id) {
         return Cn;
     };
 
+        function bindUndoRedoShortcuts({ undoManager, target = document }) {
+        const handler = (e) => {
+            // No interceptar si el usuario está escribiendo
+            const el = e.target;
+            const tag = el?.tagName?.toLowerCase();
+            const isTypingField =
+            tag === "input" ||
+            tag === "textarea" ||
+            el?.isContentEditable === true;
+
+            if (isTypingField) return;
+
+            const key = (e.key || "").toLowerCase();
+            const mod = e.ctrlKey || e.metaKey; // Ctrl (Win/Linux) o Cmd (Mac)
+            if (!mod) return;
+
+            // Ctrl/Cmd + Z => Undo
+            if (key === "z" && !e.shiftKey) {
+            e.preventDefault();
+            undoManager.undo();
+            return;
+            }
+
+            // Ctrl/Cmd + Y => Redo
+            // Ctrl/Cmd + Shift + Z => Redo (típico en Mac)
+            if (key === "y" || (key === "z" && e.shiftKey)) {
+            e.preventDefault();
+            undoManager.redo();
+            return;
+            }
+        };
+
+        target.addEventListener("keydown", handler, { capture: true });
+
+        // opcional: por si quieres desmontarlo al destruir canvas
+        return () => target.removeEventListener("keydown", handler, { capture: true });
+        }
+
+
     // Managers :
     me.undoManager = new UndoManager(me);
     me.undoManager.setBtns();
+    // Atajos de teclado (Ctrl/Cmd+Z / Ctrl+Y o Ctrl/Cmd+Shift+Z)
+    me.disposeUndoShortcuts = bindUndoRedoShortcuts({ undoManager: me.undoManager, target: document });
+
     me.propertiesManager = new PropertiesManager(me);
     me.macrosManager = new MacrosManager(me);
     me.deleteAll = new DeleteAll(me);
@@ -891,16 +928,34 @@ function Canvas(_id) {
 				// cursor-creación
                 toolsManager.showTools(ev);
                 break;
+            // case 2:
+            //     // Outil gomme :
+			// 	// Ocultar
+            //     if (!obj.isSuperHidden()) {
+            //         obj.setHidden(!obj.isHidden());
+            //         obj.setSelected(false);
+            //         obj.setIndicated(false);
+            //         me.paint(ev);
+            //     }
+            //     break;
             case 2:
-                // Outil gomme :
-				// Ocultar
-                if (!obj.isSuperHidden()) {
-                    obj.setHidden(!obj.isHidden());
-                    obj.setSelected(false);
-                    obj.setIndicated(false);
-                    me.paint(ev);
+            // Ocultar / mostrar (toggle)
+            if (!obj.isSuperHidden()) {
+                const nextHidden = !obj.isHidden();
+
+                if (!me.undoManager.isApplying) {
+                // registra el cambio de visibilidad (old -> new)
+                me.undoManager.recordVisibility(obj, nextHidden);
+                // o si implementaste toggle explícito:
+                // me.undoManager.recordVisibilityToggle(obj);
                 }
-                break;
+
+                obj.setHidden(nextHidden);
+                obj.setSelected(false);
+                obj.setIndicated(false);
+                me.paint(ev);
+            }
+  break;
             case 3:
                 // Outil poubelle :
 				// borrar
@@ -1599,7 +1654,7 @@ function Canvas(_id) {
 
 
     me.addObject = function(o) {
-        me.undoManager.record(o, true);
+        me.undoManager.recordAdd(o, true);
         o.newTimeStamp();
         Cn.add(o);
     };
@@ -1690,47 +1745,7 @@ function Canvas(_id) {
         //        me.sandboxFrame=el;
     }();
 
-    //var createSandbox = function() {
-    //        var el = document.createElement("iframe");
-    //        el.setAttribute('name', ID);
-    ////        el.setAttribute('width', 100);
-    ////        el.setAttribute('height', 100);
-    //        el.style.setProperty("position", "absolute");
-    //        el.style.setProperty("left", "0px");
-    //        el.style.setProperty("top", "0px");
-    //        el.style.setProperty("width", "0px");
-    //        el.style.setProperty("height", "0px");
-    ////        el.setAttribute('style', 'hidden');
-    //        el.setAttribute('frameborder', 0);
-    //        el.setAttribute('marginheight', 0);
-    //        el.setAttribute('marginwidth', 0);
-    //        el.setAttribute('scrolling', 'no');
-    //        // Trouver éventuellement un paramètre de langue dans le script du body :
-    //        var lang = ($BODY_SCRIPT.hasAttribute("data-lang")) ? "?lang=" + $BODY_SCRIPT.getAttribute("data-lang").toUpperCase() : "";
-    //        el.setAttribute('src', $APP_PATH + 'NotPacked/Sandbox/sandbox.html' + lang);
-    //        document.body.appendChild(el);
-    //        el.onload = function() {
-    //            interpreter = new window.frames[ID].Interpreter(window, me);
-    //            interpreter.owner = el.contentWindow;
-    //            interpreter.copyNameSpace();
-    //            // Chargement des plug-ins :
-    //            interpreter.LoadPlugins($U.loadFile($APP_PATH + "NotPacked/plug-ins.js"));
-    //
-    //            // Si le canvas a une figure attachée (base64) :
-    //            if (docObject.hasAttribute("data-source")) {
-    //                me.OpenFile("", $U.base64_decode(docObject.getAttribute("data-source")));
-    //            } else {
-    //                // Si une figure a été postée sur index.php, on l'ouvre :
-    //                try {
-    //                    me.OpenFile("", $U.base64_decode($DGPAD_FIGURE));
-    //                } catch (e) {
-    //                }
-    //            }
-    //
-    //
-    //        };
-    ////        me.sandboxFrame=el;
-    //    }();
+    
     // Intepréteur de scripts lancé par un bouton :
 	// Interpretador de scripts lanzado por un botón: 
     me.InterpretScript = function(_o, s) {
@@ -1747,8 +1762,8 @@ function Canvas(_id) {
         var ex = new Expression(me, s);
         return ex.value();
     };
-    me.InterpretMacro = function(s) {
-        interpreter.InterpretMacro(s);
+    me.InterpretMacro = function(s, name) {
+        interpreter.InterpretMacro(s, name);
     };
     me.getInterpreter = function() {
         return interpreter;
@@ -1821,6 +1836,6 @@ function Canvas(_id) {
         t += "\");\n";
         return t;
     };
-
+window.canvas=me;
 
 }

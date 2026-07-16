@@ -482,3 +482,168 @@ Blockly.Blocks['text_join'] = {
   newQuote_: Blockly.Blocks['text'].newQuote_
 };
 
+Blockly.Blocks['text_newline'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField($L.blockly.texts_newline);
+    this.setOutput(true, 'String');
+    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setTooltip('Inserta un salto de línea dentro de un texto.');
+    this.setHelpUrl('');
+  }
+};
+
+Blockly.Blocks["mathlive_latex_text"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("LaTeX")
+      .appendField(new Blockly.FieldTextInput("x+1"), "TEXT");
+    this.setOutput(true, "String");
+    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setTooltip("Devuelve texto LaTeX puro para MathLive.");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks["mathlive_latex_join"] = {
+  init: function () {
+    this.appendValueInput("A")
+      .setCheck("String")
+      .appendField("unir");
+    this.appendValueInput("B")
+      .setCheck("String")
+      .appendField("con");
+    this.setOutput(true, "String");
+    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setTooltip("Concatena dos fragmentos LaTeX.");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks["mathlive_latex_cmd_0"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField($L.blockly.texts_symbol)
+      .appendField(new Blockly.FieldDropdown([
+        ["alpha", "alpha"],
+        ["beta", "beta"],
+        ["gamma", "gamma"],
+        ["pi", "pi"],
+        ["theta", "theta"],
+        ["times", "times"],
+        ["pm", "pm"],
+        ["leq", "leq"],
+        ["geq", "geq"],
+        ["neq", "neq"],
+        ["infty", "infty"]
+      ]), "NAME");
+    this.setOutput(true, "String");
+    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setTooltip("Devuelve un comando LaTeX sin argumentos.");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks["mathlive_latex_cmd_1"] = {
+  init: function () {
+    this.appendValueInput("ARG")
+      .setCheck("String")
+      .appendField(new Blockly.FieldDropdown([
+        ["sqrt", "sqrt"],
+        ["text", "text"],
+        ["overline", "overline"],
+        ["underline", "underline"],
+        ["vec", "vec"],
+        ["hat", "hat"],
+        ["bar", "bar"],
+        ["mathbb", "mathbb"],
+        ["mathbf", "mathbf"],
+        ["mathrm", "mathrm"]
+      ]), "NAME");
+    this.setOutput(true, "String");
+    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setTooltip("Devuelve un comando LaTeX de un argumento.");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks["mathlive_latex_cmd_2"] = {
+  init: function () {
+    this.appendValueInput("ARG1")
+      .setCheck("String")
+      .appendField(new Blockly.FieldDropdown([
+        ["frac", "frac"],
+        ["binom", "binom"],
+        ["overset", "overset"],
+        ["underset", "underset"]
+      ]), "NAME");
+    this.appendValueInput("ARG2")
+      .setCheck("String")
+      
+    this.setOutput(true, "String");
+    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setTooltip("Devuelve un comando LaTeX de dos argumentos.");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks["mathlive_latex_superscript"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField($L.blockly.texts_superscript1);
+
+    this.appendValueInput("BASE")
+      .setCheck("String")
+      .appendField($L.blockly.texts_superscript2);
+
+    this.appendValueInput("EXP")
+      .setCheck("String")
+      .appendField($L.blockly.texts_superscript3);
+
+    this.setOutput(true, "String");
+    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setTooltip("Devuelve base^{exponente}.");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks["mathlive_latex_subscript"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField($L.blockly.texts_subscript1);
+    this.appendValueInput("BASE")
+      .setCheck("String")
+      .appendField($L.blockly.texts_subscript2);
+    this.appendValueInput("SUB")
+      .setCheck("String")
+      .appendField($L.blockly.texts_subscript3);
+    this.setOutput(true, "String");
+    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setTooltip("Devuelve base_{subíndice}.");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks["mathlive_latex_group"] = {
+  init: function () {
+    this.appendValueInput("VALUE")
+      .setCheck("String")
+      .appendField($L.blockly.texts_group);
+    this.setOutput(true, "String");
+    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setTooltip("Devuelve { ... }.");
+    this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks["mathlive_latex_parens"] = {
+  init: function () {
+    this.appendValueInput("VALUE")
+      .setCheck("String")
+      .appendField($L.blockly.texts_parents);
+    this.setOutput(true, "String");
+    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setTooltip("Devuelve \\left( ... \\right).");
+    this.setHelpUrl("");
+  }
+};

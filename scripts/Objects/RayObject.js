@@ -92,13 +92,14 @@ function RayObject(_construction, _name, _P1, _P2) {
   // MEAG start
   this.getAssociatedTools = function() {
     var at = superObject.getAssociatedTools();
-	at+=",fixedangle";
-
-	//JDIAZ
+    //JDIAZ
     if (this.getShowName()===true)
-      at += ",@removename";
+      at += "@removename";
     
     //JDIAZ
+	at+=",fixedangle";
+
+	
     at += ",@callcalc,@blockly";
     return at;
   };

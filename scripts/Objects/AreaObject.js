@@ -60,7 +60,7 @@ function AreaObject(_construction, _name, _Ptab) {
   
     
     //JDIAZ
-    return "point,@namemover,@callproperty,@calltrash,@callcalc,@callhide" + at2 ;
+    return "point,@namemover,@callproperty,@calltrash,@callcalc,@callhide,@blockly" + at2 ;
   };
   this.barycenter = function() {
     var len = Ptab.length;
@@ -116,6 +116,11 @@ function AreaObject(_construction, _name, _Ptab) {
   
    this.getPtab = function() {
     return Ptab;
+  }
+
+  this.setPtab = function(list) {
+    Ptab=list;
+    this.compute();
   }
 
   var isInside = function(poly, x, y) {
@@ -273,40 +278,34 @@ function AreaObject(_construction, _name, _Ptab) {
   };
 
 
+  
   var contains = function(x, y) {
     var npoints = Ptab.length;
-    if (npoints <= 2) {
-      return false;
-    }
+    if (npoints <= 2) return false;
+
     var hits = 0;
     var lastx = Ptab[npoints - 1].getX(),
       lasty = Ptab[npoints - 1].getY();
     var curx = 0,
       cury = 0;
     var test1, test2, leftx;
+
     for (var i = 0; i < npoints; lastx = curx, lasty = cury, i++) {
       var p = Ptab[i];
       curx = p.getX();
       cury = p.getY();
-      if (cury === lasty) {
-        continue;
-      }
+      if (cury === lasty) continue;
+
       if (curx < lastx) {
-        if (x >= lastx) {
-          continue;
-        }
+        if (x >= lastx) continue;
         leftx = curx;
       } else {
-        if (x >= curx) {
-          continue;
-        }
+        if (x >= curx) continue;
         leftx = lastx;
       }
 
       if (cury < lasty) {
-        if (y < cury || y >= lasty) {
-          continue;
-        }
+        if (y < cury || y >= lasty) continue;
         if (x < leftx) {
           hits++;
           continue;
@@ -314,9 +313,7 @@ function AreaObject(_construction, _name, _Ptab) {
         test1 = x - curx;
         test2 = y - cury;
       } else {
-        if (y < lasty || y >= cury) {
-          continue;
-        }
+        if (y < lasty || y >= cury) continue;
         if (x < leftx) {
           hits++;
           continue;
@@ -325,12 +322,15 @@ function AreaObject(_construction, _name, _Ptab) {
         test2 = y - lasty;
       }
 
-      if (test1 < (test2 / (lasty - cury) * (lastx - curx))) {
-        hits++;
-      }
+      if (test1 < (test2 / (lasty - cury) * (lastx - curx))) hits++;
     }
 
     return ((hits & 1) !== 0);
+  };
+
+  // ✅ esto va FUERA de contains
+  this.containsXY = function(x, y) {
+    return contains(x, y);
   };
 
 
@@ -399,14 +399,58 @@ function AreaObject(_construction, _name, _Ptab) {
     return [xmin, ymin];
   };
 
+  
+  this.projectXYEdge = function(x, y) {
+    var p = Ptab[0];
+    var x1 = p.getX(), y1 = p.getY();
+    var xstart = x1, ystart = y1;
+
+    var best = {
+      x: x1, y: y1,
+      x1: x1, y1: y1, x2: x1, y2: y1,
+      d: 1e20
+    };
+
+    function considerSeg(ax, ay, bx, by) {
+      var dx = bx - ax, dy = by - ay;
+      var r = dx * dx + dy * dy;
+      if (r <= 1e-5) return;
+
+      var h = (dx * (x - ax) + dy * (y - ay)) / r;
+      if (h > 1) h = 1;
+      else if (h < 0) h = 0;
+
+      var px = ax + h * dx;
+      var py = ay + h * dy;
+
+      var dist2 = (x - px) * (x - px) + (y - py) * (y - py);
+      if (dist2 < best.d) {
+        best = { x: px, y: py, x1: ax, y1: ay, x2: bx, y2: by, d: dist2 };
+      }
+    }
+
+    for (var i = 1; i < Ptab.length; i++) {
+      p = Ptab[i];
+      var x2 = p.getX(), y2 = p.getY();
+      considerSeg(x1, y1, x2, y2);
+      x1 = x2; y1 = y2;
+    }
+    considerSeg(x1, y1, xstart, ystart);
+
+    return best;
+  };
   this.project = function(p) {
     var px = p.getX(),
       py = p.getY();
-    if ((p.getOnBoundary()) || (!contains(px, py))) {
+
+    var onB = (p && typeof p.getOnBoundary === "function") ? p.getOnBoundary() : false;
+
+    if (onB || (!contains(px, py))) {
       var coords = this.projectXY(px, py);
       p.setXY(coords[0], coords[1]);
     }
   };
+
   this.projectAlpha = function(p) {
     var G = p.getAlpha();
     if (Ptab.length > 2) {
@@ -536,14 +580,7 @@ function calculatePolygonArea(vertices) {
     X = X / Ptab.length;
     Y = Y / Ptab.length;
       //reconocer si es un poligono 3d
-    // let pts3d=0;
-    // for (var i = 0, len = Ptab.length; i < len; i++) {
-    //   if(Ptab[i].is3D()||Cn.isOrigin3D(Ptab[i])){
-    //     pts3d=pts3d+1;
-
-    //   }
-// console.log(pts3d)
-//     }
+    
     // Calcula el área:
     //si es 2D
     if (!Cn.is3D()) {
@@ -559,8 +596,7 @@ function calculatePolygonArea(vertices) {
     for (var i = 0, len = Ptab.length; i < len; i++) {
       vertices.push(Ptab[i].getXYZ())
     }
-    console.log(this.getName());
-    console.log(vertices);
+    
     A=calculatePolygonArea(vertices);
   }
     valid = true;

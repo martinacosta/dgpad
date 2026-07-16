@@ -19,6 +19,15 @@ function AngleObject(_construction, _name, _P1, _P2, _P3) {
   var deg_coef = 180 / Math.PI;
   var mode360 = false;
   var modeRad = false;
+  // === Config etiqueta ===
+  var LABEL_OFFSET_PX = 18; // distancia fija desde el arco
+  var LABEL_GAP_PX = 8; // separación entre nombre y valor
+  var SMALL_ANGLE_DEG = 25; // umbral ángulo pequeño
+  var SMALL_ANGLE_Y_OFFSET = 6; // offset vertical extra
+  this._labelDrawn = false; // flag de pintado único
+  var LABEL_ANCHOR_MARGIN_PX = 6; // margen desde el centro de la marca
+  var LABEL_FROM_ARC_FACTOR = 1.0; // múltiplo del tamaño de fuente para despejar del arco
+
 
 
 
@@ -105,67 +114,145 @@ function AngleObject(_construction, _name, _P1, _P2, _P3) {
     return (at);
   };
 
-  this.paintLength = function(ctx) {
-    if (valid && (!$U.approximatelyEqual(AOC180, $U.halfPI))) {
-      ctx.save();
-      var r = R + this.prefs.fontmargin + this.getRealsize() / 2 + 40;
-      ctx.textAlign = "left";
-      var prec = this.getPrecision();
-      var display = (mode360) ? AOC : AOC180;
-      display = display * 180 / Math.PI;
-      display = Math.round(display * prec) / prec;
-      var a = trigo ? -toAngle + AOC / 2 : Math.PI - toAngle + AOC / 2;
-      a = a - Math.floor(a / $U.doublePI) * $U.doublePI; // retour en [0;2π]
-      
-      if ((a > $U.halfPI) && (a < 3 * $U.halfPI)) {
-        a += Math.PI;
-        r = -r + 40;
-        ctx.textAlign = "right";
-      }
-      ctx.fillStyle = ctx.strokeStyle;
-      ctx.translate(O.getX(), O.getY());
-      ctx.rotate(a);
+  // ======= Etiqueta horizontal =======
+  function computeLabelAnchor() {
+    // bisectriz del ángulo AOC
+    var phi = trigo ? -toAngle + AOC / 2 : Math.PI - toAngle + AOC / 2;
+    phi = phi - Math.floor(phi / $U.doublePI) * $U.doublePI;
 
-      ctx.fillText($L.number(display) + "°", r, this.getFontSize() / 2);
-      ctx.restore();
+
+    // punto a distancia fija desde el arco
+    var r = R + LABEL_OFFSET_PX;
+    var x = O.getX() + Math.cos(phi) * r;
+    var y = O.getY() + Math.sin(phi) * r;
+
+
+    // leve offset vertical en ángulos pequeños
+    var ang = mode360 ? AOC : AOC180;
+    var th = SMALL_ANGLE_DEG * Math.PI / 180;
+    if (ang < th) {
+    y += (Math.sin(phi) >= 0 ? -SMALL_ANGLE_Y_OFFSET : SMALL_ANGLE_Y_OFFSET);
     }
-  };
-  // JDIAZ start Función para dibujar el nombre
-  var paintTxt = function(ctx, txt) {
-    ctx.save();
-    var r = R + me.prefs.fontmargin + me.getRealsize() / 2;
-    ctx.textAlign = "left";
-    var prec = me.getPrecision();
-    var display = (mode360) ? AOC : AOC180;
-    if (!this.modeRad) {
-		display = display * 180 / Math.PI;
-	}
-		display = Math.round(display * prec) / prec;
-    var a = trigo ? -toAngle + AOC / 2 : Math.PI - toAngle + AOC / 2;
-    a = a - Math.floor(a / $U.doublePI) * $U.doublePI; // retour en [0;2π]
-    if ((a > $U.halfPI) && (a < 3 * $U.halfPI)) {
-      a += Math.PI;
-      r = -r - 80;
-      ctx.textAlign = "right";
-    }
-    ctx.fillStyle = ctx.strokeStyle;
-    ctx.translate(O.getX(), O.getY());
-    ctx.rotate(a);
-    ctx.fillText(txt + ":", r, me.getFontSize() / 2);
-    ctx.restore();
+    return { x: x, y: y, phi: phi };
   }
-  //JDIAZ end
-  //OLD CODE Función para dibujar el nombre
-  //var paintTxt = function(ctx, txt) {
-  //ctx.save();
-  //ctx.fillStyle = ctx.strokeStyle;
-  //var r = R + this.prefs.fontmargin + this.getRealsize() / 2;
-  //ctx.textAlign = "left";
-  //ctx.fillText(txt, (_P1.getX() + _P2.getX()) / 2, (_P1.getY() + _P2.getY()) / 2);
 
-  //LLamar a la función painTxt para dibujar el nombre
-  this.paintName = function(ctx) {
-    paintTxt(ctx, this.getSubName());
+  
+
+  function paintUnifiedLabel(ctx) {
+      var a = computeLabelAnchor();
+
+      // valor numérico del ángulo (AOC o AOC180) → grados si no está en radianes
+      var ang = mode360 ? AOC : AOC180;
+      var isRad = (me.modeRad === true);
+      var display = isRad ? ang : (ang * Math.PI ? (ang * 180 / Math.PI) : 0); // evita NaN si algo raro
+      var prec = me.getPrecision();
+      display = Math.round(display * prec) / prec;
+
+      var valueStr = $L.number(display) + (isRad ? "" : "°");
+      var showName = me.getShowName();
+      var nameStr  = me.getSubName() + ":";
+
+      if (me.getFont) ctx.font = me.getFont();
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = ctx.strokeStyle;
+
+      if (showName) {
+        // nombre anclado en el centro de la marca, valor a continuación
+        ctx.textAlign = "left";
+        ctx.fillText(nameStr, a.x, a.y);
+        var nameW = ctx.measureText(nameStr).width;
+        ctx.fillText(valueStr, a.x + nameW + LABEL_GAP_PX, a.y);
+      } else {
+        // solo valor centrado en la marca
+        ctx.textAlign = "center";
+        ctx.fillText(valueStr, a.x, a.y);
+      }
+    }
+
+  
+
+this.paintLength = function (ctx) {
+  if (!valid) return;
+
+  var a = computeLabelAnchor();
+  var toRight = Math.cos(a.phi) >= 0;
+
+  var ang = mode360 ? AOC : AOC180;
+  var display = (this.modeRad === true) ? ang : (ang * 180 / Math.PI);
+  var prec = this.getPrecision();
+  display = Math.round(display * prec) / prec;
+
+  var valueStr = $L.number(display) + (this.modeRad ? "" : "°");
+  var nameStr  = this.getSubName() + ":";
+
+  ctx.save();
+  if (this.getFont) ctx.font = this.getFont();
+  var fontSize = this.getFontSize ? this.getFontSize() : 12;
+  var clear = Math.max(LABEL_ANCHOR_MARGIN_PX, LABEL_FROM_ARC_FACTOR * fontSize);
+
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = ctx.strokeStyle;
+
+  if (this.getShowName()) {
+    if (toRight) {
+      // → nombre primero, luego valor
+      ctx.textAlign = "left";
+      var x0 = a.x + clear;
+      ctx.fillText(nameStr, x0, a.y);                         // NOMBRE
+      var wName = ctx.measureText(nameStr).width;
+      ctx.fillText(valueStr, x0 + wName + LABEL_GAP_PX, a.y); // VALOR
+    } else {
+  // ← escribir hacia la izquierda: NOMBRE primero, luego VALOR sin solape
+  ctx.textAlign = "right";
+  var xEnd = a.x - clear;                         // borde cercano a la marca
+  var wVal = ctx.measureText(valueStr).width;     // reserva el ancho del valor
+
+  ctx.fillText(nameStr, xEnd - LABEL_GAP_PX - wVal, a.y); // NOMBRE termina antes del valor
+  ctx.fillText(valueStr, xEnd, a.y);                       // VALOR termina en xEnd
+}
+
+  } else {
+    // solo valor, despejado del arco
+    if (toRight) {
+      ctx.textAlign = "left";
+      ctx.fillText(valueStr, a.x + clear, a.y);
+    } else {
+      ctx.textAlign = "right";
+      ctx.fillText(valueStr, a.x - clear, a.y);
+    }
+  }
+  ctx.restore();
+};
+
+
+  
+
+var paintTxt = function (ctx, txt) {
+  ctx.save();
+  var a = computeLabelAnchor();
+  if (this && this.getFont) ctx.font = this.getFont();
+
+  var nameStr = txt + ":";
+  var nameW = ctx.measureText(nameStr).width;
+  var drawToLeft = Math.cos(a.phi) >= 0;
+
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = ctx.strokeStyle;
+
+  if (drawToLeft) {           // nombre a la izquierda del valor
+    ctx.textAlign = "right";
+    ctx.fillText(nameStr, a.x - (nameW + LABEL_GAP_PX), a.y);
+  } else {                    // nombre en el ancla
+    ctx.textAlign = "left";
+    ctx.fillText(nameStr, a.x, a.y);
+  }
+  ctx.restore();
+}.bind(this);
+
+
+  
+  this.paintName = function (ctx) {
+  
   };
 
   this.paintObject = function(ctx) {
@@ -214,7 +301,7 @@ function AngleObject(_construction, _name, _P1, _P2, _P3) {
     if (!Cn.getFrame().ifObject(this.getName())) {
       Cn.getFrame().getTextCons(this);
     }
-    // MEAG end
+    this._labelDrawn = false; // reinicia por frame// MEAG end
   };
 
 
@@ -235,12 +322,7 @@ function AngleObject(_construction, _name, _P1, _P2, _P3) {
     if (isNaN(this.getRealPrecision())) s += ";p:-1";
     src.styleWrite(true, this.getName(), "STL", s);
   };
-  // this.getStyleString = function() {
-  //     var s = parent.getStyleString();
-  //     // console.log("this.getRealPrecision()="+this.getRealPrecision());
-  //     if (isNaN(this.getRealPrecision())) s += ";p:-1";
-  //     return s;
-  // };
+  
 
   // MEAG start
   this.getTextCons = function() {

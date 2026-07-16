@@ -116,99 +116,138 @@ Blockly.Blocks['dgpad_circle'] = {
     }
 };
 
-Blockly.Blocks['dgpad_point'] = {
-    // firstadd: true,
-    init: function() {
-        var props = [
-            [$L.blockly.pt_base, "base"],
-            [$L.blockly.pt_on, "pointon"],
-            [$L.blockly.pt_inter, "intersection"],
-            [$L.blockly.pt_coords, "coords"],
-            [$L.blockly.pt_exp, "exp"]
-        ];
-        var dropdown = new Blockly.FieldDropdown(props, function(option) {
-            this.sourceBlock_.updateShape_(option);
-        });
-        this.blocktype = "point";
-        var bnds = Blockly.dgpad.getBounds();
-        var right = bnds.l + bnds.w;
-        this.cx = Blockly.dgpad.CN.coordsSystem.x(right) + Math.random() * Blockly.dgpad.CN.coordsSystem.l((Blockly.dgpad.ZC.getWidth() - right));
-        this.cx = Math.round(this.cx * 10) / 10;
-        this.cy = Blockly.dgpad.CN.coordsSystem.y(0) - Math.random() * Blockly.dgpad.CN.coordsSystem.l(Blockly.dgpad.ZC.getHeight());
-        this.cy = Math.round(this.cy * 10) / 10;
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldImage($APP_PATH + "NotPacked/images/tools/point.svg", 25, 25, "*"))
-            //.appendField(new Blockly.FieldCheckbox("TRUE"), "visible")
-            .appendField(new Blockly.FieldTextInput(Blockly.dgpad.getName()), "name")
-            .appendField(" : " + $L.blockly.pt_type)
-            .appendField(dropdown, "behavior");
-        this.setPreviousStatement(true, "dgpad");
-        this.setNextStatement(true, "dgpad");
-        this.setInputsInline(true);
-        this.setColour(290);
-        this.setTooltip('');
-    },
-    dragto: function(_x, _y) {
-        this.cx = Blockly.dgpad.CN.coordsSystem.x(_x);
-        this.cy = Blockly.dgpad.CN.coordsSystem.y(_y);
-        // console.log(this.name()+" : x="+this.cx+" y="+this.cy);
-    },
-    onselect: function() {
+// Blockly.Blocks['dgpad_point'] = {
+//     // firstadd: true,
+//     init: function() {
+//         var props = [
+//             [$L.blockly.pt_base, "base"],
+//             [$L.blockly.pt_on, "pointon"],
+//             [$L.blockly.pt_inter, "intersection"],
+//             [$L.blockly.pt_coords, "coords"],
+//             [$L.blockly.pt_exp, "exp"]
+//         ];
+//         var dropdown = new Blockly.FieldDropdown(props, function(option) {
+//             this.sourceBlock_.updateShape_(option);
+//         });
+//         this.blocktype = "point";
+//         var bnds = Blockly.dgpad.getBounds();
+//         console.log(bnds)
+//         // var right = bnds.l + bnds.w;
+        
+//         this.appendDummyInput()
+//             .appendField(new Blockly.FieldImage($APP_PATH + "NotPacked/images/tools/point.svg", 25, 25, "*"))
+//             //.appendField(new Blockly.FieldCheckbox("TRUE"), "visible")
+//             .appendField(new Blockly.FieldTextInput(Blockly.dgpad.getName()), "name")
+//             .appendField(" : " + $L.blockly.pt_type)
+//             .appendField(dropdown, "behavior");
+//         this.setPreviousStatement(true, "dgpad");
+//         this.setNextStatement(true, "dgpad");
+//         this.setInputsInline(true);
+//         this.setColour(290);
+//         this.setTooltip('');
+//     },
+//     dragto: function(_x, _y) {
+//         this.cx = Blockly.dgpad.CN.coordsSystem.x(_x);
+//         console.log(this.cx)
+//         this.cy = Blockly.dgpad.CN.coordsSystem.y(_y);
 
-    },
-    onchange: function() {
-        if (this.isInConstruction()) {
-            var obj = Blockly.dgpad.CN.find(this.name());
-            if (obj) {
-                // obj.setBlockObj(this);
-            };
-            if (this.firstadd) {
-                Blockly.dgpad.addName(this.name());
-                Blockly.dgpad.refresh();
-                this.firstadd = false;
-            }
-        }
-    },
-    // mutationToDom: function() {
-    //     var container = document.createElement('mutation');
-    //     var divisorInput = (this.getFieldValue('PROPERTY') == 'DIVISIBLE_BY');
-    //     container.setAttribute('divisor_input', divisorInput);
-    //     return container;
-    // },
-    // domToMutation: function(xmlElement) {
-    //     var divisorInput = (xmlElement.getAttribute('divisor_input') == 'true');
-    //     this.updateShape_(divisorInput);
-    // },
-    updateShape_: function(tpe) {
-        if (this.getInput('obj')) {
-            this.removeInput('obj');
-        }
-        this.blocktype = tpe;
-        switch (tpe) {
-            case "pointon":
-                this.appendDummyInput('obj')
-                    .appendField(" ")
-                    .appendField(new Blockly.FieldTextInput("C1"), "obj1");
-                break;
-            case "intersect":
-                this.appendDummyInput('obj')
-                    .appendField(" ")
-                    .appendField(new Blockly.FieldTextInput("d"), "obj1")
-                    .appendField(" " + $L.blockly.pt_andof + " ")
-                    .appendField(new Blockly.FieldTextInput("z"), "obj2");
-                break;
-            case "coords":
-                this.appendDummyInput('obj')
-                    .appendField("x=")
-                    .appendField(new Blockly.FieldTextInput(this.cx), "obj1")
-                    .appendField(" " + $L.blockly.pt_and + " y=")
-                    .appendField(new Blockly.FieldTextInput(this.cy), "obj2");
-                break;
-            case "exp":
-                this.appendDummyInput('obj')
-                    .appendField(" ")
-                    .appendField(new Blockly.FieldTextInput(" "), "obj1");
-                break;
-        }
+//         console.log(this.name()+" : x="+this.cx+" y="+this.cy);
+//     },
+//     onselect: function() {
+
+//     },
+//     onchange: function() {
+//         if (this.isInConstruction()) {
+//             var obj = Blockly.dgpad.CN.find(this.name());
+//             if (obj) {
+//                 // obj.setBlockObj(this);
+//             };
+//             if (this.firstadd) {
+//                 Blockly.dgpad.addName(this.name());
+//                 Blockly.dgpad.refresh();
+//                 this.firstadd = false;
+//             }
+//         }
+//     },
+//     // mutationToDom: function() {
+//     //     var container = document.createElement('mutation');
+//     //     var divisorInput = (this.getFieldValue('PROPERTY') == 'DIVISIBLE_BY');
+//     //     container.setAttribute('divisor_input', divisorInput);
+//     //     return container;
+//     // },
+//     // domToMutation: function(xmlElement) {
+//     //     var divisorInput = (xmlElement.getAttribute('divisor_input') == 'true');
+//     //     this.updateShape_(divisorInput);
+//     // },
+//     updateShape_: function(tpe) {
+//         if (this.getInput('obj')) {
+//             this.removeInput('obj');
+//         }
+//         this.blocktype = tpe;
+//         console.log(tpe)
+//         switch (tpe) {
+//             case "pointon":
+//                 this.appendDummyInput('obj')
+//                     .appendField(" ")
+//                     .appendField(new Blockly.FieldTextInput("C1"), "obj1");
+//                 break;
+//             case "intersect":
+//                 this.appendDummyInput('obj')
+//                     .appendField(" ")
+//                     .appendField(new Blockly.FieldTextInput("d"), "obj1")
+//                     .appendField(" " + $L.blockly.pt_andof + " ")
+//                     .appendField(new Blockly.FieldTextInput("z"), "obj2");
+//                 break;
+//             case "coords":
+//                 this.appendDummyInput('obj')
+//                     .appendField("x=")
+//                     .appendField(new Blockly.FieldTextInput(this.cx), "obj1")
+//                     .appendField(" " + $L.blockly.pt_and + " y=")
+//                     .appendField(new Blockly.FieldTextInput(this.cy), "obj2");
+//                 break;
+//             case "exp":
+//                 this.appendDummyInput('obj')
+//                     .appendField(" ")
+//                     .appendField(new Blockly.FieldTextInput(" "), "obj1");
+//                 break;
+//         }
+//     }
+// };
+// Blockly.Blocks['dgpad_point'] = {
+//     init: function() {
+//         // Agregar la entrada de valor con nombre 'NOM'
+//         this.appendValueInput("NOM")
+//             .setCheck(Text) 
+//             .appendField("Punto cualquiera");
+
+//         // Configurar las conexiones con otros bloques
+//         this.setPreviousStatement(true, null); // Se puede conectar después de otro bloque
+//         this.setNextStatement(true, null); // Se puede conectar antes de otro bloque
+
+//         // Establecer propiedades visuales del bloque
+//         this.setInputsInline(true); // Mantener los elementos en línea
+//         this.setColour(60); // Color del bloque
+//         this.setTooltip('Dibuja un punto de coordenadas aleatorias');
+//     }
+// };
+Blockly.Blocks['dgpad_point'] = {
+    init: function() {
+        // Agregar la entrada de valor con nombre 'NOM'
+        this.appendValueInput("NOM")
+            .setCheck(null) // Permite cualquier tipo de entrada
+            .appendField("Punto cualquiera");
+        this.appendValueInput("VAR")
+            .setCheck(null) // Debe ser una variable
+            .appendField("almacenar en");
+        // Configurar las conexiones con otros bloques
+        this.setPreviousStatement(true, null); // Se puede conectar después de otro bloque
+        this.setNextStatement(true, null); // Se puede conectar antes de otro bloque
+
+        // Establecer propiedades visuales del bloque
+        this.setInputsInline(true); // Mantener los elementos en línea
+        this.setColour(60); // Color del bloque
+        this.setTooltip('Dibuja un punto de coordenadas aleatorias');
     }
 };
+
+  

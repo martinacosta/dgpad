@@ -45,6 +45,7 @@ function SymbolicCompute(_cn) {
                 if (v[0] === 0) return "-" + v[1];
                 return v[0] + "-" + v[1];
                 break;
+            
             case "times":
                 if (contains(v[0], "+,-")) v[0] = "(" + v[0] + ")";
                 if (contains(v[1], "+,-,/")) v[1] = "(" + v[1] + ")";
@@ -94,6 +95,7 @@ function SymbolicCompute(_cn) {
                 if (v[0] === v[1]) return 0;
                 return "minus(" + v[0] + "," + v[1] + ")";
                 break;
+            
             case "times":
                 if ((v[0] === 0) || (v[1] === 0)) return 0;
                 if (v[0] === 1) return v[1];
@@ -130,17 +132,16 @@ function SymbolicCompute(_cn) {
                 break;
             default:
                 return _s;
-                //            default:
-                //                return f + "(" + simplifyFromCode(_t, _m, _t[parseInt(st[1])]) + ")";
+                
         }
 
     };
 
 
     var derivateFromCode = function(_t, _m, _s, _v) {
-        //        console.log("****derivateFromCode="+_s);
+        
         if (_s === _v) return 1;
-        //        if (_s.indexOf(mask)===-1) return 0;
+        
 
         var st = _s.split(_m);
         if (st.length === 1) return 0; // Il s'agit d'une constante
@@ -230,10 +231,7 @@ function SymbolicCompute(_cn) {
                 break;
         }
 
-        //        
-        //        _s = _s.replace(new RegExp(mask + "(\\d+)", "g"), function(m, _d) {
-        //            return tabExpr[_d];
-        //        });
+        
         return 0;
 
     }
@@ -309,13 +307,7 @@ function SymbolicCompute(_cn) {
         var str;
         do {
             str = _s;
-            //            // Remplacement des divisions et multiplications de nombres par le quotient ou produit :
-            //            _s = _s.replace(/(^|[^\^]{1})(\b\d+\.*\d*\b)(\*|\/)(\b\d+\.*\d*\b)([^\^]{1}|$)/g, function(_m, _c, _n1,_op, _n2, _c2) {
-            //                _n1 = parseFloat(_n1);
-            //                _n2 = parseFloat(_n2);
-            //                var r=(_op==="*")?(_n1 * _n2):(_n1 / _n2);
-            //                return "" + _c + r + _c2;
-            //            });
+            
             // Remplacement des puissances de nombres :
             _s = _s.replace(/(\b\d+\.*\d*\b)\^(\b\d+\.*\d*\b)/g, function(_m, _n1, _n2) {
                 _n1 = parseFloat(_n1);
@@ -333,27 +325,10 @@ function SymbolicCompute(_cn) {
                 var r = Math.round(_n1 * _n2 * 1e13) / 1e13;
                 return "" + _c + r + _c2;
             });
-            //            // Remplacement des divisions de nombres par le quotient :
-            //            _s = _s.replace(/([^\^]{1})(\b\d+\.*\d*\b)\/(\b\d+\.*\d*\b)([^\^]{1})/g, function(_m, _c,_n1, _n2,_c2) {
-            //                _n1 = parseFloat(_n1);
-            //                _n2 = parseFloat(_n2);
-            //                return ""+_c+(_n1 / _n2)+_c2;
-            //            });
-            // On commute variable et nombre de sorte que le nombre soit
-            // au début :
-            //            _s = _s.replace(/(^|[^\^]{1})(\b[xyzt]{1}\b)\*(\b\d+\.*\d*\b)([^\^]{1}|$)/g, "$1$3*$2$4");
-            // On commute mots et nombre de sorte que le nombre soit
-            // au début :
-            //            _s = _s.replace(/(^|[^\^]{1})(\b\w+\b)\*(\b\d+\.*\d*\b)([^\^]{1}|$)/g, "$1$3*$2$4");
-            //            console.log(_s);
+            
         } while (str !== _s);
 
-        //        _s=_s.replace(/\*/g,"");
-
-
-        //        _s = _s.replace(/[0-9\.]+([\+\-\*\/\^]){1}/g, function(_m, _n) {
-        //            return EXPS[_n].getVarName();
-        //        });
+        
 
 
         return _s;
@@ -365,7 +340,7 @@ function SymbolicCompute(_cn) {
         var tab = prepareMaskFromCode(mask, _s);
         var simpl = simplifyFromCode(tab, mask, tab[tab.length - 1]);
         _s = restituteCodeFromMask(tab, mask, simpl);
-        //        console.log("me.simplify=" + _s);
+        
         return _s;
     }
 
@@ -379,17 +354,11 @@ function SymbolicCompute(_cn) {
         var der = derivateFromCode(tab, mask, tab[tab.length - 1], _v);
         _s = restituteCodeFromMask(tab, mask, der);
 
-        //        tab = prepareMaskFromCode(mask, _s, _v);
-        //        der = simplifyFromCode(tab, mask, tab[tab.length - 1], _v);
-        //        _s = restituteCodeFromMask(tab, mask, der);
-
-        //        console.log("CODE =" + _s);
-        //        return me.simplify(_s);
-        //        return _s;
+        
 
         _s = me.userCode(me.simplify(_s));
 
-        //        console.log("USER CODE="+_s);
+        
 
         return _s;
 

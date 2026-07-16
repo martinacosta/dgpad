@@ -15,7 +15,8 @@ Blockly.JavaScript['dgpad_object_style_fix'] = function(block) {
     value_name = value_name.replace(/^\((.*)\)$/, "$1");
     value_object=value_object.replace(/^\'(.*)\'$/, "\"$1\"");
     // TODO: Assemble JavaScript into code variable.
-    var code = 'BLK_STL(' + Find(value_object) + ',' + value_name + ");\n";
+    var code = 'BLK_STL(' + value_object+ ',' + value_name + ");\n";
+ 
     return code;
 };
 
@@ -36,7 +37,12 @@ Blockly.dgpad_style_block_js = function(_cmd) {
         return [code, Blockly.JavaScript.ORDER_NONE];
     });
 }
-Blockly.JavaScript['dgpad_style_visibility'] = Blockly.dgpad_style_block_js("setHidden");
+// Blockly.JavaScript['dgpad_style_visibility'] = Blockly.dgpad_style_block_js("setHidden");
+Blockly.JavaScript['dgpad_style_visibility'] = function (block) {
+    const hidden = block.getFieldValue("VISIBILITY");
+    return [`"setHidden", [${hidden}]`, Blockly.JavaScript.ORDER_ATOMIC];
+  };
+
 Blockly.JavaScript['dgpad_style_size'] = Blockly.dgpad_style_block_js("setSize");
 Blockly.JavaScript['dgpad_style_layer'] = Blockly.dgpad_style_block_js("setLayer");
 Blockly.JavaScript['dgpad_style_font'] = Blockly.dgpad_style_block_js("setFontSize");
@@ -57,22 +63,72 @@ Blockly.JavaScript['dgpad_style_arrow'] = function(block) {
 
 
 
-Blockly.JavaScript['dgpad_inputs_deleteValue'] = function(block) {
-    
-    let selectedId = block.getSelectedId();
-    var code = 'CustomInputErase("'+selectedId+'");';
-    console.log(code)
-    return code;
+
+
+
+Blockly.JavaScript["dgpad_inputs_deleteValue"] = function (block) {
+  const id = String(block.getSelectedId?.() || block.getFieldValue?.("ID") || "");
+
+  if (!id) return "";
+
+  return (
+    `;\n(() => {\n` +
+    `  const id = ${JSON.stringify(id)};\n` +
+    `  if (window.$U?.inputValues) window.$U.inputValues[id] = "";\n` +
+    `  (window.parent || window).postMessage({\n` +
+    `    action: "clear-custom-input",\n` +
+    `    id\n` +
+    `  }, "*");\n` +
+    `})();\n`
+  );
 };
 
 
 
 
-Blockly.JavaScript['dgpad_inputs_showHide'] = function(block) {
-    let selectedId = block.getSelectedId();
-    var value_visible = Blockly.JavaScript.valueToCode(block, 'VISIBLE', Blockly.JavaScript.ORDER_ATOMIC);
-    var code = 'CustomInputShow("' + selectedId + '",' + value_visible + ');\n';
-    return code;
-  };
+Blockly.JavaScript["dgpad_inputs_showHide"] = function (block) {
+  const id = block.getFieldValue("ID") || "";
+  const visible = block.getFieldValue("ACTION") === "true";
 
+  // Nota: empieza con ';' para evitar “pegado” con la línea anterior
+  return (
+    `;\nparent.postMessage({` +
+    ` action: "toggle-custom-input-visibility",` +
+    ` id: ${JSON.stringify(id)},` +
+    ` visible: ${visible}` +
+    ` }, "*");\n`
+  );
+};
+
+
+Blockly.JavaScript["dgpad_speakers_showHide"] = function (block) {
+  const id = block.getSelectedId() || "";
+  const visible = block.getActionValue() === "true";
+
+  return `
+(() => {
+  parent.postMessage({
+    action: "toggle-custom-speaker-visibility",
+    id: ${Blockly.JavaScript.quote_(id)},
+    visible: ${visible}
+  }, "*");
+})();
+`;
+};
+
+ Blockly.JavaScript["mathlive_clear"] = function (block) {
+  const id = block.getFieldValue("ID") || "";
+  return "DG.clearMathLive(" + JSON.stringify(id) + ");\n";
+}; 
+
+Blockly.JavaScript["mathlive_visibility"] = function (block) {
+  const id = block.getFieldValue("ID") || "";
+  const action = block.getFieldValue("ACTION") || "show";
+
+  if (action === "hide") {
+    return "DG.hideMathLive(" + JSON.stringify(id) + ");\n";
+  }
+
+  return "DG.showMathLive(" + JSON.stringify(id) + ");\n";
+};
 

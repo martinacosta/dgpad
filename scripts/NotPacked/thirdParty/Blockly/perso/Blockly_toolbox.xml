@@ -18,19 +18,23 @@
             <block type="dgpad_circle"></block>
         </category> -->
     <!-- </category> --> -->
-    <category name="$L.blockly.logic" colour="210">
+    <category id="logic" name="$L.blockly.logic" colour="210">
         <block type="controls_if"></block>
         <block type="controls_if">
             <mutation else="1"></mutation>
         </block>
+        <!-- <block type="switch_case"></block>
+        <block type="case"></block> -->
         <block type="logic_compare"></block>
         <block type="logic_operation"></block>
         <block type="logic_negate"></block>
         <block type="logic_boolean"></block>
         <block type="logic_null"></block>
         <block type="logic_ternary"></block>
+        <block type="switch_case"></block>
+        
     </category>
-    <category name="$L.blockly.loops" colour="120">
+    <category id="loops" name="$L.blockly.loops" colour="120">
         <block type="controls_for" id="Q])V6nf~C#6}]v=lB.Vy" x="63" y="113">
             <field name="VAR">i</field>
             <value name="FROM">
@@ -61,7 +65,7 @@
         <block type="controls_flow_statements"></block>
     </category>
     <sep></sep>
-    <category name="$L.blockly.aspect" colour="65">
+    <category id="aspect" name="$L.blockly.aspect" colour="65">
         <block type="dgpad_style_fix"></block>
         <block type="dgpad_object_style_fix">
             <value name="OBJECT">
@@ -173,24 +177,38 @@
           <field name="NUM">1</field>
         </block>
       </value>
-   
+    </block>
+    <block type="dgpad_speakers_showHide"></block>
+    <block type="mathlive_clear"></block>
+    <block type="mathlive_visibility"></block>
 
         
     </category>
-    <category name="$L.blockly.expression" colour="20">
-        <block type="dgpad_return"></block>
+    <category id="expression" name="$L.blockly.expression" colour="20">
+        <!-- <block type="dgpad_return"></block> -->
         <block type="dgpad_set_object"></block>
         <block type="dgpad_get_object_short"></block>
+        <block type="dgpad_value_of">
+            <value name="NAME">
+                <block type="text">
+                <field name="TEXT">"P1"</field>
+                </block>
+            </value>
+            </block>
+
 		<block type="dgpad_inputs_value"></block> 
-        <block type="dgpad_compute">
-            
-        </block>  
+        <block type="dgpad_compute"></block>
+        <!-- <block type="dgpad_lastObject"></block>
+        <block type="dgpad_name"></block>   -->
         <block type="dgpad_object_name">
             <field name="TEXT">P1</field>
         </block>
         <block type="dgpad_get_object"></block>
         <block type="dgpad_mouse"></block>
         <block type="dgpad_expression_input"></block>
+        
+        <block type="mathlive_value"></block>
+        <block type="mathlive_prompt_value"></block>
         <block type="turtle_get">
             <value name="NUM">
                 <shadow type="math_number">
@@ -256,20 +274,22 @@
             </value>
         </block>
     </category>
-    <category name="$L.blockly.math" colour="230">
+    <category id="math" name="$L.blockly.math" colour="230">
         <block type="math_number"></block>
         <block type="math_arithmetic"></block>
         <block type="math_single"></block>
         <block type="math_trig"></block>
         <block type="math_constant"></block>
         <block type="math_number_property"></block>
-        <block type="math_change">
+        <block type="calcular_mcd"></block>
+        <block type="calcular_mcm"></block>
+        <!-- <block type="math_change">
             <value name="DELTA">
                 <block type="math_number">
                     <field name="NUM">1</field>
                 </block>
             </value>
-        </block>
+        </block> -->
         <block type="math_round"></block>
         <block type="math_on_list"></block>
         <block type="math_modulo"></block>
@@ -297,9 +317,9 @@
                 </block>
             </value>
         </block>
-        <block type="math_random_float"></block>
+        <!-- <block type="math_random_float"></block> -->
     </category>
-    <category name="$L.blockly.turtle_category" colour="180">
+    <category id="turtle" name="$L.blockly.turtle_category" colour="180">
         <block type="turtle_pen"></block>
         <block type="turtle_move">
             <value name="VALUE">
@@ -353,7 +373,7 @@
             </value>
         </block>
         <block type="turtle_colour">
-            <value name="N">
+            <value name="ColorCode">
                 <shadow type="math_number">
                     <field name="NUM">18</field>
                 </shadow>
@@ -424,7 +444,7 @@
             </value>
             <value name="FontSize">
                 <shadow type="math_number">
-                    <field name="NUM">25</field>
+                    <field name="NUM">30</field>
                 </shadow>
             </value>
 			
@@ -449,7 +469,7 @@
             
             <value name="width">
                 <shadow type="math_number">
-                    <field name="NUM">50</field>
+                    <field name="NUM">100</field>
                 </shadow>
             </value>
             			
@@ -460,17 +480,57 @@
                 </shadow>
             </value>
 			
-			<value name="target">
-			    <block type="dgpad_get_object_short"></block>	
-			</value>
+			
         </block>
-		
+        <!-- <block type="dgpad_input_ref">
+        </block>
+        <block type="dgpad_content_obj">
+        </block> -->
+       <block type="turtle_mathlive">
+            <value name="width">
+                <shadow type="math_number">
+                    <field name="NUM">120</field>
+                </shadow>
+            </value>
+            <value name="height">
+                <shadow type="math_number">
+                    <field name="NUM">40</field>
+                </shadow>
+            </value>
+            <value name="latex">
+                <shadow type="mathlive_latex_text">
+                <field name="TEXT">\frac{\placeholder[ph_default_n]{?}}{\placeholder[ph_default_d]{?}}</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="mathlive_placeholder">
+            <value name="VALUE">
+                <shadow type="mathlive_latex_text">
+                    <field name="tex">""</field>
+                </shadow>
+            </value>
+        </block>
+        <block type="turtle_speaker_tts">
+        <value name="TEXT">
+            <shadow type="text">
+            <field name="TEXT">Hola</field>
+            </shadow>
+        </value>
+
+        <value name="SIZE">
+            <shadow type="math_number">
+            <field name="NUM">56</field>
+            </shadow>
+        </value>
+        </block>
+        
+		<block type="dgpad_cronometro_create"></block>
     </category>
-    <category name="$L.blockly.texts" colour="160">
+    <category id="texts" name="$L.blockly.texts" colour="160">
         <block type="dgpad_output_precision"></block>
         <block type="text"></block>
         <block type="text_join"></block>
-        
+        <block type="text_newline"></block>
         <block type="dgpad_tex">
         </block>
         <block type="dgpad_tex_2">
@@ -501,11 +561,11 @@
                 </shadow>
             </value>
         </block>
-        <block type="text_append">
+        <!-- <block type="text_append">
             <value name="TEXT">
                 <shadow type="text"></shadow>
             </value>
-        </block>
+        </block> -->
         <block type="text_isEmpty">
             <value name="VALUE">
                 <shadow type="text">
@@ -546,8 +606,33 @@
                 </shadow>
             </value>
         </block>
+        <block type="turtle_font">
+			<value name="FONTSIZE">
+                <shadow type="math_number">
+                    <field name="NUM">30</field>
+                </shadow>
+            </value>
+		</block>
+        <block type="mathlive_latex_text">
+        </block>
+        <!-- <block type="mathlive_latex_join">
+        </block> -->
+        <block type="mathlive_latex_cmd_0">
+        </block>
+        <block type="mathlive_latex_cmd_1">
+        </block>
+        <block type="mathlive_latex_cmd_2">
+        </block>
+        <block type="mathlive_latex_superscript">
+        </block>
+        <block type="mathlive_latex_subscript">
+        </block>
+        <block type="mathlive_latex_group">
+        </block>
+        <block type="mathlive_latex_parens">
+        </block>
     </category>
-    <category name="$L.blockly.lists" colour="260">
+    <category id="lists" name="$L.blockly.lists" colour="260">
         <block type="dgpad_create_list"></block>
         <block type="dgpad_stop_list"></block>
         <block type="dgpad_push"></block>
@@ -559,24 +644,46 @@
                 </block>
             </value>
         </block>
-        
+        <block type="shuffle_list"></block>
+        <block type="order_list"></block>
         <block type="lists_length"></block>
         <block type="lists_isEmpty"></block>
         <block type="lists_indexOf"></block>
         <block type="lists_getIndex"></block>
         <block type="lists_setIndex"></block>
         <block type="remove_item_from_named_list"></block>
-      <block type="math_number">
-        <field name="NUM">0</field>
-      </block>
+            
       
 		<block type="dgpad_get_list"></block>
         <block type="dgpad_set_list"></block>
-        <block type="dgpad_lista_objetos_tipo"></block>
+        
         <block type="dgpad_lista_NombresObjetos_tipo"></block>
+        
+        <block type="dgpad_lista_nombres_puntos_prefijo">
+            <value name="PREFIX">
+                <block type="text">
+                    
+                </block>
+            </value>
+            
+        </block>
+        <block type="dgpad_lista_exclusiva_ocupantes_nombres">
+            <value name="LIST">
+                <block type="dgpad_get_list_short">
+                </block>
+            </value>
+        </block>
+        <block type="dgpad_lista_exclusiva_ocupantes_nombres_sin_null">
+            <value name="LIST">
+                <block type="dgpad_get_list_short">
+                </block>
+            </value>
+        </block>
+        
+        <!-- <block type="for_each"></block> -->
     </category>
     <!-- MEAG start ><-->
-    <category name="$L.blockly.actions_title" colour="320">
+    <category id="actions" name="$L.blockly.actions_title" colour="320">
       <block type="dgpad_actions_anchor">
 	  <value name="OBJ1">
                 <block type="dgpad_get_point_short">
@@ -641,6 +748,18 @@
                 </shadow>
             </value>
 	  </block>
+      <block type="dgpad_actions_exclusive">
+		<value name="OBJ1">
+                <block type="dgpad_get_point_short">
+                </block>
+            </value>
+		</block>
+        <block type="dgpad_actions_exclusiveList">
+		<value name="OBJ1">
+                <block type="dgpad_get_object_short">
+                </block>
+            </value>
+		</block>
 	  <block type="dgpad_actions_animPause"></block>
 	  <block type="dgpad_actions_animStart"></block>
       <block type="dgpad_actions_audio">
@@ -650,34 +769,29 @@
                 </shadow>
             </value>
 		</block>
+        <block type="dgpad_cronometro_startstop"></block>
+        <block type="tiempo_actual"></block>
+        <block type="tiempo_actual_formato_legible"></block>
     </category>
-    <!-- MEAG end ><-->
-	<!-- MEAG1 start ><-->
-    <!-- <category name="$L.blockly.geometry_title" colour="320"> -->
-      <!-- <block type="dgpad_construction"></block> -->
-      <!-- <block type="dgpad_anglebiss"></block> -->
-	  <!-- <block type="dgpad_plumb"></block> -->
-      <!-- <block type="dgpad_segment"></block> -->
-	  <!-- <block type="segmento"> -->
-		<!-- <value name="ext1"> -->
-                <!-- <shadow type="dgpad_get_point_short_turtle"> -->
-                <!-- </shadow> -->
-            <!-- </value> -->
-		<!-- <value name="ext2"> -->
-                <!-- <shadow type="dgpad_get_point_short_turtle"> -->
-                <!-- </shadow> -->
-            <!-- </value> -->
-	  <!-- </block> -->
-	  <!-- <block type="dgpad_droite"></block> -->
-	  <!-- <block type="dgpad_circle"></block> -->
-	  <!-- <block type="dgpad_point"></block> -->
-	  <!-- <block type="dgpad_get_object_short"></block> -->
-	  
-	 
-    <!-- </category>  -->
+    
+    <!-- <category name="$L.blockly.geometry" colour="310"> -->
+    <!-- <block type="dgpad_point"> -->
+        <!-- <value name="NOM"> Hace referencia al nombre del campo de entrada -->
+            <!-- <block type="text"> -->
+                
+            <!-- </block> -->
+        <!-- </value> -->
+        <!-- <value name="VAR"> Hace referencia al nombre del campo de entrada -->
+            <!-- <block type="text"> -->
+                
+            <!-- </block> -->
+        <!-- </value> -->
+    <!-- </block> -->
+<!-- </category> -->
+
     <!-- MEAG1 end ><-->
     <!-- <sep></sep> -->
-	<category name="$L.blockly.restrictions_title" colour="60">
+	<category id="restrictions" name="$L.blockly.restrictions_title" colour="60">
 		<block type="dgpad_restrictions_ShowCtrl">
 		<value name="BOOL">
               <shadow type="math_number">
@@ -692,18 +806,18 @@
                 </shadow>  
             </value>
 		</block>
-		<block type="dgpad_restrictions_disableButton">
+		<block type="dgpad_restrictions_setButton">
 		
 		</block>
-		<block type="dgpad_restrictions_enableButton">
+		<!-- <block type="dgpad_restrictions_enableButton">
 		
+		</block> -->
+		<block type="dgpad_restrictions_setTool">
 		</block>
-		<block type="dgpad_restrictions_disableTool">
-		
-		</block>
+		<!-- </block>
 		<block type="dgpad_restrictions_enableTool">
 		
-		</block>
+		</block> -->
 		
 		<block type="dgpad_restrictions_Zoom">
 		<value name="BOOL">
@@ -782,9 +896,10 @@
                 </shadow>  
             </value>
 		</block>
+        <block type="dgpad_protect_object">	</block>
 	</category>
 	<!-- <sep></sep> -->
-    <category name="$L.blockly.inputouput" colour="20">
+    <category id="io" name="$L.blockly.inputouput" colour="20">
         <block type="number_prompt">
             <value name="TEXT">
                 <shadow type="text">
@@ -800,23 +915,46 @@
             </value>
         </block>
 		<block type="text_confirm">
-            <value name="TEXT">
+            <value name="MESSAGE">
                 <shadow type="text">
-                    <field name="TEXT">$L.blockly.msgconfirm</field>
+                    <field name="TEXT">$L.blockly.msgconfirm1</field>
                 </shadow>
             </value>
+            <value name="YES_TEXT">
+                <shadow type="text">
+                    <field name="TEXT">$L.blockly.msgconfirm2</field>
+                </shadow>
+            </value>
+            <value name="NO_TEXT">
+                <shadow type="text">
+                    <field name="TEXT">$L.blockly.msgconfirm3</field>
+                </shadow>
+            </value>
+            
         </block>
 		
+        
         <block type="dgpad_print"></block>
         <block type="mostrar_tabla"></block>
-        
+        <block type="dgpad_tts_speak">
+        <value name="TEXT">
+            <shadow type="text">
+            <field name="TEXT">Hola</field>
+            </shadow>
+        </value>
+        </block>
     </category>
-    <category name="$L.blockly.variables" custom="VARIABLE" colour="330"></category>
-    <category name="$L.blockly.functions" custom="PROCEDURE" colour="290">
-		
-	</category>
+    
+        <category name="$L.blockly.locales" custom="VARIABLE" colour="330"></category>
+       <category name="$L.blockly.globales" custom="GLOBAL" colour="200"></category>
+    
     <sep></sep>
-    <category name="$L.blockly.globales" custom="GLOBAL" colour="200"></category>
+    <category id="functions" name="$L.blockly.functions" custom="PROCEDURE" colour="290">
+	
+    <!-- <block type="await_delayt"></block>	 -->
+	</category>
+    
+    
 </xml>
 <!-- <xml id="startBlocks" style="display: none"> -->
 <!-- </xml> -->

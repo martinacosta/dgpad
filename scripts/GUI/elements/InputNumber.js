@@ -1,7 +1,4 @@
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 
 function InputNumber(_owner) {
     $U.extend(this, new GUIElement(_owner, "div"));

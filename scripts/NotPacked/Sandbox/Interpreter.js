@@ -122,12 +122,20 @@ function Interpreter(_win, _canvas) {
         cTag.addEventListener('mouseup', me.Z.mouseReleased, false);
     }
 
+    
+
+    
 
     me.Interpret = function(_s) {
+        try {
+            parent.postMessage({ action: "begin-file-load" }, "*");
+        } catch (_) {}
+
         clearNameSpace();
         var code = $initProgress(_s);
         $macros = null;
         $num_precision = $const_num_precision;
+        
         // Eval is evil ? :
         try {
             eval(code.header);
@@ -135,6 +143,7 @@ function Interpreter(_win, _canvas) {
                 me.removeMouseEvents();
                 var interval = setInterval(function() {
                     if (code.num === code.lines.length) {
+                        console.log("[Interpret] fin con progress bar");
                         clearInterval(interval);
                         $progressBar.hide();
                         $progressBar = null;
@@ -146,6 +155,11 @@ function Interpreter(_win, _canvas) {
                         me.C.clearIndicated();
                         me.C.clearSelected();
                         me.Z.paint(me.E);
+                        
+                        
+                        try {
+                            parent.postMessage({ action: "end-file-load" }, "*");
+                        } catch (_) {}
                         return;
                     }
                     eval(code.lines[code.num]);
@@ -164,14 +178,27 @@ function Interpreter(_win, _canvas) {
         } catch (err) {
             alert(err.message);
         }
+        // if (!$progressBar) {
+        //     me.C.validate(me.E);
+        //     me.C.computeAll();
+        //     me.Z.paint(me.E);
+        //     clearNameSpace();
+
+        // }
         if (!$progressBar) {
+            console.log("[Interpret] fin sin progress bar");
             me.C.validate(me.E);
             me.C.computeAll();
             me.Z.paint(me.E);
             clearNameSpace();
 
+            try {
+                parent.postMessage({ action: "end-file-load" }, "*");
+            } catch (_) {}
         }
     };
+
+    
 
 
     me.LoadPlugins = function(_plugins) {
@@ -195,22 +222,19 @@ function Interpreter(_win, _canvas) {
         clearNameSpace();
     };
 
-    me.InterpretMacro = function(_s) {
-        
+    
+    me.InterpretMacro = function(_s, name) {
         clearNameSpace();
         $macromode = true;
         $macroFinals = [];
         $num_precision = $const_num_precision;
+        // Obtener el último elemento del nombre de la macro (después de dividir por '/')
+        var macroNameParts = name.split('/');  // Dividir por '/'
+        var shortMacroName = macroNameParts[macroNameParts.length - 1];  // Obtener el último elemento
+
         try {
-            // antes de la evaluación, se hace una copia de todos los parámetros
-            // eventuales de la función/macro. Necesita una búsqueda
-            // regexp de los parámetros y la ubicación de las afectaciones
-            // en el interior del bloque función. Esto sirve únicamente
-            // para el parsevariable (ver methode me.p)
-
+            // Extraer parámetros y reescribir la función
             var match = _s.match(/(myexecutefunc=)function.*\((.*)\).*{([\s\S]*)/m);
-
-            // var match = _s.match(/([\s\S]*)function.*\((.*)\).*{([\s\S]*)/m);
             var s = match[1] + "function(" + match[2] + "){";
             var params = match[2].replace(/\s*/g, "").split(",");
             for (var i = 0, len = params.length; i < len; i++) {
@@ -219,16 +243,46 @@ function Interpreter(_win, _canvas) {
                 }
             }
             s += match[3];
-            // Eval is evil ? :
             
+            // Ejecutar la macro
             eval(s);
+    
+            // Revisión de los objetos finales creados por la macro
             for (var i = 0, len = $macroFinals.length; i < len; i++) {
-                me.f($macroFinals[i]).setHidden(false);
+                var obj = me.f($macroFinals[i]);  // Buscar el objeto final
+                obj.setHidden(false);  // Mostrar el objeto
+                
+                // Añadir el objeto final al protocolo usando FrameText
+                // Esto asegura que el protocolo se actualice con los nuevos objetos
+                me.C.getFrame().getTextCons(obj);  // Añadir el objeto al protocolo
             }
+    
+            // Ahora que los objetos finales han sido añadidos al protocolo, cargamos la lista M
+            var M = me.C.getFrame().getList();
+            // console.log("Lista M después de añadir objetos finales:", M.length);  // Verificar el tamaño de M
+    
+            // Revisión de todos los objetos en la lista M
+            var lenM = M.length;
+            for (var i = 0, lenFinals = $macroFinals.length; i < lenFinals; i++) {
+                var obj = me.f($macroFinals[i]);  // Buscar el objeto final
+                
+                // Buscar el objeto en la lista M y modificar su texto
+                for (var j = 0; j < lenM; j++) {
+                    if (M[j].name === obj.getName()) {
+                        // Modificar el texto para incluir la etiqueta de macro
+                        M[j].texto += " (Macro "+shortMacroName+")";
+                        break;
+                    }
+                }
+            }
+    
+            // Actualizar la lista modificada en FrameText
+            me.C.getFrame().setList(M);
+    
         } catch (err) {
             alert(err.message);
         }
-        //        me.C.setDeps();
+    
         $macromode = false;
         $macroFinals = null;
         me.C.validate(me.E);
@@ -236,6 +290,7 @@ function Interpreter(_win, _canvas) {
         me.Z.paint(me.E);
         clearNameSpace();
     };
+    
 
 
     // Encuentra y devuelve el objeto llamado _s :
@@ -332,14 +387,17 @@ function Interpreter(_win, _canvas) {
         me.$U.alert(_msg)
     };
 	
-	/* var CONFIRM = function(_msg, _W, _H) {
-        return me.$U.confirm(_msg, _W, _H)
-}; */
+	
 
-	var CONFIRM = async function(_msg, _W, _H) {
-        respuesta = await me.$U.confirm(_msg, _W, _H);
+// 	var CONFIRM = async function(_msg, _W, _H) {
+//         respuesta = await me.$U.confirm(_msg, _W, _H);
+//         return respuesta;
+//     };
+
+    var CONFIRM = async function(_msg, _W, _H, _font, _size, _style, _align, _yes, _no, _speaker) {
+        var respuesta = await me.$U.confirm(_msg, _W, _H, _font, _size, _style, _align, _yes, _no, _speaker);
         return respuesta;
-    };
+    };
 
     var GLOBAL_SET = function(_var, _val) {
         blockly_namespace[_var] = _val;
@@ -442,17 +500,68 @@ function Interpreter(_win, _canvas) {
         me.Z.blocklyManager.changeTurtleUVW(t.NAME, t.U, t.V, t.W);
     };
 
-    var TURTLE_PRINT = function(_t) {
-        var t = TURTLE_VARS;
-        _t = "" + _t;
-        _t = _t.replace(/([0-9]+\.[0-9]+)/g, function(_a, _m) {
-            var num = parseFloat(_m);
-            num = Math.round(num * $num_precision) / $num_precision;
-            return me.$L.number(num)
-        });
-        t.TAB.push([20, 0, _t, t.U]);
-        t.TAB.push(t.LAST);
-    };
+    // var TURTLE_PRINT = function(_t) {
+    //     var t = TURTLE_VARS;
+    //     _t = "" + _t;
+    //     _t = _t.replace(/([0-9]+\.[0-9]+)/g, function(_a, _m) {
+    //         var num = parseFloat(_m);
+    //         num = Math.round(num * $num_precision) / $num_precision;
+    //         return me.$L.number(num)
+    //     });
+        
+    //     t.TAB.push([20, 0, _t, t.U]);
+    //     t.TAB.push(t.LAST);
+    // };
+
+    var TURTLE_GET_FONT_SIZE = function() {
+    var t = TURTLE_VARS;
+
+    if (!t || !Array.isArray(t.TAB)) return 20;
+
+    for (var i = t.TAB.length - 1; i >= 0; i--) {
+        var cmd = t.TAB[i];
+        if (Array.isArray(cmd) && cmd[0] === 21 && Array.isArray(cmd[3])) {
+            return Number(cmd[3][1]) || 20;
+        }
+    }
+
+    return 20;
+};
+
+var TURTLE_GET_LINE_HEIGHT = function() {
+    return TURTLE_GET_FONT_SIZE() * 1.2;
+};
+
+var TURTLE_PRINT = function(_t) {
+    var t = TURTLE_VARS;
+
+    _t = "" + _t;
+    _t = _t.replace(/([0-9]+\.[0-9]+)/g, function(_a, _m) {
+        var num = parseFloat(_m);
+        num = Math.round(num * $num_precision) / $num_precision;
+        return me.$L.number(num);
+    });
+
+    var lines = _t.split(/\r?\n/);
+    var startPos = TURTLE_POS();
+
+    for (var i = 0; i < lines.length; i++) {
+        t.TAB.push([20, 0, lines[i], t.U]);
+
+        if (i < lines.length - 1) {
+            var h = TURTLE_GET_LINE_HEIGHT();
+            var currentPos = TURTLE_POS();
+
+            TURTLE_UP(true);
+            TURTLE_MV(startPos[0] - currentPos[0], true);
+            TURTLE_TURN(-90);
+            TURTLE_MV(h, true);
+            TURTLE_TURN(90);
+        }
+    }
+
+    t.TAB.push(t.LAST);
+};
 
     var TURTLE_PRINT_IMG = function(_url, _w, _h, _z, _o) {
         var t = TURTLE_VARS;
@@ -492,6 +601,7 @@ function Interpreter(_win, _canvas) {
         var vp = [c * t.V[0] - s * t.U[0], c * t.V[1] - s * t.U[1], c * t.V[2] - s * t.U[2]];
         t.U = up;
         t.V = vp;
+        // console.log(t.U,t.V,t.W)
         me.Z.blocklyManager.changeTurtleUVW(t.NAME, t.U, t.V, t.W);
     };
 
@@ -510,6 +620,7 @@ function Interpreter(_win, _canvas) {
             t.V = vp;
             t.W = wp;
         };
+        // console.log(t.U,t.V,t.W)
         me.Z.blocklyManager.changeTurtleUVW(t.NAME, t.U, t.V, t.W);
     };
 
@@ -576,56 +687,85 @@ function Interpreter(_win, _canvas) {
         t.TAB.push(last);
     };
 
+    
+
     var TURTLE_ROTATE_PT = function(_pt) {
         var c, s;
         var t = TURTLE_VARS;
         var last = t.LAST.slice();
         var p = Math.minus(_pt, last); // translation
+        // console.log(_pt,last);
+    
         if (t.D3) {
-            // Cambio de coordenadas:
-            var pp = [p[0] * t.U[0] + p[1] * t.U[1] + p[2] * t.U[2], p[0] * t.V[0] + p[1] * t.V[1] + p[2] * t.V[2], p[0] * t.W[0] + p[1] * t.W[1] + p[2] * t.W[2]];
-            var d1 = Math.sqrt(pp[0] * pp[0] + pp[1] * pp[1]);
-            var d3D = Math.sqrt(pp[0] * pp[0] + pp[1] * pp[1] + pp[2] * pp[2]);
-            // if (d1 > 1e-13) {
-            //     c = pp[0] / d1; // cosinus
-            //     s = pp[1] / d1; // sinus
-            //     var up = [c * t.U[0] + s * t.V[0], c * t.U[1] + s * t.V[1], c * t.U[2] + s * t.V[2]];
-            //     var vp = [c * t.V[0] - s * t.U[0], c * t.V[1] - s * t.U[1], c * t.V[2] - s * t.U[2]];
-            //     t.U = up;
-            //     t.V = vp;
-            // }
-            if ((d3D > 1e-13) && (d1 > 1e-13)) {
-                c = pp[0] / d1; // cosinus
-                s = pp[1] / d1; // sinus
-                var up = [c * t.U[0] + s * t.V[0], c * t.U[1] + s * t.V[1], c * t.U[2] + s * t.V[2]];
-                var vp = [c * t.V[0] - s * t.U[0], c * t.V[1] - s * t.U[1], c * t.V[2] - s * t.U[2]];
-                t.U = up;
-                t.V = vp;
-                c = d1 / d3D;
-                s = pp[2] / d3D;
-                up = [c * t.U[0] + s * t.W[0], c * t.U[1] + s * t.W[1], c * t.U[2] + s * t.W[2]];
-                var wp = [c * t.W[0] - s * t.U[0], c * t.W[1] - s * t.U[1], c * t.W[2] - s * t.U[2]];
-                t.U = up;
-                t.W = wp;
+            // Cambio de coordenadas en 3D:
+            var pp = [p[0] * t.U[0] + p[1] * t.U[1] + p[2] * t.U[2], 
+                      p[0] * t.V[0] + p[1] * t.V[1] + p[2] * t.V[2], 
+                      p[0] * t.W[0] + p[1] * t.W[1] + p[2] * t.W[2]];
+            
+            var d1 = Math.sqrt(pp[0] * pp[0] + pp[1] * pp[1]); // Magnitud en el plano XY
+            var d3D = Math.sqrt(pp[0] * pp[0] + pp[1] * pp[1] + pp[2] * pp[2]); // Magnitud en 3D
+            // console.log("pp=" + pp, "d1=" + d1, "d3D=" + d3D);
+    
+            if (d3D > 1e-13) {
+                // console.log("d3D=",d3D)
+                if (d1 > 1.5e-13) {
+                    // Caso general: vector tiene componentes en el plano XY
+                    // console.log("d1=",d1);
+                    c = pp[0] / d1; // coseno
+                    s = pp[1] / d1; // seno
+                    var up = [c * t.U[0] + s * t.V[0], c * t.U[1] + s * t.V[1], c * t.U[2] + s * t.V[2]];
+                    var vp = [c * t.V[0] - s * t.U[0], c * t.V[1] - s * t.U[1], c * t.V[2] - s * t.U[2]];
+                    t.U = up;
+                    t.V = vp;
+    
+                    c = d1 / d3D;
+                    s = pp[2] / d3D;
+                    up = [c * t.U[0] + s * t.W[0], c * t.U[1] + s * t.W[1], c * t.U[2] + s * t.W[2]];
+                    var wp = [c * t.W[0] - s * t.U[0], c * t.W[1] - s * t.U[1], c * t.W[2] - s * t.U[2]];
+                    t.U = up;
+                    t.W = wp;
+                } 
+                if(Math.abs(_pt[0]-last[0])<1.5e-11&&Math.abs(_pt[1]-last[1])<1.5e-11){
+                    // Caso especial: el vector está alineado con el eje Z
+                    // console.log("Alineado con el eje Z",d1);
+                    if (pp[2] > 0) {
+                        // Apunta hacia el eje Z positivo
+                        t.U = [0, 0, 1];
+                        t.V = [0, 1, 0];  // Eje X
+                        t.W = [-1, 0, 0];  // Eje Y
+                    } else {
+                        // Apunta hacia el eje Z negativo
+                        t.U = [0, 0, -1];
+                        t.V = [0, 1, 0];  // Eje X
+                        t.W = [1, 0, 0]; // Eje Y (invertido)
+                    }
+                }
             }
         } else {
-            // Cambio de coordenadas:
+           
+            // Cambio de coordenadas en 2D:
             var pp = [p[0] * t.U[0] + p[1] * t.U[1], p[0] * t.V[0] + p[1] * t.V[1]];
             var d1 = Math.sqrt(pp[0] * pp[0] + pp[1] * pp[1]);
             if (d1 > 1e-13) {
-                c = pp[0] / d1; // cosinus
-                s = pp[1] / d1; // sinus
+                c = pp[0] / d1; // coseno
+                s = pp[1] / d1; // seno
                 var up = [c * t.U[0] + s * t.V[0], c * t.U[1] + s * t.V[1], c * t.U[2] + s * t.V[2]];
                 var vp = [c * t.V[0] - s * t.U[0], c * t.V[1] - s * t.U[1], c * t.V[2] - s * t.U[2]];
                 t.U = up;
                 t.V = vp;
+                t.W = [0, 0, 1];
             }
-        };
+        }
+    
+        // Actualización de la tortuga
         me.Z.blocklyManager.changeTurtleUVW(t.NAME, t.U, t.V, t.W);
+        // console.log("t.U=", t.U, "t.V=", t.V, "t.W=", t.W);
     };
+    
 
     var TURTLE_JOIN_PT = function(_pt) {
         TURTLE_ROTATE_PT(_pt);
+        // console.log(Math.distance(TURTLE_VARS.LAST, _pt))
         TURTLE_MV(Math.distance(TURTLE_VARS.LAST, _pt), false);
     };
 
@@ -635,377 +775,577 @@ function Interpreter(_win, _canvas) {
 	
 	
 
-const CreateCustomInput = function(fs, width, ident) {
-    const positiony = me.C.coordsSystem.py(TURTLE_POS()[1]) - fs;
-    const Zo = GetCanvas().getDocObject();
-    let inputs = parent.$U.inputs || {};
-    ident=ident+"A";
-    var nombre = `input${TURTLE_VARS.NAME}-${ident}`;
-    if (!inputs.hasOwnProperty(nombre)) {
-        const input = document.createElement('input');
-        input.id = ident;
-        input.name = nombre;
-        inputs[nombre] = { visibility: "block", id: ident, name: nombre };
-        parent.$U.inputs = inputs;
-        input.style.cssText = `position:absolute; top:${positiony}px; left:${me.C.coordsSystem.px(TURTLE_POS()[0])}px; width:${width*me.$U.escala}px; font-size:${fs*me.$U.escala}px; display:block;`;
-        GetCanvas().getDocObject().parentNode.appendChild(input);
-        
-    } else {
-        const inputId = inputs[nombre].id;
-        const selector = `#${CSS.escape(inputId)}`;
-        const input = GetCanvas().getDocObject().parentNode.querySelector(selector);
-        input.style.cssText = `position:absolute; top:${positiony}px; left:${me.C.coordsSystem.px(TURTLE_POS()[0])}px; width:${width*me.$U.escala}px; font-size:${fs*me.$U.escala}px; display:${inputs[nombre].visibility}`;
-    }
-};
-
-const CustomInputValue = function(id){
-    const inputId = id;
-    const selector = `#${CSS.escape(inputId)}`;
-    const input = GetCanvas().getDocObject().parentNode.querySelector(selector);
-    return input.value;
-};
-
-const CustomInputErase = function(id){
-    const inputId = id;
-    const selector = `#${CSS.escape(inputId)}`;
-    const input = GetCanvas().getDocObject().parentNode.querySelector(selector);
-    input.value="";
-};
 
 
 
-const CustomInputShow = function(id, visible) {
-    let inputs = parent.$U.inputs || {};
-    const inputId = id;
-    const selector = `#${CSS.escape(inputId)}`;
-    const input = GetCanvas().getDocObject().parentNode.querySelector(selector);
-    if (input) {
-        if (visible == 1) {
-            inputs[input.name].visibility = "block";
-        } else {
-            inputs[input.name].visibility = "none";
-        }
-        input.style.cssText = `display:${inputs[input.name].visibility}`;
-        computeAll();
-    } else {
-        console.error("Input not found for selector: " + selector);
-    }
-};
 
-var CreateCustomInputNumber = function(min, max, step, fs, width, ident, target) {
-    const positiony = me.C.coordsSystem.py(TURTLE_POS()[1]) - fs;
-    var Zo = GetCanvas().getDocObject();
-    let inputs = parent.$U.inputs || {};
-    ident = ident + "A";
-    var nombre = `inputNumber${TURTLE_VARS.NAME}-${ident}`;
 
-    let input;
+// window.$U = window.$U || {};
+// if (!window.$U.inputValues) window.$U.inputValues = Object.create(null);
+// if (!window.$U.inputs) window.$U.inputs = Object.create(null); // por si acaso
 
-    if (!inputs.hasOwnProperty(nombre)) {
-        input = document.createElement('input');
-        input.id = ident;
-        input.name = nombre;
-        inputs[nombre] = { visibility: "block", id: ident, name: nombre, type: "number", min: min, max: max, step: step };
-        parent.$U.inputs = inputs;
-        input.type = "number";
-        input.min = min;
-        input.max = max;
-        input.step = step;
-        input.style.cssText = `position:absolute; top:${positiony}px; left:${me.C.coordsSystem.px(TURTLE_POS()[0])}px; width:${width*me.$U.escala}px; font-size:${fs*me.$U.escala}px; display:block;`;
-        GetCanvas().getDocObject().parentNode.appendChild(input);
-    } else {
-        const inputId = inputs[nombre].id;
-        const selector = `#${CSS.escape(inputId)}`;
-        input = GetCanvas().getDocObject().parentNode.querySelector(selector);
-        input.type = "number";
-        input.min = min;
-        input.max = max;
-        input.step = step;
-        input.style.cssText = `position:absolute; top:${positiony}px; left:${me.C.coordsSystem.px(TURTLE_POS()[0])}px; width:${width*me.$U.escala}px; font-size:${fs*me.$U.escala}px; display:` + parent.$U.inputs[nombre].visibility;
-    }
+// window.addEventListener("message", function (e) {
+//   const message = e.data;
+//   if (!message || typeof message !== "object") return;
 
-    input.onchange = function() {
-        var e = target.replaceAll("(", "").replaceAll(")", "");
-        
-        SetExpressionValue(e, parseFloat(input.value));
-        computeAll();
-    };
-};
+//   switch (message.action) {
+//     case "update-input-value": {
+//       const id = String(message.id || "");
+//       if (!id) break;
 
-// var mostrarTablaDatos =function (array) {
-//     var Zo = GetCanvas();
-//     if (!array || array.length === 0) {
-//       alert("No hay datos para mostrar.");
-//       return;
-//     }
-// console.log(array);
+//       window.$U.inputValues[id] = String(message.value ?? "");
 
-//     var modal = document.createElement('div');
-//     console.log(modal)
-//     modal.style.display = 'block';
-//     modal.style.position = 'fixed';
-//     modal.style.zIndex = '100';
-//     modal.style.left = '0';
-//     modal.style.top = '0';
-//     modal.style.width = '300px';
-//     modal.style.height = '300px';
-//     modal.style.overflow = 'auto';
-//     modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-//     modal.style.paddingTop = '60px';
-// console.log("2",modal)
-//     var modalContent = document.createElement('div');
-//     modalContent.style.backgroundColor = '#fefefe';
-//     modalContent.style.margin = '5% auto';
-//     modalContent.style.padding = '20px';
-//     modalContent.style.border = '1px solid #888';
-//     modalContent.style.width = '80%';
-//     modalContent.style.maxWidth = '500px';
-
-//     var table = document.createElement('table');
-//     table.style.width = '100%';
-//     table.style.borderCollapse = 'collapse';
-// console.log("tabla",table)
-//     array.forEach((fila, i) => {
-//         console.log(i)
-//       var tr = document.createElement('tr');
-//       fila.forEach((celda) => {
-//         var td = document.createElement(i === 0 ? 'th' : 'td');
-//         td.style.border = '1px solid #ddd';
-//         td.style.padding = '8px';
-//         td.style.textAlign = 'left';
-//         td.textContent = celda;
-//         tr.appendChild(td);
-//       });
-//       table.appendChild(tr);
-//     });
-// console.log("tabla2",table)
-//     modalContent.appendChild(table);
-// console.log("3",modalContent)
-//     var closeButton = document.createElement('span');
-//     closeButton.style.color = '#aaa';
-//     closeButton.style.float = 'right';
-//     closeButton.style.fontSize = '28px';
-//     closeButton.style.fontWeight = 'bold';
-//     closeButton.innerHTML = '&times;';
-//     closeButton.onclick = function() {
-//       modal.style.display = 'none';
-//     };
-// console.log("4",closeButton)
-//     modalContent.insertBefore(closeButton, modalContent.firstChild);
-//     modal.appendChild(modalContent);
-//     console.log("Contenido del botón de cierre:", closeButton.innerHTML);
-
-//     document.body.appendChild(modal);
-// console.log("5",modal)
-//     window.onclick = function(event) {
-//       if (event.target == modal) {
-//         modal.style.display = 'none';
+//       const exprName = message.expression;
+//       if (exprName) {
+//         SetExpressionValue(exprName, DG.parseNumberLike ? DG.parseNumberLike(message.value) : parseFloat(message.value));
+//         computeAll();
 //       }
+//       break;
+//     }
+
+    
+//     case "rename-point-for-tab": {
+//     const oldN = String(message.oldName || "");
+//     const newN = String(message.newName || "");
+//     if (!oldN || !newN || oldN === newN) break;
+
+//     const tab = TURTLE_VARS?.TAB;
+//     if (!Array.isArray(tab)) break;
+
+//     const OPS = new Set([91, 92]); // 91=input texto (si lo usas), 92=input número
+//     for (const cmd of tab) {
+//         if (Array.isArray(cmd) && OPS.has(cmd[0]) && cmd[3]?.point === oldN) {
+//         cmd[3].point = newN;
+//         }
+//     }
+//     break;
+//     }
+
+
+    
+//     case "delete-input":{
+//         delete window.$U.inputValues[message.id];
+//         delete window.$U.inputs[message.id];
+//         break;
+//     }
+
+//     case "update-mathlive-value": {
+//     const id = String(message.id || "");
+//     if (!id) break;
+
+//     window.$U.mathliveValues[id] = {
+//       value: String(message.value || ""),
+//       prompts: message.prompts || {}
+//     };
+//     break;
+//   }
+
+//   case "delete-mathlive": {
+//     const id = String(message.id || "");
+//     if (!id) break;
+//     delete window.$U.mathliveValues[id];
+//     break;
+//   }
+
+//   case "delete-all-mathlive": {
+//     window.$U.mathliveValues = Object.create(null);
+//     break;
+//   }
+        
+        
+
+//   }
+  
+// });
+
+// window.DG = window.DG || {};
+
+// /**
+//  * Lee el valor cacheado del input.
+//  * Devuelve "" si no existe.
+//  */
+// DG.inputValue = function inputValue(id) {
+//   const key = String(id || "");
+//   if (!key) return "";
+//   return String(window.$U?.inputValues?.[key] ?? "");
+// };
+
+
+// window.$U = window.$U || {};
+// window.$U.mathliveValues = window.$U.mathliveValues || Object.create(null);
+
+// window.addEventListener("message", function(event) {
+//   const data = event.data;
+//   if (!data || typeof data !== "object") return;
+
+//   if (data.action === "update-mathlive-value") {
+//     const id = String(data.id || "");
+//     if (!id) return;
+
+//     window.$U.mathliveValues[id] = {
+//       value: String(data.value || ""),
+//       prompts: data.prompts || {}
 //     };
 //   }
 
-// var mostrarTablaDatos = function(array) {
-//     if (!array || array.length === 0) {
-//       alert("No hay datos para mostrar.");
-//       return;
-//     }
-//     console.log("Datos del array:", array);
+//   if (data.action === "delete-mathlive") {
+//     const id = String(data.id || "");
+//     if (!id) return;
+//     delete window.$U.mathliveValues[id];
+//   }
+// });
+
+// window.DG = window.DG || {};
+
+// /**
+//  * Lee el valor completo cacheado del MathLive.
+//  * Devuelve "" si no existe.
+//  */
+// DG.mathliveValue = function mathliveValue(id) {
+//     var key = String(id || "");
+//     if (!key) return "";
+//     return String(window.$U && window.$U.mathliveValues && window.$U.mathliveValues[key]
+//         ? window.$U.mathliveValues[key].value || ""
+//         : "");
+// };
+
+window.$U = window.$U || {};
+
+window.$U.inputValues = window.$U.inputValues || Object.create(null);
+window.$U.inputs = window.$U.inputs || Object.create(null);
+window.$U.mathliveValues = window.$U.mathliveValues || Object.create(null);
+
+window.DG = window.DG || {};
+
+window.addEventListener("message", function (e) {
+  const message = e.data;
+  if (!message || typeof message !== "object") return;
+
+  switch (message.action) {
+
+    case "update-input-value": {
+      const id = String(message.id || "");
+      if (!id) break;
+
+      window.$U.inputValues[id] = String(message.value ?? "");
+
+      const exprName = message.expression;
+      if (exprName) {
+        SetExpressionValue(
+          exprName,
+          DG.parseNumberLike
+            ? DG.parseNumberLike(message.value)
+            : parseFloat(message.value)
+        );
+        computeAll();
+      }
+      break;
+    }
+
+    case "delete-input": {
+      delete window.$U.inputValues[message.id];
+      delete window.$U.inputs[message.id];
+      break;
+    }
+
+    case "update-mathlive-value": {
+      const id = String(message.id || "");
+      if (!id) break;
+
+      window.$U.mathliveValues[id] = {
+        value: String(message.value || ""),
+        prompts: message.prompts || {}
+      };
+      break;
+    }
+
+    case "delete-mathlive": {
+      const id = String(message.id || "");
+      if (!id) break;
+
+      delete window.$U.mathliveValues[id];
+      break;
+    }
+
+    case "delete-all-mathlive": {
+      window.$U.mathliveValues = Object.create(null);
+      break;
+    }
+
+    case "rename-point-for-tab": {
+      const oldN = String(message.oldName || "");
+      const newN = String(message.newName || "");
+
+      if (!oldN || !newN || oldN === newN) break;
+
+      const tab = TURTLE_VARS?.TAB;
+      if (!Array.isArray(tab)) break;
+
+      const OPS = new Set([91, 92]);
+
+      for (const cmd of tab) {
+        if (
+          Array.isArray(cmd) &&
+          OPS.has(cmd[0]) &&
+          cmd[3]?.point === oldN
+        ) {
+          cmd[3].point = newN;
+        }
+      }
+
+      break;
+    }
+  }
+});
+
+DG.inputValue = function(id) {
+  const key = String(id || "");
+  if (!key) return "";
+  return String(window.$U.inputValues[key] ?? "");
+};
+
+
+
+DG.mathliveValue = function(id) {
+  const key = String(id || "");
+  if (!key) return "";
+
+  return String(
+    window.$U.mathliveValues[key]
+      ? window.$U.mathliveValues[key].value || ""
+      : ""
+  );
+};
+/**
+ * Lee el valor cacheado de una casilla concreta del MathLive.
+ * Devuelve "" si no existe.
+ */
+DG.mathlivePromptValue = function mathlivePromptValue(id, promptName) {
+    var key = String(id || "");
+    var prompt = String(promptName || "");
+    if (!key || !prompt) return "";
+
+    var item = window.$U && window.$U.mathliveValues
+        ? window.$U.mathliveValues[key]
+        : null;
+
+    if (!item || !item.prompts) return "";
+    return String(item.prompts[prompt] || "");
+};
+
+DG.clearMathLive = function clearMathLive(id) {
+  var key = String(id || "");
+  if (!key) return;
+
+  parent.postMessage({
+    action: "clear-mathlive",
+    id: key
+  }, "*");
+
+  if (window.$U && window.$U.mathliveValues) {
+    delete window.$U.mathliveValues[key];
+  }
+};
+
+DG.showMathLive = function showMathLive(id) {
+  var key = String(id || "");
+  if (!key) return;
+
+  parent.postMessage({
+    action: "show-mathlive",
+    id: key
+  }, "*");
+};
+
+DG.hideMathLive = function hideMathLive(id) {
+  var key = String(id || "");
+  if (!key) return;
+
+  parent.postMessage({
+    action: "hide-mathlive",
+    id: key
+  }, "*");
+};
+
+let cronometros = {};
+let cronometrosLegibles = {};
+let cronometroContadores = {};
+
+
+
+function crearCronometro(id) {
+    
+  if (!cronometros[id]) {
+    cronometros[id] = {
+      running: false,
+      startTime: null,
+      elapsed: 0
+    };
+    
+  } else {
+    cronometros[id].running = false;
+    cronometros[id].startTime = null;
+    cronometros[id].elapsed = 0;
+  }
+}
+
+function startCronometro(id) {
+    
+  const c = cronometros[id];
+  if (c && !c.running) {
+    c.running = true;
+    c.startTime = Date.now();
+  }
+}
+
+function stopCronometro(id) {
+  const c = cronometros[id];
+  if (c && c.running) {
+    c.elapsed += Date.now() - c.startTime;
+    c.running = false;
+  }
+}
+
+function resetCronometro(id) {
+    
+  const c = cronometros[id];
+  if (c) {
+    c.elapsed = 0;
+    c.startTime = c.running ? Date.now() : null;
+  }
+}
+
+function valorCronometro(id) {
+  const c = cronometros[id];
+  if (!c) return 0;
+  let tiempo = c.elapsed;
+  if (c.running && c.startTime) {
+    tiempo += Date.now() - c.startTime;
+  }
+  return Math.floor(tiempo / 1000);
+}
+
+
+
   
-//     // Crear el modal
-//     var modal = document.createElement('div');
-//     modal.id = 'custom-modal'; // Asignar un ID al modal
-//     modal.style.display = 'block';
-//     modal.style.position = 'fixed';
-//     modal.style.zIndex = '1000'; // Asegúrate de que el z-index sea alto
-//     modal.style.left = '0';
-//     modal.style.top = '0';
-//     modal.style.width = '300px';
-//     modal.style.height = '300px';
-//     modal.style.overflow = 'auto';
-//     modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-//     modal.style.paddingTop = '60px';
-  
-//     console.log("Modal creado", modal);
-  
-//     // Contenido del modal
-//     var modalContent = document.createElement('div');
-//     modalContent.style.backgroundColor = '#fefefe';
-//     modalContent.style.margin = '5% auto';
-//     modalContent.style.padding = '20px';
-//     modalContent.style.border = '1px solid #888';
-//     modalContent.style.width = '80%';
-//     modalContent.style.maxWidth = '500px';
-  
-//     console.log("Contenido del modal creado", modalContent);
-  
-//     // Crear la tabla
-//     var table = document.createElement('table');
-//     table.style.width = '100%';
-//     table.style.borderCollapse = 'collapse';
-  
-//     try {
-//       array.forEach((fila, i) => {
-//         console.log("Procesando fila", i);
-//         var tr = document.createElement('tr');
-//         fila.forEach((celda) => {
-//           var td = document.createElement(i === 0 ? 'th' : 'td');
-//           td.style.border = '1px solid #ddd';
-//           td.style.padding = '8px';
-//           td.style.textAlign = 'left';
-//           td.textContent = celda;
-//           tr.appendChild(td);
-//         });
-//         table.appendChild(tr);
-//       });
-//     } catch (error) {
-//       console.error("Error al procesar la fila del array:", error);
-//       return;
-//     }
-  
-//     modalContent.appendChild(table);
-  
-//     console.log("Tabla añadida al contenido del modal", modalContent);
-  
-//     // Botón de cierre
-//     var closeButton = document.createElement('span');
-//     closeButton.style.color = '#aaa';
-//     closeButton.style.float = 'right';
-//     closeButton.style.fontSize = '28px';
-//     closeButton.style.fontWeight = 'bold';
-//     closeButton.textContent = '×'; // Usa el carácter directamente
-//     closeButton.onclick = function() {
-//       modal.style.display = 'none';
-//     };
-  
-//     console.log("Botón de cierre creado", closeButton);
-  
-//     modalContent.insertBefore(closeButton, modalContent.firstChild);
-//     modal.appendChild(modalContent);
-  
-//     console.log("Modal completo", modal);
-  
-//     // Asegúrate de que el body está listo
-//     if (document.body) {
-//       document.body.appendChild(modal);
-//       console.log("Modal añadido al body");
-//     } else {
-//       console.error("document.body no está disponible");
-//     }
-  
-//     window.onclick = function(event) {
-//       if (event.target.id === 'custom-modal') {
-//         document.getElementById('custom-modal').style.display = 'none';
-//       }
-//     };
-//   };
+
+
+
+
+
+
+
+
+
+
+
 
 var mostrarTablaDatos = function(array) {
     if (!array || array.length === 0) {
-      alert("No hay datos para mostrar.");
-      return;
+        alert("No hay datos para mostrar.");
+        return;
     }
-    console.log("Datos del array:", array);
-  
-    // Crear el modal
-    var modal = document.createElement('div');
-    modal.id = 'custom-modal'; // Asignar un ID al modal
-    modal.style.display = 'block';
-    modal.style.position = 'fixed';
-    modal.style.zIndex = '1000'; // Asegúrate de que el z-index sea alto
-    modal.style.left = '0';
-    modal.style.top = '0';
-    modal.style.width = '100vw';
-    modal.style.height = '100vh';
-    modal.style.overflow = 'auto';
-    modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
-    modal.style.paddingTop = '60px';
-  
-    console.log("Modal creado", modal);
-  
-    // Contenido del modal
-    var modalContent = document.createElement('div');
-    modalContent.style.backgroundColor = '#fefefe';
-    modalContent.style.margin = '5% auto';
-    modalContent.style.padding = '20px';
-    modalContent.style.border = '1px solid #888';
-    modalContent.style.width = '80%';
-    modalContent.style.maxWidth = '500px';
-  
-    console.log("Contenido del modal creado", modalContent);
-  
-    // Crear la tabla
-    var table = document.createElement('table');
-    table.style.width = '100%';
-    table.style.borderCollapse = 'collapse';
-  
-    // Procesar cada fila del array
-    try {
-      array.forEach((fila, i) => {
-        console.log("Procesando fila", i, ":", fila);
-        var tr = document.createElement('tr');
+
+    var renderTable = function() {
+        var modal = document.createElement('div');
+        modal.id = 'custom-modal';
+        Object.assign(modal.style, {
+            display: 'block',
+            position: 'fixed',
+            zIndex: '1000',
+            left: '0',
+            top: '0',
+            width: '100vw',
+            height: '100vh',
+            overflow: 'auto',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            paddingTop: '60px'
+        });
+
+        var modalContent = document.createElement('div');
+        Object.assign(modalContent.style, {
+            backgroundColor: '#fefefe',
+            margin: '5% auto',
+            padding: '20px',
+            border: '1px solid #888',
+            width: '80%',
+            
+            maxWidth: '90vw',
+            maxHeight: '80vh',
+            overflow: 'auto',
+
+        });
+
+        var table = document.createElement('table');
+        // table.style.width = '100%';
+        // table.style.borderCollapse = 'collapse';
+        Object.assign(table.style, {
+            width: '100%',
+            borderCollapse: 'collapse',
+            display: 'block',
+            overflowX: 'auto',
+            whiteSpace: 'nowrap'
+        });
+
         
-        // Asegurarse de que cada fila es un array
-        if (Array.isArray(fila)) {
-          fila.forEach((celda, j) => {
-            console.log(`Añadiendo celda ${j} con valor:`, celda);
-            var td = document.createElement(i === 0 ? 'th' : 'td');
-            td.style.border = '1px solid #ddd';
-            td.style.padding = '8px';
-            td.style.textAlign = 'left';
-            td.textContent = celda;
-            tr.appendChild(td);
-          });
-        } else {
-          console.error("Fila no es un array:", fila);
+
+        try {
+            array.forEach((fila, i) => {
+                var tr = document.createElement('tr');
+                if (Array.isArray(fila)) {
+                    fila.forEach((celda, j) => {
+                        var td = document.createElement(i === 0 ? 'th' : 'td');
+                        Object.assign(td.style, {
+                            border: '1px solid #ddd',
+                            padding: '8px',
+                            textAlign: 'left'
+                        });
+
+                        try {
+                            const strCelda = String(celda);
+                            if (strCelda.includes('$') || strCelda.includes('$$')) {
+                                const processedCell = strCelda.replace(/\$\$/g, '');
+                                td.innerHTML = parent.katex.renderToString(processedCell, {
+                                    throwOnError: false
+                                });
+                            } else {
+                                td.textContent = strCelda;
+                            }
+                        } catch (error) {
+                            console.error("Error al renderizar LaTeX:", error);
+                            td.textContent = celda;
+                        }
+
+                        tr.appendChild(td);
+                    });
+                } else {
+                    console.error("Fila no es un array:", fila);
+                }
+                table.appendChild(tr);
+            });
+        } catch (error) {
+            console.error("Error al procesar el array:", error);
+            return;
         }
-  
-        table.appendChild(tr);
-      });
-    } catch (error) {
-      console.error("Error al procesar el array:", error);
-      return;
-    }
-  
-    console.log("Tabla creada:", table);
-  
-    modalContent.appendChild(table);
-    console.log("Tabla añadida al contenido del modal", modalContent);
-  
-    // Botón de cierre
-    var closeButton = document.createElement('span');
-    closeButton.style.color = '#aaa';
-    closeButton.style.float = 'right';
-    closeButton.style.fontSize = '28px';
-    closeButton.style.fontWeight = 'bold';
-    closeButton.textContent = '×'; // Usa el carácter directamente
-    closeButton.onclick = function() {
-      modal.style.display = 'none';
+
+        modalContent.appendChild(table);
+
+        var closeButton = document.createElement('span');
+        Object.assign(closeButton.style, {
+            color: '#aaa',
+            float: 'right',
+            fontSize: '28px',
+            fontWeight: 'bold'
+        });
+        closeButton.textContent = '×';
+        closeButton.onclick = () => modal.remove();
+        modalContent.insertBefore(closeButton, modalContent.firstChild);
+
+        var printButton = document.createElement('button');
+        printButton.id = 'print-btn';
+        printButton.textContent = 'Imprimir';
+        printButton.onclick = function() {
+            var w = window.open('', '', 'height=600,width=800');
+            w.document.write('<html><head><title>Imprimir Tabla</title></head><body>');
+            w.document.write(table.outerHTML);
+            w.document.write('</body></html>');
+            w.document.close();
+            w.print();
+        };
+        modalContent.appendChild(printButton);
+
+        var exportButton = document.createElement('button');
+        exportButton.textContent = 'Descargar tabla';
+        exportButton.onclick = function() {
+            let htmlContent = '<html><head><meta charset="UTF-8"></head><body>';
+            htmlContent += '<table border="1" style="border-collapse:collapse;">';
+            for (let row of table.rows) {
+                htmlContent += '<tr>';
+                for (let cell of row.cells) {
+                    let tag = cell.tagName.toLowerCase();
+                    htmlContent += `<${tag} style="border:1px solid #000;padding:5px;">${cell.textContent}</${tag}>`;
+                }
+                htmlContent += '</tr>';
+            }
+            htmlContent += '</table></body></html>';
+
+            const extension = exportSelect.value;
+            const blob = new Blob([htmlContent], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tabla_ejercicios.${extension}`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+        modalContent.appendChild(exportButton);
+
+        var exportSelect = document.createElement('select');
+        ['doc', 'html', 'xls'].forEach(ext => {
+            var option = document.createElement('option');
+            option.value = ext;
+            option.textContent = "." + ext;
+            exportSelect.appendChild(option);
+        });
+        modalContent.appendChild(exportSelect);
+
+        // Botón: Enviar por correo
+        var emailButton = document.createElement('button');
+        emailButton.textContent = 'Enviar por correo';
+        emailButton.onclick = function() {
+            let text = '';
+            for (let row of table.rows) {
+                let cells = Array.from(row.cells).map(cell => cell.textContent);
+                text += cells.join('\t') + '\n';
+            }
+            const subject = encodeURIComponent('Tabla de resultados');
+            const body = encodeURIComponent(text);
+            window.open(`mailto:?subject=${subject}&body=${body}`);
+        };
+        modalContent.appendChild(emailButton);
+
+        // Botón: Enviar por WhatsApp
+        var whatsappButton = document.createElement('button');
+        whatsappButton.textContent = 'Enviar por WhatsApp';
+        whatsappButton.onclick = function() {
+            let text = '';
+            for (let row of table.rows) {
+                let cells = Array.from(row.cells).map(cell => cell.textContent);
+                text += cells.join('\t') + '\n';
+            }
+            const msg = encodeURIComponent(text);
+            window.open(`https://wa.me/?text=${msg}`);
+        };
+        modalContent.appendChild(whatsappButton);
+
+        modal.appendChild(modalContent);
+
+        if (document.body) {
+            GetCanvas().getDocObject().parentNode.appendChild(modal);
+        } else {
+            console.error("document.body no está disponible");
+        }
+
+        window.onclick = function(event) {
+            if (event.target.id === 'custom-modal') {
+                document.getElementById('custom-modal').style.display = 'none';
+            }
+        };
     };
+
+    renderTable();
+};
+
+
+
   
-    console.log("Botón de cierre creado", closeButton);
-  
-    modalContent.insertBefore(closeButton, modalContent.firstChild);
-    modal.appendChild(modalContent);
-  
-    console.log("Modal completo", modal);
-  
-    // Asegúrate de que el body está listo
-    if (document.body) {
-    //   document.body.appendChild(modal);
-      GetCanvas().getDocObject().parentNode.appendChild(modal);
-      console.log("Modal añadido al body");
-    } else {
-      console.error("document.body no está disponible");
-    }
-  
-    window.onclick = function(event) {
-      if (event.target.id === 'custom-modal') {
-        document.getElementById('custom-modal').style.display = 'none';
-      }
-    };
-  };
-  
-  
+
+
+
+
+
+    
+
 
 
 
@@ -1066,16 +1406,7 @@ var mostrarTablaDatos = function(array) {
         return (o ? JSON.parse(me.$U.parseArrayEnglish(o.getValue(_x, _y, _z, _t))) : NaN);
     };
 	
-	// var distancia = function(p1,p2){
-		// return Math.sqrt((p2.getX()-p1.getX())*(p2.getX()-p1.getX())+(p2.getY()-p1.getY())*(p2.getY()-p1.getY()))/me.C.coordsSystem.getUnit();
-	// };
 	
-	// var imantar = function(puntocentro, punto,radi){
-		// if (dist(puntocentro,punto)<GetExpressionValue(radi.getName())){
-			// Move(punto.getName(),puntocentro.getx(),puntocentro.gety()-GetExpressionValue(radi.getName())/2);
-			// punto.setEXY("[x("+puntocentro.getName()+"),y("+puntocentro.getName()+")-"+GetExpressionValue(radi.getName())/2+"]")
-		// }
-	// };
 
     var SetExpressionValue = function(_e, _m) {
         var o = me.f(_e);
@@ -1256,11 +1587,11 @@ var mostrarTablaDatos = function(array) {
 	
 	var fixOx = function(bool){
 		
-		me.C.coordsSystem.setlockOx(bool);
+		me.C.coordsSystem.setLockOx(bool);
 	};
 	
 	var fixOy = function(bool){
-		me.C.coordsSystem.setlockOy(bool);
+		me.C.coordsSystem.setLockOy(bool);
 	};
 	
 	var onlyPositive = function(bool){
@@ -1268,8 +1599,8 @@ var mostrarTablaDatos = function(array) {
 	};
 	
 	var fixOxOy= function(bool){
-		me.C.coordsSystem.setlockOx(bool);
-		me.C.coordsSystem.setlockOy(bool);
+		me.C.coordsSystem.setLockOx(bool);
+		me.C.coordsSystem.setLockOy(bool);
 	}
 		
 	var centerZoom=function(bool){
@@ -1368,19 +1699,78 @@ var mostrarTablaDatos = function(array) {
 		
 	
 	
-	var imantar = function(_punto, _objeto, num) {
-		punto=Find(_punto);
-		objeto=Find(_objeto);
+	// var imantar = function(_punto, _objeto, num) {
+	// 	punto=Find(_punto);
+	// 	objeto=Find(_objeto);
        
-        // Verifica si objeto es una instancia de Expression (asumiendo que Expression es la clase/constructor)
-    if (objeto.getCode()=="area"||objeto.getCode()=="circle1"||objeto.getCode()=="list"||objeto.getCode()=="point"||objeto.getCode()=="line"||objeto.getCode()=="arc3pts"||objeto.getCode()=="circle3"||objeto.getCode()=="circle"||objeto.getCode()=="ray"||objeto.getCode()=="segment"||objeto.getCode()=="circle3pts") {
-        if (punto.getMagnet(objeto)==undefined){punto.addMagnet(objeto,num)}
-		else {var fuerza = punto.getMagnet(objeto); 
-		fuerza[1] = num;}
-         // Si es un tipo 'expression', no hacer nada
-    }else {return}
+    //     // Verifica si objeto es una instancia de Expression (asumiendo que Expression es la clase/constructor)
+    // if (objeto.getCode()=="area"||objeto.getCode()=="circle1"||objeto.getCode()=="list"||objeto.getCode()=="point"||objeto.getCode()=="line"||objeto.getCode()=="arc3pts"||objeto.getCode()=="circle3"||objeto.getCode()=="circle"||objeto.getCode()=="ray"||objeto.getCode()=="segment"||objeto.getCode()=="circle3pts") {
+    //     if (punto.getMagnet(objeto)==undefined){punto.addMagnet(objeto,num)}
+	// 	else {var fuerza = punto.getMagnet(objeto); 
+	// 	fuerza[1] = num;}
+    //      // Si es un tipo 'expression', no hacer nada
+    // }else {return}
 		
-	}
+	// }
+    var imantar = function(_punto, _objeto, num, unit) {
+    var punto = Find(_punto);
+    var objeto = Find(_objeto);
+
+    if (!punto || !objeto) return;
+
+    unit = (unit === "u") ? "u" : "px";
+    num = Number(num);
+    if (!isFinite(num)) return;
+
+    var code = objeto.getCode();
+    var permitido =
+        code == "area" ||
+        code == "circle1" ||
+        code == "list" ||
+        code == "point" ||
+        code == "line" ||
+        code == "arc3pts" ||
+        code == "circle3" ||
+        code == "circle" ||
+        code == "ray" ||
+        code == "segment" ||
+        code == "circle3pts";
+
+    if (!permitido) return;
+
+    var fuerzaPx = num;
+
+    if (unit === "u") {
+        try {
+            var C = punto.getCn ? punto.getCn() : null;
+            var cs =
+                (C && typeof C.getCoordsSystem === "function" ? C.getCoordsSystem() : null) ||
+                (C && C.coordsSystem ? C.coordsSystem : null);
+
+            var pxPerUnit = cs && typeof cs.getUnit === "function" ? Number(cs.getUnit()) : 1;
+            if (!isFinite(pxPerUnit) || pxPerUnit <= 0) pxPerUnit = 1;
+
+            fuerzaPx = num * pxPerUnit;
+        } catch (e) {
+            fuerzaPx = num;
+        }
+    }
+
+    var magnet = punto.getMagnet(objeto);
+
+    if (magnet == undefined || magnet == null) {
+        magnet = punto.addMagnet(objeto, fuerzaPx);
+    } else {
+        magnet[1] = fuerzaPx;
+    }
+
+    if (magnet) {
+        magnet[1] = fuerzaPx;
+        magnet[2] = "px";
+        magnet._uiVal = num;
+        magnet._uiUnit = unit;
+    }
+};
 
 	
 	var FixPointToPoint = function (_p1, _p2) {
@@ -1411,15 +1801,42 @@ var mostrarTablaDatos = function(array) {
 		p1.setXY(x+2,y+2);
 	}
 	
-	var restrictPoint = function (_p1, xmin, xmax) {
-		p1=Find(_p1);
-		if (!p1.getParentLength()){
-			x=p1.getx();
-			y=p1.gety();
-			if (x<xmin){p1.setxy(xmin,y)};
-			if (x>xmax){p1.setxy(xmax,y)};
-		}
-	}
+	// var restrictPoint = function (_p1, xmin, xmax) {
+	// 	p1=Find(_p1);
+	// 	if (!p1.getParentLength()){
+	// 		x=p1.getx();
+	// 		y=p1.gety();
+	// 		if (x<xmin){p1.setxy(xmin,y)};
+	// 		if (x>xmax){p1.setxy(xmax,y)};
+	// 	}
+	// }
+
+    var restrictPoint = function(_p1, xmin, xmax, ymin, ymax) {
+        var p1 = Find(_p1);
+        if (p1 && p1.setBounds) p1.setBounds(xmin, xmax, ymin, ymax);
+    };
+
+    var restrictPointX = function(_p1, xmin, xmax) {
+        var p1 = Find(_p1);
+        if (p1 && p1.setXBounds) p1.setXBounds(xmin, xmax);
+    };
+
+    var restrictPointY = function(_p1, ymin, ymax) {
+        var p1 = Find(_p1);
+        if (p1 && p1.setYBounds) p1.setYBounds(ymin, ymax);
+    };
+
+    var freeRestrictPoint = function(_p1) {
+        var p1 = Find(_p1);
+        if (p1 && p1.clearBounds) p1.clearBounds();
+    };
+
+//proteger un objeto para que no pueda ser borrado ni renombrado
+    var ProtectObject = function (obj,val){
+        o1=Find(obj);
+        o1.setProtected(val);
+    }
+//fin de proteger
 
     var Delete=function(o){
 		obj=Find(o);
@@ -1557,22 +1974,7 @@ var mostrarTablaDatos = function(array) {
 		//  este comando actualiza los widgets
     };
 
-    // var InteractiveInput = function(_m, _type) {
-    //     throw {
-    //         name: "System Error",
-    //         level: "Show Stopper",
-    //         message: "Error detected. Please contact the system administrator.",
-    //         htmlMessage: "Error detected. Please contact the <a href=\"mailto:sysadmin@acme-widgets.com\">system administrator</a>.",
-    //         toString: function() {
-    //             return this.name + ": " + this.message;
-    //         }
-    //     };
-    // };
-
-	// var FixPoint = function(_p, _t) {
-		// _p.setEXY("[x("+_t+"),y("+_t+")]")
-	// };
-
+   
 
     var OrderedIntersection = function(_n, _a, _b, _order, _away) {
         if (me.t(2))
@@ -2041,6 +2443,7 @@ var mostrarTablaDatos = function(array) {
             return me.a("List");
         var _E = me.f(_exp);
         return me.o("ListObject", _n, _E);
+        
     };
 
     var parseBoolean = function(val) {
@@ -2050,7 +2453,9 @@ var mostrarTablaDatos = function(array) {
     var BLK = function(_n, _s) {
         var o = me.f(_n);
         o.blocks.setSource(_s);
-    }
+    };
+    this.BLK = BLK;
+    
 	
 	
 	
@@ -2134,13 +2539,93 @@ var mostrarTablaDatos = function(array) {
                 case "sg": // With segments (for list objects)
                     o.setSegmentsSize(e[1]);
                     break;
-                case "mg": // Magnetismo de los objetos
+                
+                // case "mg": { // Magnetismo de los objetos
+                //     var t = eval("[" + e[1] + "]");
+                //     for (var k = 0; k < t.length; k++) {
+                //         t[k][0] = me.C.find(t[k][0]);
+                //     }
+
+                //     o.setMagnets(t);
+
+                //     for (var k2 = 0; k2 < t.length; k2++) {
+                //         var tgt2 = t[k2][0];
+                //         var r2 = t[k2][1]; 
+
+                //         // ListObject exclusive slots: expand to slot targets
+                //         if (tgt2 && tgt2.expandMagnetForPointIfExclusive) {
+                //         tgt2.expandMagnetForPointIfExclusive(o);
+                //         }
+
+                //         // PointObject exclusive target: restore lock if already "close enough"
+                //         if (
+                //         tgt2 &&
+                //         tgt2.isExclusiveMagnetTarget &&
+                //         tgt2.isExclusiveMagnetTarget() &&
+                //         tgt2.lockMagnet &&
+                //         o.getX && o.getY &&
+                //         tgt2.getX && tgt2.getY
+                //         ) {
+                //         var dx = o.getX() - tgt2.getX();
+                //         var dy = o.getY() - tgt2.getY();
+                //         var rr = Math.abs(r2 || 0);
+                //         if ((dx * dx + dy * dy) <= (rr * rr)) {
+                //             tgt2.lockMagnet(o);
+                //         }
+                //         }
+                //     }
+
+                //     break;
+                //     }
+                case "mg": { // Magnetismo de los objetos
                     var t = eval("[" + e[1] + "]");
+
                     for (var k = 0; k < t.length; k++) {
+                        // target
                         t[k][0] = me.C.find(t[k][0]);
-                    };
+
+                        // fuerza
+                        t[k][1] = Number(t[k][1]);
+
+                        // ✅ unidad (nuevo): default "px"
+                        var rawUnit = (t[k].length >= 3 && t[k][2] != null) ? String(t[k][2]) : "px";
+                        rawUnit = rawUnit.replace(/['"]/g, "").trim().toLowerCase();
+                        t[k][2] = (rawUnit === "u" || rawUnit === "unit" || rawUnit === "units") ? "u" : "px";
+                    }
+
                     o.setMagnets(t);
+
+                    for (var k2 = 0; k2 < t.length; k2++) {
+                        var tgt2 = t[k2][0];
+                        var r2 = t[k2][1];
+
+                        if (tgt2 && tgt2.expandMagnetForPointIfExclusive) {
+                        tgt2.expandMagnetForPointIfExclusive(o);
+                        }
+
+                        if (
+                        tgt2 &&
+                        tgt2.isExclusiveMagnetTarget &&
+                        tgt2.isExclusiveMagnetTarget() &&
+                        tgt2.lockMagnet &&
+                        o.getX && o.getY &&
+                        tgt2.getX && tgt2.getY
+                        ) {
+                        var dx = o.getX() - tgt2.getX();
+                        var dy = o.getY() - tgt2.getY();
+
+                        // Nota: aquí r2 es tal cual venga (px o u). Si necesitas que esto respete "u",
+                        // avísame y lo ajustamos usando CoordsSystem.getUnit().
+                        var rr = Math.abs(r2 || 0);
+
+                        if ((dx * dx + dy * dy) <= (rr * rr)) {
+                            tgt2.lockMagnet(o);
+                        }
+                        }
+                    }
+
                     break;
+                    }
                 case "an": // Animaciones
                     var t = eval("[" + e[1] + "]");
                     me.C.addAnimation(o, t[0][0], t[0][1], t[0][2]);
@@ -2168,6 +2653,46 @@ var mostrarTablaDatos = function(array) {
                     }
                     o.setDragPoints(t);
                     break;
+                // case "mx": // Magnet slots exclusive (ListObject)
+                // if (o.setMagnetSlotsExclusive) o.setMagnetSlotsExclusive(parseInt(e[1], 10) === 1);
+                // break;
+                case "mx": { // Magnet slots exclusive (ListObject)
+                    var isExclusive = (parseInt(e[1], 10) === 1);
+
+                    if (o.setMagnetSlotsExclusive) o.setMagnetSlotsExclusive(isExclusive);
+                    
+                    // If mx is applied AFTER points already loaded mg, rebuild magnet targets now.
+                    // if (isExclusive && o.expandMagnetForPointIfExclusive && me.C.getAllObjectsFromType) {
+                        // Ajusta el string si tu tipo de puntos se llama distinto ("point", "PointObject", etc.)
+                        var points = me.C.getAllObjectsFromType("point") || [];
+                        
+                        for (var i2 = 0; i2 < points.length; i2++) {
+                            
+                            var pt = points[i2];
+                            
+                            if (!pt || !pt.getMagnets) continue;
+
+                            var mags = pt.getMagnets();
+                            
+                            if (!mags || !mags.length) continue;
+
+                            for (var j2 = 0; j2 < mags.length; j2++) {
+                                if (mags[j2] && mags[j2][0] === o) {
+                                    
+                                    o.expandMagnetForPointIfExclusive(pt);
+                                    break;
+                                }
+                            }
+                        }
+                    // }
+                    break;
+                }
+                case "mxt": { // Exclusive magnet target (PointObject)
+                    var raw = (e[1] === undefined || e[1] === null) ? "" : String(e[1]).trim();
+                    var isExclusive = (raw === "1" || raw.toLowerCase() === "true");
+                    if (o.setExclusiveMagnetTarget) o.setExclusiveMagnetTarget(isExclusive);
+                    break;
+                }
             }
         }
     };
@@ -2220,10 +2745,12 @@ var mostrarTablaDatos = function(array) {
                     cs.showOy(e[1] === "true");
                     break;
                 case "isLockOx":
-                    cs.setlockOx(e[1] === "true");
+                    // cs.setlockOx(e[1] === "true");
+                    cs.setLockOx(e[1] === "true");
                     break;
                 case "isLockOy":
-                    cs.setlockOy(e[1] === "true");
+                    // cs.setlockOy(e[1] === "true");
+                    cs.setLockOy(e[1] === "true");
                     break;
                 case "centerZoom":
                     cs.setCenterZoom(e[1] === "true");
@@ -2247,13 +2774,7 @@ var mostrarTablaDatos = function(array) {
         }
     };
 	
-	var getVarillasD= function(){
-		return GetCanvas()["VarillasD"]
-	}
 	
-	var getVarillasC= function(){
-		return GetCanvas()["VarillasC"]
-	}
 
 
     /********************************************************************************
@@ -2268,7 +2789,11 @@ var mostrarTablaDatos = function(array) {
     var EXPS = []; // Tabla de almacenamiento de los objetos implicados en las expresiones elementales
 
     me.CreateFunctionFromExpression = function(_s, _v) {
+        
         //        if (_s === "") _s = "NaN";
+        _s = _s.replace(/\\"/g, '"');
+
+
         var t = _s.split(";");
         t[t.length - 1] = "return (" + t[t.length - 1] + ");";
         var s = t.join(";");
@@ -2284,6 +2809,9 @@ var mostrarTablaDatos = function(array) {
         }
         return f;
     };
+    
+    
+    
 
 
 
@@ -2667,7 +3195,7 @@ var mostrarTablaDatos = function(array) {
 		// se hace que el objeto _o dependa de la lista:
         var dep = s2.replace(/TURTLE_GET\(\"([^\"]+)\"/g, function(m, _d) {
             var o = me.f("blk_turtle_list_" + _d);
-            if ((o) && (_o.getVarName) && (_o.getVarName() != ("blk_turtle_exp_" + _d))) {
+            if ((o) && (_o.getVarName) && (_o.getVarName() != ("blk_turtle_exp__" + _d))) {
                 if ((_o) && (_o.getParent) && (_o.getParent().indexOf(o) === -1)) {
                     _o.addParent(o);
                 }
@@ -2678,7 +3206,7 @@ var mostrarTablaDatos = function(array) {
         // idem pour TURTLE_LENGTH :
         dep = s2.replace(/TURTLE_LENGTH\(\"([^\"]+)\"/g, function(m, _d) {
             var o = me.f("blk_turtle_list_" + _d);
-            if ((o) && (_o.getVarName) && (_o.getVarName() != ("blk_turtle_exp_" + _d))) {
+            if ((o) && (_o.getVarName) && (_o.getVarName() != ("blk_turtle_exp__" + _d))) {
                 if ((_o) && (_o.getParent) && (_o.getParent().indexOf(o) === -1)) {
                     _o.addParent(o);
                 }
@@ -3248,4 +3776,20 @@ enviarMensaje= function(n){
 	
 	parent.parent.postMessage(JSON.stringify(n),"*");
 }
+
+
+
+// Interpreter
+alertModal = function(config) {
+    parent.postMessage({ action: "dgpad-alert", content: config }, "*");
+};
+window.addEventListener("message", function(e) {
+    if (e.data?.action === "set-global-variable") {
+      GLOBAL_SET(e.data.name, e.data.value);
+      
+      
+    }
+  });
+  
+  
 }

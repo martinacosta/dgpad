@@ -2,89 +2,91 @@
 //*************** Homothety Area OBJECT ****************
 //************************************************
 function HomoAreaObject(_construction, _name, _E, _pol, _P) {
-   // Herencia
-  var pol = _pol;
-  var P = _P;
-  var E = _E; 
-  // MEAG start
-  var Cn = _construction;
-  // MEAG end
-  var polRef=[];
-  var puntos=pol.getPtab();
-  var homoPuntos=Cn.getAllObjectsFromType("point");
-  
-  
-  for (var i = 0, len = puntos.length; i < len; i++) {
-	  var ptoExistente=-1;
-	  for (var j = 0, len2 = homoPuntos.length; j < len2; j++) {
-		  
-		  if (homoPuntos[j].isChild(E)&&homoPuntos[j].isChild(pol.getPt(i))){ptoExistente=j}
-		  
-	  }
-	  if (ptoExistente>-1){var vertice=homoPuntos[ptoExistente]}
-	  if (ptoExistente==-1) {var vertice = new HomoPointObject(_construction, "_P", E, pol.getPt(i),P);_construction.add(vertice);}
-	  polRef.push(vertice);
-	  
-	 
-	  
+  const Cn = _construction;
+  const E = _E;
+  const pol = _pol;
+  const P = _P;
+
+  const polRef = [];
+  const puntos = pol.getPtab();
+  const homoPuntos = Cn.getAllObjectsFromType("point");
+
+  function yaExisteHomoteciaDe(A, E, P) {
+    const nombreA = A.getVarName();
+    const nombreE = E.getVarName();
+    const nombreP = P.getVarName();
+    const textoBuscado = $L.object_homothety_description_of + nombreA + $L.object_homothety_description_wrto + nombreP + $L.object_homothety_description_ratio + E.getValue();
+
+    for (let i = 0; i < homoPuntos.length; i++) {
+      const tc = homoPuntos[i].getTextCons?.();
+      if (tc && tc.texto && tc.texto.includes(textoBuscado)) {
+        return homoPuntos[i].getName();
+      }
+    }
+    return null;
   }
-  /* polRef.push(new TransPointObject(_construction, _name, V, P.getPt(0))); */
+
+  for (let i = 0; i < puntos.length; i++) {
+    const A = pol.getPt(i);
+    let vertice = null;
+
+    const nombreExistente = yaExisteHomoteciaDe(A, E, P);
+    if (nombreExistente) {
+      vertice = Cn.find(nombreExistente);
+    } else {
+      vertice = new HomoPointObject(Cn, "_P", E, A, P);
+      Cn.add(vertice);
+    }
+    polRef.push(vertice);
+  }
+
   polRef.push(polRef[0]);
-  /* for (var i = 0, len = puntos.length; i < len; i++) {
-	  var vertice = new HomoPointObject(_construction, "_P", E, pol.getPt(i),P);
-	  polRef.push(vertice);
-	  _construction.add(vertice);
-	  // this.setParent(vertice);
-	  vertice.setParent(E, pol, P, pol.getPt(i));
+
+  const a = new AreaObject(Cn, "pol", polRef);
+  a.setOpacity(0.2);
+  $U.extend(this, a);
+
+  this.setParent(pol, E, P);
+  for (let i = 0; i < polRef.length - 1; i++) {
+    this.addParent(polRef[i]);
   }
-  polRef.push(new HomoPointObject(_construction, _name, E, pol.getPt(0),P)); */
-  var a=new AreaObject(_construction, _name, polRef)
-  // $U.extend(this, new AreaObject(_construction, _name, polRef));
-	a.setOpacity(0.2);
-	$U.extend(this, a);
-	
-	this.setParent(pol,E,P);
-	for (var i = 0, len = polRef.length-1; i < len; i++) {
-		this.addParent(polRef[i]);
-	};
-  this.getCode = function() {
+
+  this.getCode = function () {
     return "area";
   };
 
-
-  this.isMoveable = function() {
+  this.isMoveable = function () {
     return false;
   };
 
-
-  this.compute = function() {
-	for (var i = 0, len = puntos.length; i < len; i++) {
-	  polRef[i].compute();
-	}
-    // MEAG start
+  this.compute = function () {
+    for (let i = 0; i < puntos.length; i++) {
+      polRef[i].compute();
+    }
     if (!Cn.getFrame().ifObject(this.getName())) {
       Cn.getFrame().getTextCons(this);
     }
-    // MEAG end
   };
 
-  this.getSource = function(src) {
-    // if (this.execMacroSource(src)) return;
-    src.geomWrite(false, this.getName(), "Homothety",E.getVarName(), pol.getVarName(), P.getVarName());
+  this.getSource = function (src) {
+    src.geomWrite(false, this.getName(), "Homothety", E.getVarName(), pol.getVarName(), P.getVarName());
   };
 
-  // MEAG start
-  this.getTextCons = function() {
+  this.getTextCons = function () {
     if (this.getParentLength()) {
-      texto = "";
-     texto = this.getName() + $L.object_homothety_description_of + pol.getVarName() + $L.object_homothety_description_wrto + P.getVarName()+$L.object_homothety_description_ratio + E.getValue();
-      parents = [P.getVarName(), pol.getVarName(), E.getVarName()];
+      const texto =
+        this.getName() +
+        $L.object_homothety_description_of +
+        pol.getVarName() +
+        $L.object_homothety_description_wrto +
+        P.getVarName() +
+        $L.object_homothety_description_ratio +
+        E.getValue();
+      const parents = [P.getVarName(), pol.getVarName(), E.getVarName()];
       return {
-        "texto": texto,
-        "parents": parents
+        texto,
+        parents,
       };
     }
-  }
-  // MEAG end
-
+  };
 };

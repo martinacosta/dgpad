@@ -47,6 +47,28 @@ Blockly.JavaScript['dgpad_return'] = function(block) {
     return code;
 };
 
+Blockly.JavaScript['dgpad_lastObject'] = function(block) {
+    
+    
+    var code = `me.Z.getConstruction().getListObject()[me.Z.getConstruction().getListObject().length-1].getName()`;
+    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
+
+
+Blockly.JavaScript['dgpad_name'] = function(block) {
+    var value_obj = Blockly.JavaScript.valueToCode(block, 'OBJ', Blockly.JavaScript.ORDER_ATOMIC);
+
+    // Reemplazar paréntesis con comillas
+    value_obj = value_obj.replace(/\(|\)/g, '"');
+
+    // Generar el código que almacena el nombre en la variable
+    var code = `Find(${value_obj}).getName()`;
+    return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+};
+
+
+
 Blockly.JavaScript['dgpad_get_object_short'] = function(block) {
     var dropdown_name = block.getFieldValue('NAME');
     // Blockly.dgpad.PARS.push(dropdown_name);
@@ -55,7 +77,10 @@ Blockly.JavaScript['dgpad_get_object_short'] = function(block) {
     return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
+
+
 Blockly.JavaScript['dgpad_get_point_short'] = Blockly.JavaScript['dgpad_get_object_short'];
+Blockly.JavaScript['dgpad_get_list_short'] = Blockly.JavaScript['dgpad_get_object_short'];
 Blockly.JavaScript['dgpad_get_point_short_turtle'] = Blockly.JavaScript['dgpad_get_object_short'];
 
 Blockly.JavaScript['dgpad_get_object'] = function(block) {
@@ -67,18 +92,17 @@ Blockly.JavaScript['dgpad_get_object'] = function(block) {
     return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
-// Blockly.JavaScript['dgpad_set_object'] = function(block) {
-//     var name = block.getFieldValue('NAME');
-//     var arg0 = Blockly.JavaScript.valueToCode(block, 'obj_val');
-//     if (arg0 === "") return "";
-    
-//     Blockly.dgpad.pushVARS(name);
-//     var loopVar = 'blockly_var_' + Blockly.JavaScript.variableDB_.getDistinctName(
-//         'temp_var', Blockly.Variables.NAME_TYPE);
-//     var code = "var " + loopVar + " = " + arg0 + " ;\n";
-//     code += 'SET_EXP("' + name + '",' + loopVar + ');\n';
-//     return code;
-// };
+
+Blockly.JavaScript['dgpad_value_of'] = function (block) {
+  var nameCode =
+    Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_NONE) || '""';
+
+  var code = 'Find(' + nameCode + ').getValue()';
+  return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+
+
 
 Blockly.JavaScript['dgpad_set_object'] = function(block) {
     var name = block.getFieldValue('NAME');
@@ -125,19 +149,38 @@ Blockly.JavaScript['dgpad_print'] = function(block) {
 };
 
 
-Blockly.JavaScript['dgpad_inputs_value'] = function(block) {
-    let selectedId = block.getSelectedId();
-    var code = 'CustomInputValue("'+selectedId+'")';
-    
-    return [code, Blockly.JavaScript.ORDER_ATOMIC];
+
+
+Blockly.JavaScript["dgpad_inputs_value"] = function (block) {
+  const id = block.getFieldValue("ID") || "";
+  return [`DG.inputValue(${Blockly.JavaScript.quote_(id)})`, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
 
 
+Blockly.JavaScript["mathlive_value"] = function (block) {
+  const id = block.getFieldValue("ID") || "";
+  return [`DG.mathliveValue(${JSON.stringify(id)})`, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+};
+
+Blockly.JavaScript["mathlive_prompt_value"] = function (block) {
+  const id = block.getFieldValue("ID") || "";
+  const prompt = block.getFieldValue("PROMPT") || "";
+  return [
+    `DG.mathlivePromptValue(${JSON.stringify(id)}, ${JSON.stringify(prompt)})`,
+    Blockly.JavaScript.ORDER_FUNCTION_CALL
+  ];
+};
+
+Blockly.JavaScript['dgpad_cronometro_valor'] = function (block) {
+  const id = `"${block.getFieldValue("ID")}"`;
+  return [`valorCronometro(${id})`, Blockly.JavaScript.ORDER_ATOMIC];
+};
+
 
 Blockly.JavaScript['dgpad_compute'] = function(block) {
     var dropdown_object = block.getFieldValue('OBJECT');
-    var code = dropdown_object + '.compute();'
+    var code = dropdown_object + '.compute();\n'
     return code;
     
 };

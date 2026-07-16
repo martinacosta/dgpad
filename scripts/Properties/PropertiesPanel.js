@@ -9,6 +9,8 @@ function PropertiesPanel(_canvas) {
     var Cn = canvas.getConstruction();
     $U.extend(this, new VerticalBorderPanel(canvas, 240, false));
     me.setBounds(me.getBounds().left + 15, -5, 0, 0); // Le fond n'est pas affiché
+    me._syncing = false;
+
 
 	var xx = 0,
 		yy = 0,
@@ -96,6 +98,21 @@ function PropertiesPanel(_canvas) {
     var props_color = new props_colorPanel(me);
     var props_grid = new props_gridPanel(me);
     var props_message = new props_messagePanel(me);
+    // Devuelve el objeto actualmente mostrado (lo guardan los subpaneles)
+    me.getObj = function () {
+    return props_color.obj || props_name.obj || props_grid.obj || null;
+    };
+
+    // Refresca los controles con los valores actuales del objeto, sin cambiar selección
+    me.refreshValues = function () {
+    if (props_grid.isVisible && props_grid.isVisible() && props_grid.setObj) props_grid.setObj();
+    if (props_name.isVisible && props_name.isVisible() && props_name.setObj) props_name.setObj();
+    if (props_color.isVisible && props_color.isVisible() && props_color.setObj) props_color.setObj();
+    console.log("[PROPS] refreshValues obj =", me.getObj()?.getName?.());
+
+    };
+
+
     // Une ineptie necessaire parce que sinon le clavier virtuel
     // de l'ipad change la position du panneau de propriété :
     if (Object.touchpad) {
@@ -104,7 +121,22 @@ function PropertiesPanel(_canvas) {
 
     props_message.show();
 
+    // Objeto actualmente mostrado en el panel (para poder refrescar tras undo/redo)
+    me.obj = null;
+
+    me.getObj = function () {
+    return me.obj;
+    };
+
+    // Re-pinta los controles con los valores actuales del objeto
+    me.refreshValues = function () {
+    if (me.obj) me.showProperties(me.obj);
+    };
+
+
     me.showProperties = function(_obj) {
+        me.obj = _obj; // ✅ para poder refrescar luego en undo/redo
+        me._syncing = true;   // ⛔️ estamos sincronizando UI
         if ($U.isMobile.mobilePhone()) {
             props_color.clearContent();
             props_message.clearContent();
@@ -132,8 +164,18 @@ function PropertiesPanel(_canvas) {
                 window.scrollTo(0, 0);
             }
         }
+        me._syncing = false;  // ✅ fin de sincronización
     };
     //
+
+    /**
+         * Rehidrata el UI (sliders/checkboxes) con los valores actuales.
+         * Ideal para llamar tras Undo/Redo.
+         */
+        me.refresh = function() {
+            if (lastObj) me.showProperties(lastObj);
+        };
+
     me.compute = function() {
         Cn.computeAll();
     };
@@ -298,6 +340,8 @@ function props_messagePanel(_owner) {
 }
 
 
+
+
 function props_gridPanel(_owner) {
     var me = this;
     $U.extend(this, new props_panel(_owner));
@@ -311,10 +355,34 @@ function props_gridPanel(_owner) {
     title.setStyle("color", "#252525");
     title.setBounds(0, 10, 220, 20);
 
-    var HEXcallback = function(_c) {
-        CS.setColor(_c);
+    
+
+    var commitUndo = function (methodName, oldVal, newVal) {
+        if (!canvas || !canvas.undoManager) return;
+        if (canvas.undoManager.isApplying) return;
+        if (typeof canvas.undoManager.recordPropertyChange !== "function") return;
+        if (oldVal === newVal) return;
+        canvas.undoManager.recordPropertyChange(CS, methodName, oldVal, newVal);
+    };
+
+    var HEXcallback = function (_hex) {
+        if (_owner._syncing) return;
+
+        if (_colorStart === null) _colorStart = CS.getColor();
+        CS.setColor(_hex);
         me.repaint();
-    }
+
+        if (_colorTimer) clearTimeout(_colorTimer);
+        _colorTimer = setTimeout(function () {
+            var end = CS.getColor();
+            commitUndo("setColor", _colorStart, end);
+            _colorStart = null;
+            _colorTimer = null;
+        }, 200);
+    };
+
+    
+
     if (!$U.isMobile.mobilePhone()) {
         var cp = new ColorPicker(me.getDocObject(), 10, 40, 200, ch);
         cp.setHEXcallback(HEXcallback);
@@ -323,108 +391,136 @@ function props_gridPanel(_owner) {
         ch = 40;
 
 
-    var FONTcallback = function(_s) {
+    // ---- Sliders
+    var FONTAXIScallback = function (_s) {
+        if (_owner._syncing) return;
         CS.setFontSize(_s);
         me.repaint();
-    }
-    var sFont = new slider(me.getDocObject(), 10, ch, 200, 40, 6, 60, CS.getFontSize(), FONTcallback);
-    sFont.setValueWidth(40);
-    sFont.setLabel($L.props_font, 110);
-    sFont.setTextColor("#252525");
-    sFont.setValuePrecision(1);
-    sFont.setBackgroundColor("rgba(0,0,0,0)");
+    };
+    var sAxisFont = new slider(me.getDocObject(), 10, ch, 200, 40, 6, 60, CS.getFontSize(), FONTAXIScallback);
+    sAxisFont.setValueWidth(40);
+    sAxisFont.setLabel($L.props_font, 110);
+    sAxisFont.setTextColor("#252525");
+    sAxisFont.setValuePrecision(1);
+    sAxisFont.setBackgroundColor("rgba(0,0,0,0)");
+    sAxisFont.setOnDragEnd((startVal, endVal) => commitUndo("setFontSize", startVal, endVal));
     ch += 40;
 
-    var AXIScallback = function(_s) {
+    var AXIScallback = function (_s) {
+        if (_owner._syncing) return;
         CS.setAxisWidth(_s);
         me.repaint();
-    }
+    };
     var sAxis = new slider(me.getDocObject(), 10, ch, 200, 40, 0.5, 10, CS.getAxisWidth(), AXIScallback);
     sAxis.setValueWidth(40);
     sAxis.setLabel($L.props_axis_size, 110);
     sAxis.setTextColor("#252525");
     sAxis.setValuePrecision(0.5);
     sAxis.setBackgroundColor("rgba(0,0,0,0)");
+    sAxis.setOnDragEnd((startVal, endVal) => commitUndo("setAxisWidth", startVal, endVal));
     ch += 40;
-    var GRIDcallback = function(_s) {
+
+    var GRIDcallback = function (_s) {
+        if (_owner._syncing) return;
         CS.setGridWidth(_s);
         me.repaint();
-    }
-    var sAxis = new slider(me.getDocObject(), 10, ch, 200, 40, 0.1, 2, CS.getGridWidth(), GRIDcallback);
-    sAxis.setValueWidth(40);
-    sAxis.setLabel($L.props_grid_size, 110);
-    sAxis.setTextColor("#252525");
-    sAxis.setValuePrecision(0.1);
-    sAxis.setBackgroundColor("rgba(0,0,0,0)");
+    };
+    var sGrid = new slider(me.getDocObject(), 10, ch, 200, 40, 0.1, 2, CS.getGridWidth(), GRIDcallback);
+    sGrid.setValueWidth(40);
+    sGrid.setLabel($L.props_grid_size, 110);
+    sGrid.setTextColor("#252525");
+    sGrid.setValuePrecision(0.1);
+    sGrid.setBackgroundColor("rgba(0,0,0,0)");
+    sGrid.setOnDragEnd((startVal, endVal) => commitUndo("setGridWidth", startVal, endVal));
     ch += 50;
 
-
-    var SHGRIDcallback = function(_s) {
+    // ---- Checkboxes
+    var SHGRIDcallback = function (_s) {
+        if (_owner._syncing) return;
+        var old = CS.isGrid();
         CS.showGrid(_s);
+        commitUndo("showGrid", old, _s);
         me.repaint();
-    }
+    };
     var cbshowCS = new Checkbox(me.getDocObject(), 10, ch, 200, 30, CS.isGrid(), $L.props_grid_show, SHGRIDcallback);
     cbshowCS.setTextColor("#252525");
     ch += 30;
 
-    var OXcallback = function(_s) {
+    var OXcallback = function (_s) {
+        if (_owner._syncing) return;
+        var old = CS.isOx();
         CS.showOx(_s);
+        commitUndo("showOx", old, _s);
         me.repaint();
-    }
+    };
     var cbshowOX = new Checkbox(me.getDocObject(), 10, ch, 200, 30, CS.isOx(), $L.props_ox_show, OXcallback);
     cbshowOX.setTextColor("#252525");
     ch += 30;
 
-    var OYcallback = function(_s) {
+    var OYcallback = function (_s) {
+        if (_owner._syncing) return;
+        var old = CS.isOy();
         CS.showOy(_s);
+        commitUndo("showOy", old, _s);
         me.repaint();
-    }
+    };
     var cbshowOY = new Checkbox(me.getDocObject(), 10, ch, 200, 30, CS.isOy(), $L.props_oy_show, OYcallback);
     cbshowOY.setTextColor("#252525");
     ch += 30;
 
-    var LockXcallback = function(_s) {
-        CS.setlockOx(_s);
+    // ✅ nombres reales (como la versión buena)
+    var LockXcallback = function (_s) {
+        if (_owner._syncing) return;
+        var old = CS.isLockOx();
+        CS.setLockOx(_s);
+        commitUndo("setLockOx", old, _s);
         me.repaint();
-    }
-    var cblockX = new Checkbox(me.getDocObject(), 10, ch, 200, 30, CS.islockOx(), $L.props_ox_lock, LockXcallback);
+    };
+    var cblockX = new Checkbox(me.getDocObject(), 10, ch, 200, 30, CS.isLockOx(), $L.props_ox_lock, LockXcallback);
     cblockX.setTextColor("#252525");
     ch += 30;
 
-    var LockYcallback = function(_s) {
-        CS.setlockOy(_s);
+    var LockYcallback = function (_s) {
+        if (_owner._syncing) return;
+        var old = CS.isLockOy();
+        CS.setLockOy(_s);
+        commitUndo("setLockOy", old, _s);
         me.repaint();
-    }
-    var cblockY = new Checkbox(me.getDocObject(), 10, ch, 200, 30, CS.islockOy(), $L.props_oy_lock, LockYcallback);
+    };
+    var cblockY = new Checkbox(me.getDocObject(), 10, ch, 200, 30, CS.isLockOy(), $L.props_oy_lock, LockYcallback);
     cblockY.setTextColor("#252525");
     ch += 30;
 
-
-    var OnlyPoscallback = function(_s) {
+    var OnlyPoscallback = function (_s) {
+        if (_owner._syncing) return;
+        var old = CS.isOnlyPos();
         CS.setOnlyPos(_s);
+        commitUndo("setOnlyPos", old, _s);
         me.repaint();
     };
     var cbonlypos = new Checkbox(me.getDocObject(), 10, ch, 200, 30, CS.isOnlyPos(), $L.props_only_pos, OnlyPoscallback);
     cbonlypos.setTextColor("#252525");
     ch += 30;
 
-    var CenterZcallback = function(_s) {
+    var CenterZcallback = function (_s) {
+        if (_owner._syncing) return;
+        var old = CS.isCenterZoom();
         CS.setCenterZoom(_s);
+        commitUndo("setCenterZoom", old, _s);
         me.repaint();
     };
-
     var cbcenterzoom = new Checkbox(me.getDocObject(), 10, ch, 200, 30, CS.isCenterZoom(), $L.props_center_zoom, CenterZcallback);
     cbcenterzoom.setTextColor("#252525");
 
-
-    this.setObj = function() {
-        if (!$U.isMobile.mobilePhone()) {
+    // ---- Sync UI desde valores actuales
+    this.setObj = function () {
+        if (cp && !$U.isMobile.mobilePhone()) {
             cp.setHEX(CS.getColor());
         }
     };
-
     me.addContent(title);
 }
+
 
 
 function props_namePanel(_owner) {
@@ -433,12 +529,13 @@ function props_namePanel(_owner) {
     me.setAttr("className", "props_nameDIV");
     me.transition("translate_x", 0.2, 200);
 
-
     var input = new InputText(me);
     input.setBounds(10, 10, 100, 25);
     me.addContent(input);
 
     var show_callback = function(_val) {
+        const old = me.obj.getShowName();
+        canvas.undoManager.recordPropertyChange(me.obj, 'setShowName', old, _val);
         me.obj.setShowName(_val);
         me.repaint();
     }
@@ -448,14 +545,40 @@ function props_namePanel(_owner) {
 
     input.valid_callback = function(_t) {};
 
+    
     input.keyup_callback = function(_t) {
+        const oldName = me.obj.getName();     // 👈 antes
         me.obj.setName(_t);
+        if ($U.renamePointInInputMeta) $U.renamePointInInputMeta(oldName, _t);  // 👈 después
+        if ($U.renamePointInMathLiveMeta) $U.renamePointInMathLiveMeta(oldName, _t);
+
         me.obj.setShowName(true);
         show.setValue(true);
         me.obj.refreshChildsNames();
-        me.repaint();
-    };
 
+        // Eliminar los símbolos $ antes de procesar con KaTeX
+        let processedName = _t.replace(/\$/g, ''); // Eliminar todos los $ antes de renderizar
+
+        // Usar $U.katexLoaded para cargar KaTeX si no está disponible
+        if (!$U.katexLoaded(function() {
+            try {
+                // Renderizar el nombre con KaTeX sin los delimitadores de LaTeX
+                me.obj.displayName = window.katex.renderToString(processedName, {
+                    throwOnError: false
+                });
+            } catch (error) {
+                console.error("Error al renderizar el nombre con KaTeX:", error);
+                me.obj.displayName = _t; // Si falla, usar el nombre normal
+            }
+
+            me.repaint(); // Actualizar el renderizado
+        })) {
+            console.log("KaTeX aún no está cargado.");
+            me.obj.displayName = _t; // Si KaTeX no está disponible, usar el nombre normal
+        }
+
+        me.repaint(); // Actualizar el renderizado
+    };
 
     this.focus = function() {
         input.focus();
@@ -479,6 +602,8 @@ function props_namePanel(_owner) {
         }
     };
 }
+
+
 
 function props_colorPanel(_owner) {
     var me = this;
@@ -505,11 +630,15 @@ function props_colorPanel(_owner) {
 
     me.setAttr("className", $U.isMobile.mobilePhone() ? "props_colorDIV_Mobile" : "props_colorDIV");
     me.transition("translate_x", 0.2, 200);
+    
 
     var HEXcallback = function(_hex) {
         if (setall)
             _owner.setAllColor(me.obj.getFamilyCode(), _hex);
         else
+            old = me.obj.getColor().getHEX();
+
+            canvas.undoManager.recordPropertyChange(me.obj, 'setColor', old, _hex);
             me.obj.setColor(_hex);
         me.repaint();
     };
@@ -523,6 +652,7 @@ function props_colorPanel(_owner) {
     };
 
     var SZcallback = function(_val) {
+        if (me._syncing) return;   // ⛔️ NO aplicar cambios
         if (setall)
             _owner.setAllSize(me.obj.getFamilyCode(), _val);
         else {
@@ -530,6 +660,7 @@ function props_colorPanel(_owner) {
                 me.obj.setSegmentsSize(0.1);
                 segSize.setValue(0.1);
             }
+            
             me.obj.setSize(_val);
             me.obj.compute();
             me.obj.computeChilds();
@@ -562,6 +693,8 @@ function props_colorPanel(_owner) {
         if (setall)
             _owner.setAllFontSize(me.obj.getFamilyCode(), _val);
         else
+            old = me.obj.getFontSize();
+            canvas.undoManager.recordPropertyChange(me.obj, 'setFontSize', old, _val);
             me.obj.setFontSize(_val);
         me.repaint();
     };
@@ -594,6 +727,8 @@ function props_colorPanel(_owner) {
         if (setall)
             _owner.setAllPtShape(_val);
         else
+            old = me.obj.getShape();
+            canvas.undoManager.recordPropertyChange(me.obj, 'setShape', old, _val);
             me.obj.setShape(_val);
         me.repaint();
     };
@@ -604,6 +739,8 @@ function props_colorPanel(_owner) {
         if (setall)
             _owner.setAllDash(me.obj.getFamilyCode(), _val);
         else
+            old = me.obj.isDash();
+            canvas.undoManager.recordPropertyChange(me.obj, 'setDash', old, _val);
             me.obj.setDash(_val);
         me.repaint();
     };
@@ -628,6 +765,8 @@ function props_colorPanel(_owner) {
         if (setall)
             _owner.setAllNoMouse(me.obj.getFamilyCode(), _val);
         else
+            old = me.obj.isNoMouseInside();
+            canvas.undoManager.recordPropertyChange(me.obj, 'setNoMouseInside', old, _val);
             me.obj.setNoMouseInside(_val);
         me.repaint();
     };
@@ -697,23 +836,17 @@ function props_colorPanel(_owner) {
         sSize.setValuePrecision(0.5);
         sSize.setBackgroundColor("rgba(0,0,0,0)");
         sSize.setValue(me.obj.getSize());
-		// }
-		//añade un cursor tamaño que cambia el tamaño del boton
+        let _sizeStart;
+        sSize.setOnDragStart(() => { _sizeStart = me.obj.getSize(); });
+        sSize.setOnDragEnd(() => {
+            if (canvas.undoManager?.isApplying) return;
+        // Registrar una sola vez cuando se suelta el cursor:
+        canvas.undoManager.recordPropertyChange(me.obj, 'setSize', _sizeStart, me.obj.getSize());console.log("registró",me.obj.getSize());
+        });
+       
+
+
 		
-		// if (me.obj.getCode() === "blockly_button") {
-			/* ch += sh; */
-            // sSize.setMin(2);
-            // sSize.setMax(8);
-            // sSize.setValuePrecision(0.1);
-            // sSize.setValue(me.obj.getSize());
-			// sSize = new slider(me.getDocObject(), 10, ch, 200, sh, 2.5, 8, me.obj.getSize(), SZcallback);
-        // sSize.setValueWidth(40);
-        // sSize.setLabel($L.props_size, 80);
-        // sSize.setTextColor("#252525");
-        // sSize.setValuePrecision(0.5);
-        // sSize.setBackgroundColor("rgba(0,0,0,0)");
-        // sSize.setValue(me.obj.getSize());
-		// }
 		
         if (me.obj.getCode() === "list") {
             ch += sh;
@@ -727,6 +860,12 @@ function props_colorPanel(_owner) {
             segSize.setTextColor("#252525");
             segSize.setValuePrecision(0.1);
             segSize.setBackgroundColor("rgba(0,0,0,0)");
+            let _segSizeStart;
+            segSize.setOnDragStart(() => { _segSizeStart = me.obj.getSegmentsSize(); });
+            segSize.setOnDragEnd(() => {
+            canvas.undoManager.recordPropertyChange(me.obj, 'setSegmentsSize', _segSizeStart, me.obj.getSegmentsSize());
+            });
+
         }
 
         // if (!me.obj.getCode() === "blockly_button") {
@@ -739,6 +878,13 @@ function props_colorPanel(_owner) {
         sOpacity.setValuePrecision(0.01);
         sOpacity.setBackgroundColor("rgba(0,0,0,0)");
         sOpacity.setValue(me.obj.getOpacity());
+        let _opacityStart;
+        sOpacity.setOnDragStart(() => { _opacityStart = me.obj.getOpacity(); });
+        sOpacity.setOnDragEnd(() => {
+        // Registrar una sola vez cuando se suelta el cursor:
+        canvas.undoManager.recordPropertyChange(me.obj, 'setOpacity', _opacityStart, me.obj.getOpacity());
+        });
+
 		
 
         ch += sh;
@@ -749,6 +895,12 @@ function props_colorPanel(_owner) {
         sLayer.setValuePrecision(1);
         sLayer.setBackgroundColor("rgba(0,0,0,0)");
         sLayer.setValue(me.obj.getLayer());
+        let _layerStart;
+        sLayer.setOnDragStart(() => { _layerStart = me.obj.getLayer(); });
+        sLayer.setOnDragEnd(() => {
+        canvas.undoManager.recordPropertyChange(me.obj, 'setLayer', _layerStart, me.obj.getLayer());
+        });
+
 		// }
 
         ch += sh;
@@ -759,6 +911,12 @@ function props_colorPanel(_owner) {
         sFont.setValuePrecision(1);
         sFont.setBackgroundColor("rgba(0,0,0,0)");
         sFont.setValue(me.obj.getFontSize());
+        let _fontStart;
+        sFont.setOnDragStart(() => { _fontStart = me.obj.getFontSize(); });
+        sFont.setOnDragEnd(() => {
+        canvas.undoManager.recordPropertyChange(me.obj, 'setFontSize', _fontStart, me.obj.getFontSize());
+        });
+
 
         // if (!me.obj.getCode() === "blockly_button") {
 		ch += sh;
@@ -781,6 +939,12 @@ function props_colorPanel(_owner) {
             sPrec.setValue(precVal(me.obj.getPrecision()));
             sPrec.setLabel($L.props_length, 80);
         }
+        let _precStart;
+        sPrec.setOnDragStart(() => { _precStart = me.obj.getPrecision(); });
+        sPrec.setOnDragEnd(() => {
+        canvas.undoManager.recordPropertyChange(me.obj, 'setPrecision', _precStart, me.obj.getPrecision());
+        });
+
 		// }
 
         ch += sh;
@@ -809,6 +973,12 @@ function props_colorPanel(_owner) {
             sInc.setBackgroundColor("rgba(0,0,0,0)");
             sInc.setValue(me.obj.getIncrement());
             ch += sh;
+            let _incStart;
+            sInc.setOnDragStart(() => { _incStart = me.obj.getIncrement(); });
+            sInc.setOnDragEnd(() => {
+            canvas.undoManager.recordPropertyChange(me.obj, 'setIncrement', _incStart, me.obj.getIncrement());
+            });
+
         }
 		
 
@@ -845,6 +1015,54 @@ function props_colorPanel(_owner) {
             cbTrack.setValue(me.obj.isTrack());
         }
         ch += cbh;
+        // --- Exclusivo (imanes) : point + list ------------------------------------
+        if (me.obj && (me.obj.getCode() === "point" || me.obj.getCode() === "list")) {
+        // ch += cbh;
+
+        var isPoint = (me.obj.getCode() === "point");
+        var labelExclusive = ($L && $L.props_exclusive) ? $L.props_exclusive : "Exclusivo";
+
+        var getExclusive = function () {
+            if (isPoint) {
+            return (me.obj.isExclusiveMagnetTarget && me.obj.isExclusiveMagnetTarget()) || false;
+            }
+            return (me.obj.isMagnetSlotsExclusive && me.obj.isMagnetSlotsExclusive()) || false;
+        };
+
+        var setExclusive = function (v) {
+            if (isPoint) {
+            if (me.obj.setExclusiveMagnetTarget) me.obj.setExclusiveMagnetTarget(!!v);
+            return "setExclusiveMagnetTarget";
+            }
+            if (me.obj.setMagnetSlotsExclusive) me.obj.setMagnetSlotsExclusive(!!v);
+            return "setMagnetSlotsExclusive";
+        };
+
+        var EXCLcallback = function (_val) {
+            if (_owner._syncing) return;
+
+            var old = !!getExclusive();
+            var neu = !!_val;
+            if (old === neu) return;
+
+            var setterName = isPoint ? "setExclusiveMagnetTarget" : "setMagnetSlotsExclusive";
+
+            if (canvas && canvas.undoManager && typeof canvas.undoManager.recordPropertyChange === "function") {
+            if (!canvas.undoManager.isApplying) {
+                canvas.undoManager.recordPropertyChange(me.obj, setterName, old, neu);
+            }
+            }
+
+            setExclusive(neu);
+            me.repaint();
+        };
+
+        var cbExclusive = new Checkbox(me.getDocObject(), 10, ch, 200, cbh, false, labelExclusive, EXCLcallback);
+        cbExclusive.setTextColor("#252525");
+        cbExclusive.setValue(getExclusive());
+        }
+        ch += cbh;
+        // --------------------------------------------------------------------------
         cbApplyAll = new Checkbox(me.getDocObject(), 10, ch, 200, cbh, false, $L.props_applyall + $L.object.family[me.obj.getFamilyCode()], APALLcallback);
         cbApplyAll.setTextColor("#252525");
         cbApplyAll.setText($L.props_applyall + $L.object.family[me.obj.getFamilyCode()]);

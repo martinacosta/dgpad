@@ -109,6 +109,17 @@ function slider(_owner, _left, _top, _width, _height, _min, _max, _value, _callb
         ip("border", "1px solid #BEBEBE");
     }
 
+    var isDragging = false;
+    var dragStartVal = null;
+    var dragStartCb = null;
+    var dragEndCb   = null;
+    var mousepressed = false;
+    var dragStartCb = null;
+    var dragEndCb = null;
+    var dragStartVal = null;
+
+    
+
     init();
 
 
@@ -282,18 +293,30 @@ function slider(_owner, _left, _top, _width, _height, _min, _max, _value, _callb
 
 
     var mousepressed = false;
+    var dragStartCb = null;
+    var dragEndCb = null;
+    var dragStartVal = null;
+
+    // API pública
+    me.setOnDragStart = function (cb) { dragStartCb = cb; };
+    me.setOnDragEnd   = function (cb) { dragEndCb   = cb; };
 
     var mousedown = function(ev) {
         ev.preventDefault();
         mousepressed = true;
+        dragStartVal = me.getValue();
+        if (dragStartCb) dragStartCb(dragStartVal);
         mousemove(ev);
     };
     var touchdown = function(tch) {
         tch.preventDefault();
-        if (tch.touches.length === 1) {
-            var touch = tch.touches[0] || tch.changedTouches[0];
-            mousedown($U.PadToMouseEvent(touch));
-        }
+        isDragging = true;
+        dragStartVal = me.getValue();
+        if (dragStartCb) dragStartCb(dragStartVal);
+                if (tch.touches.length === 1) {
+                    var touch = tch.touches[0] || tch.changedTouches[0];
+                    mousedown($U.PadToMouseEvent(touch));
+                }
     };
 
 
@@ -332,16 +355,28 @@ function slider(_owner, _left, _top, _width, _height, _min, _max, _value, _callb
 
 
     var mouseup = function(ev) {
-        ev.preventDefault();
-        mousepressed = false;
-    };
-    var touchup = function(tch) {
-        tch.preventDefault();
-        if (tch.touches.length === 1) {
-            var touch = tch.touches[0] || tch.changedTouches[0];
-            mouseup($U.PadToMouseEvent(touch));
-        }
-    };
+    ev.preventDefault();
+    if (!mousepressed || dragStartVal === null) return; // solo si realmente arrastró
+    mousepressed = false;
+
+    var endVal = me.getValue();
+    if (dragEndCb && endVal !== dragStartVal) {
+        dragEndCb(dragStartVal, endVal); // firma consistente
+    }
+    dragStartVal = null;
+};
+
+var touchup = function(tch) {
+    tch.preventDefault();
+    if (!mousepressed || dragStartVal === null) return;
+    mousepressed = false;
+
+    var endVal = me.getValue();
+    if (dragEndCb && endVal !== dragStartVal) {
+        dragEndCb(dragStartVal, endVal);
+    }
+    dragStartVal = null;
+};
 
     me.setWindowsEvents = function() {
         slider_wrapper.removeEventListener('touchstart', touchdown, false);
@@ -377,4 +412,7 @@ function slider(_owner, _left, _top, _width, _height, _min, _max, _value, _callb
     wrapper.appendChild(value_wrapper);
     wrapper.appendChild(slider_wrapper);
     _owner.appendChild(wrapper);
+
+    
+
 };

@@ -18,7 +18,12 @@ function FixedAngleObject(_construction, _name, _sr1, _trigo) {
     var toAngle = 0; // Fin de l'arc (xOC sens trigo dans [0;2π[)
     var trigo = _trigo; // Sens de l'angle
     var sel_arc, sel_ray = true;
-
+    var LABEL_OFFSET_PX = 18; // distancia fija desde el arco (px)
+    var LABEL_GAP_PX = 8;     // separación horizontal entre nombre y valor (px)
+    var SMALL_ANGLE_DEG = 25;      // umbral para “ángulo pequeño”
+    var SMALL_ANGLE_Y_OFFSET = 6;  // desplazamiento vertical extra (px)
+    var LABEL_ANCHOR_MARGIN_PX = 6; // margen desde el centro de la marca
+    var LABEL_FROM_ARC_FACTOR = 1.0; // múltiplo del tamaño de fuente para despejar del arco
 
 
     this.setParent(A, O);
@@ -61,7 +66,7 @@ function FixedAngleObject(_construction, _name, _sr1, _trigo) {
         at += ",@callcalc,@blockly";
 		//JDIAZ
     if (this.getShowName()===true)
-      at += ",@removename";
+      at += "@removename";
     
     //JDIAZ
     
@@ -131,41 +136,55 @@ function FixedAngleObject(_construction, _name, _sr1, _trigo) {
         R=_r;
     };
 
-    this.paintLength = function(ctx) {
-        ctx.save();
-        var r = R + this.prefs.fontmargin + this.getRealsize() / 2;
-        ctx.textAlign = "left";
+    
+
+    this.paintLength = function (ctx) {
+        var a = computeLabelAnchor();
+        var toRight = Math.cos(a.phi) >= 0;
+
         var prec = this.getPrecision();
-        var display = VALUE;
-        display = Math.round(display * prec) / prec;
-        var a = trigo ? -toAngle + AOC / 2 : Math.PI - toAngle + AOC / 2;
-        a = a - Math.floor(a / $U.doublePI) * $U.doublePI; // retour dans [0;2π]
-        if ((a > $U.halfPI) && (a < 3 * $U.halfPI)) {
-            a += Math.PI;
-            r = -r;
-            ctx.textAlign = "right";
-        }
+        var display = Math.round(VALUE * prec) / prec;
+        var valueStr = $L.number(display) + "°";
+        var nameStr  = this.getSubName() + ":";
+
+        ctx.save();
+        if (this.getFont) ctx.font = this.getFont();
+        var fontSize = this.getFontSize ? this.getFontSize() : 12;
+        var clear = Math.max(LABEL_ANCHOR_MARGIN_PX, LABEL_FROM_ARC_FACTOR * fontSize);
+
+        ctx.textBaseline = "middle";
         ctx.fillStyle = ctx.strokeStyle;
-        ctx.translate(O.getX(), O.getY());
-        ctx.rotate(a);
-        ctx.fillText($L.number(display) + "°", r, this.getFontSize() / 2);
+
+        if (this.getShowName()) {
+            if (toRight) {
+            ctx.textAlign = "left";
+            var x0 = a.x + clear;
+            ctx.fillText(nameStr, x0, a.y);                         // NOMBRE
+            var wName = ctx.measureText(nameStr).width;
+            ctx.fillText(valueStr, x0 + wName + LABEL_GAP_PX, a.y); // VALOR
+            } else {
+        // ← escribir hacia la izquierda: NOMBRE primero, luego VALOR sin solape
+        ctx.textAlign = "right";
+        var xEnd = a.x - clear;
+        var wVal = ctx.measureText(valueStr).width;
+
+        ctx.fillText(nameStr, xEnd - LABEL_GAP_PX - wVal, a.y);
+        ctx.fillText(valueStr, xEnd, a.y);
+        }
+        } else {
+            if (toRight) {
+            ctx.textAlign = "left";
+            ctx.fillText(valueStr, a.x + clear, a.y);
+            } else {
+            ctx.textAlign = "right";
+            ctx.fillText(valueStr, a.x - clear, a.y);
+            }
+        }
         ctx.restore();
     };
 
-    /* this.paintObject = function(ctx) {
-        ctx.beginPath();
-        ctx.moveTo(O.getX(), O.getY());
-        ctx.lineTo(this.getXmax(), this.getYmax());
-        ctx.stroke();
-        ctx.moveTo(O.getX(), O.getY());
-        ctx.beginPath();
-        ctx.lineTo(O.getX() + R * Math.cos(-fromAngle), O.getY() + R * Math.sin(-fromAngle));
-        ctx.lineWidth = ctx.lineWidth * 3;
-        ctx.arc(O.getX(), O.getY(), R, -fromAngle, -toAngle, trigo);
-        ctx.stroke();
-        ctx.lineTo(O.getX(), O.getY());
-        ctx.fill();
-    }; */
+
+    
 	
 	this.paintObject = function(ctx) {
     ctx.beginPath();
@@ -182,35 +201,45 @@ function FixedAngleObject(_construction, _name, _sr1, _trigo) {
     ctx.fill();
 	
   };
+    
+  function computeLabelAnchor() {
+        var phi = trigo ? -toAngle + AOC / 2 : Math.PI - toAngle + AOC / 2;
+        phi = phi - Math.floor(phi / $U.doublePI) * $U.doublePI;
 
-	
-	//JDIAZ start
-  var paintTxt= function(ctx, txt) {
-    ctx.save();
-    var r = R + me.prefs.fontmargin + me.getRealsize() / 2;
-    ctx.textAlign = "left";
-    var prec = me.getPrecision();
-    var display = VALUE;
-    display = Math.round(display * prec) / prec;
-    var a = trigo ? -toAngle + AOC / 2 : Math.PI - toAngle + AOC / 2;
-    a = a - Math.floor(a / $U.doublePI) * $U.doublePI; // retour dans [0;2π]
-    if ((a > $U.halfPI) && (a < 3 * $U.halfPI)) {
-      a += Math.PI;
-      r = -r - 60;
-      ctx.textAlign = "right";
+        var r = R + LABEL_OFFSET_PX;          // distancia fija al arco
+        var x = O.getX() + Math.cos(phi) * r; // ancla básico
+        var y = O.getY() + Math.sin(phi) * r;
+
+        // si el ángulo es pequeño, aplica leve desplazamiento vertical
+        var th = SMALL_ANGLE_DEG * Math.PI / 180;
+        if (AOC < th) {
+            // why: mover en el sentido vertical del bisector para despegar del rayo
+            y += (Math.sin(phi) >= 0 ? -SMALL_ANGLE_Y_OFFSET : SMALL_ANGLE_Y_OFFSET);
+        }
+        return { x: x, y: y, phi: phi };
     }
-    ctx.fillStyle = ctx.strokeStyle;
-    ctx.translate(O.getX(), O.getY());
-    ctx.rotate(a);
-    ctx.fillText(txt + ":", r, me.getFontSize() / 2);
-    ctx.restore();
-  }
+	
+	
+
+    var paintTxt = function (ctx, txt) {
+        ctx.save();
+        var a = computeLabelAnchor();
+
+        if (this && this.getFont) ctx.font = this.getFont();
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "left";
+        ctx.fillStyle = ctx.strokeStyle;
+
+        // ancla el borde izquierdo del NOMBRE al punto a distancia fija del arco
+        ctx.fillText(txt + ":", a.x, a.y);
+        ctx.restore();
+        }.bind(this);
   //JDIAZ end
   
-  //LLamar a la función painTxt para dibujar el nombre
-  this.paintName = function(ctx) {
-    paintTxt(ctx, this.getSubName());
-  };
+    //LLamar a la función painTxt para dibujar el nombre
+    this.paintName = function(ctx) {
+        
+    };
 
     this.compute = function() {
         E1.compute();
@@ -252,21 +281,21 @@ function FixedAngleObject(_construction, _name, _sr1, _trigo) {
 
     this.setDefaults("fixedangle");
 	// MEAG start
-  this.getTextCons = function() {
-    if (this.getParentLength()) {
-      var _ex = E1.getUnicodeSource().replace(/\n/g, "\\n");
-      texto = "";
-	  if(trigo){
-      texto = this.getName() + $L.object_fixedAngle_description0+O.getVarName()+ $L.object_fixedAngle_description_measure + _ex + $L.object_fixedAngle_description1+_sr1.getVarName()+$L.tool_FixedAngle_help_2_sentidoA;}
-	  else {
-		  texto = this.getName() + $L.object_fixedAngle_description0+O.getVarName()+ $L.object_fixedAngle_description_measure + _ex + $L.object_fixedAngle_description1+_sr1.getVarName()+$L.tool_FixedAngle_help_2_sentidoB;}
-      parents = [O.getVarName()];
-      return {
-        "texto": texto,
-        "parents": parents
-      };
+    this.getTextCons = function() {
+        if (this.getParentLength()) {
+        var _ex = E1.getUnicodeSource().replace(/\n/g, "\\n");
+        texto = "";
+        if(trigo){
+        texto = this.getName() + $L.object_fixedAngle_description0+O.getVarName()+ $L.object_fixedAngle_description_measure + _ex + $L.object_fixedAngle_description1+_sr1.getVarName()+$L.tool_FixedAngle_help_2_sentidoA;}
+        else {
+            texto = this.getName() + $L.object_fixedAngle_description0+O.getVarName()+ $L.object_fixedAngle_description_measure + _ex + $L.object_fixedAngle_description1+_sr1.getVarName()+$L.tool_FixedAngle_help_2_sentidoB;}
+        parents = [O.getVarName()];
+        return {
+            "texto": texto,
+            "parents": parents
+        };
+        }
     }
-  }
   // MEAG end
   //JDIAZ start
    this.nameMover = function(ev, zc) {

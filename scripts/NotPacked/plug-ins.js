@@ -20,9 +20,9 @@ $macros[$L.macros.distance]={
 	parameters:["point","point"],
 	exec:
 	function(P2,P1){
-blk_turtle_exp_P1=Expression("blk_turtle_exp_P1","","","","var bl_iadfiehdc=function(){\nTURTLE_INIT(\"P1\",P1);\nif (Math.times((d((P1),(P2))),(pixel())) < 30) {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P1),(P2)),2)));\n  TURTLE_ROTATE_PT((P2));\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_MV(20,true);\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P1),(P2))),100)),100)));\n} else {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P1),(P2)),2)));\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P1),(P2))),100)),100)));\n  TURTLE_JOIN_PT((P1));\n  TURTLE_ROTATE_PT((P2));\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_UP(false);\n  TURTLE_MV(15,true);\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV((Math.quotient((d((P1),(P2))),3)),false);\n  TURTLE_UP(true);\n  TURTLE_MV((Math.quotient((d((P1),(P2))),3)),false);\n  TURTLE_UP(false);\n  TURTLE_MV((Math.quotient((d((P1),(P2))),3)),false);\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV(15,true);\n}\nreturn TURTLE_RESULT()\n};\nbl_iadfiehdc()","-13.958333333333334","6.770833333333333");
-blk_turtle_list_P1=List("blk_turtle_list_P1",blk_turtle_exp_P1);
-STL(blk_turtle_list_P1,"c:#0000b2;s:0;f:30;p:0;nmi:true;sg:1");
+blk_turtle_exp__P1=Expression("blk_turtle_exp__P1","","","","var bl_iadfiehdc=function(){\nTURTLE_INIT(\"P1\",P1);\nif (Math.times((d((P1),(P2))),(pixel())) < 30) {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P1),(P2)),2)));\n  TURTLE_ROTATE_PT((P2));\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_MV(20,true);\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P1),(P2))),100)),100)));\n} else {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P1),(P2)),2)));\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P1),(P2))),100)),100)));\n  TURTLE_JOIN_PT((P1));\n  TURTLE_ROTATE_PT((P2));\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_UP(false);\n  TURTLE_MV(15,true);\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV((Math.quotient((d((P1),(P2))),3)),false);\n  TURTLE_UP(true);\n  TURTLE_MV((Math.quotient((d((P1),(P2))),3)),false);\n  TURTLE_UP(false);\n  TURTLE_MV((Math.quotient((d((P1),(P2))),3)),false);\n  if ((Coordinate(P1.getName(),0)) < (Coordinate(P2.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV(15,true);\n}\nreturn TURTLE_RESULT()\n};\nbl_iadfiehdc()","-13.958333333333334","6.770833333333333");
+blk_turtle_list_P1=List("blk_turtle_list_P1",blk_turtle_exp__P1);
+STL(blk_turtle_list_P1,"c:#0000b2;s:0;f:30;p:0;nmi:false;sg:1");
 return [blk_turtle_list_P1];
 }};
 
@@ -36,8 +36,8 @@ P1=DefinitionPoint("P1",r1,0);
 P2=DefinitionPoint("P2",r1,1);
 r2=Perpendicular("r2",r1,P3);
 P4=OrderedIntersection("P4",r1,r2,0);
-blk_turtle_exp_P1=Expression("blk_turtle_exp_P1","","","","var bl_iadfiehdc=function(){\nTURTLE_INIT(\"P1\",P3);\nif (Math.times((d((P3),(P4))),(pixel())) < 30) {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P3),(P4)),2)));\n  TURTLE_ROTATE_PT((P4));\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_MV(20,true);\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P3),(P4))),100)),100)));\n} else {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P3),(P4)),2)));\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P3),(P4))),100)),100)));\n  TURTLE_JOIN_PT((P3));\n  TURTLE_ROTATE_PT((P4));\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_UP(false);\n  TURTLE_MV(15,true);\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV((Math.quotient((d((P3),(P4))),3)),false);\n  TURTLE_UP(true);\n  TURTLE_MV((Math.quotient((d((P3),(P4))),3)),false);\n  TURTLE_UP(false);\n  TURTLE_MV((Math.quotient((d((P3),(P4))),3)),false);\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV(15,true);\n}\nreturn TURTLE_RESULT()\n};\nbl_iadfiehdc()","-13.958333333333334","6.770833333333333");
-blk_turtle_list_P1=List("blk_turtle_list_P1",blk_turtle_exp_P1);
+blk_turtle_exp__P1=Expression("blk_turtle_exp__P1","","","","var bl_iadfiehdc=function(){\nTURTLE_INIT(\"P1\",P3);\nif (Math.times((d((P3),(P4))),(pixel())) < 30) {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P3),(P4)),2)));\n  TURTLE_ROTATE_PT((P4));\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_MV(20,true);\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P3),(P4))),100)),100)));\n} else {\n  TURTLE_UP(true);\n  TURTLE_JOIN_PT((Math.quotient(Math.plus((P3),(P4)),2)));\n  TURTLE_RESET();\n  TURTLE_PRINT((Math.quotient(Math.round(Math.times((d((P3),(P4))),100)),100)));\n  TURTLE_JOIN_PT((P3));\n  TURTLE_ROTATE_PT((P4));\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN((90));\n  } else {\n    TURTLE_TURN(-(90));\n  }\n  TURTLE_UP(false);\n  TURTLE_MV(15,true);\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV((Math.quotient((d((P3),(P4))),3)),false);\n  TURTLE_UP(true);\n  TURTLE_MV((Math.quotient((d((P3),(P4))),3)),false);\n  TURTLE_UP(false);\n  TURTLE_MV((Math.quotient((d((P3),(P4))),3)),false);\n  if ((Coordinate(P3.getName(),0)) < (Coordinate(P4.getName(),0))) {\n    TURTLE_TURN(-(90));\n  } else {\n    TURTLE_TURN((90));\n  }\n  TURTLE_MV(15,true);\n}\nreturn TURTLE_RESULT()\n};\nbl_iadfiehdc()","-13.958333333333334","6.770833333333333");
+blk_turtle_list_P1=List("blk_turtle_list_P1",blk_turtle_exp__P1);
 STL(P1,"c:#0000b2;s:6;f:30");
 STL(P2,"c:#0000b2;s:6;f:30");
 STL(blk_turtle_list_P1,"c:#0000b2;s:0;f:30;p:0;nmi:true;sg:1");
@@ -50,8 +50,8 @@ $macros[$L.macros.RegPolCenter]={
 	parameters:["point","point","expression"],
 	exec:
 	function(P1,P2,E1){
-blk_turtle_exp_P2=Expression("blk_turtle_exp_P2","","","","var bl_bfcgdjbeb=function(){\nTURTLE_INIT(\"P2\",P2);\nTURTLE_ROTATE_PT((P1));\n  TURTLE_POINTS_WIDTH(6);\nTURTLE_TURN(-(Math.minus(90,Math.quotient(180,(E1)))));\nfor (var blockly_var_count = 1 ; blockly_var_count <= (E1) ; blockly_var_count++){\n  TURTLE_MV((Math.times(Math.times((d((P1),(P2))),Math.cos(Math.minus(90,Math.quotient(180,(E1))))),2)),false);\n  TURTLE_TURN((Math.minus(180,Math.minus(180,Math.quotient(360,(E1))))));\n};\nBLK_STL(\"blk_turtle_list_P2\",\"setNoMouseInside\",[0]);\nreturn TURTLE_RESULT()\n};\nbl_bfcgdjbeb()","-13.958333333333334","6.770833333333333");
-blk_turtle_list_P2=List("blk_turtle_list_P2",blk_turtle_exp_P2);
+blk_turtle_exp__P2=Expression("blk_turtle_exp__P2","","","","var bl_bfcgdjbeb=function(){\nTURTLE_INIT(\"P2\",P2);\nTURTLE_ROTATE_PT((P1));\n  TURTLE_POINTS_WIDTH(6);\nTURTLE_TURN(-(Math.minus(90,Math.quotient(180,(E1)))));\nfor (var blockly_var_count = 1 ; blockly_var_count <= (E1) ; blockly_var_count++){\n  TURTLE_MV((Math.times(Math.times((d((P1),(P2))),Math.cos(Math.minus(90,Math.quotient(180,(E1))))),2)),false);\n  TURTLE_TURN((Math.minus(180,Math.minus(180,Math.quotient(360,(E1))))));\n};\nBLK_STL(\"blk_turtle_list_P2\",\"setNoMouseInside\",[0]);\nreturn TURTLE_RESULT()\n};\nbl_bfcgdjbeb()","-13.958333333333334","6.770833333333333");
+blk_turtle_list_P2=List("blk_turtle_list_P2",blk_turtle_exp__P2);
 STL(blk_turtle_list_P2,"c:#0000b2;s:0.8;f:30;sg:0.5");
 return [blk_turtle_list_P2];
 }};
@@ -62,8 +62,8 @@ $macros[$L.macros.RegPolSide]={
 	parameters:["point","point","expression"],
 	exec:
 	function(P2,P1,E1){
-blk_turtle_exp_P2=Expression("blk_turtle_exp_P2","","","","var bl_dbeihcghc=function(){\nTURTLE_INIT(\"P2\",P2);\nTURTLE_ROTATE_PT((P1));\n  TURTLE_POINTS_WIDTH(6);\nfor (var blockly_var_count = 1 ; blockly_var_count <= (E1) ; blockly_var_count++){\n  TURTLE_MV((d((P1),(P2))),false);\n  TURTLE_TURN((Math.minus(180,Math.minus(180,Math.quotient(360,(E1))))));\n};\nBLK_STL(\"blk_turtle_list_P2\",\"setNoMouseInside\",[0]);\nreturn TURTLE_RESULT()\n};\nbl_dbeihcghc()","-13.958333333333334","6.770833333333333");
-blk_turtle_list_P2=List("blk_turtle_list_P2",blk_turtle_exp_P2);
+blk_turtle_exp__P2=Expression("blk_turtle_exp__P2","","","","var bl_dbeihcghc=function(){\nTURTLE_INIT(\"P2\",P2);\nTURTLE_ROTATE_PT((P1));\n  TURTLE_POINTS_WIDTH(6);\nfor (var blockly_var_count = 1 ; blockly_var_count <= (E1) ; blockly_var_count++){\n  TURTLE_MV((d((P1),(P2))),false);\n  TURTLE_TURN((Math.minus(180,Math.minus(180,Math.quotient(360,(E1))))));\n};\nBLK_STL(\"blk_turtle_list_P2\",\"setNoMouseInside\",[0]);\nreturn TURTLE_RESULT()\n};\nbl_dbeihcghc()","-13.958333333333334","6.770833333333333");
+blk_turtle_list_P2=List("blk_turtle_list_P2",blk_turtle_exp__P2);
 STL(blk_turtle_list_P2,"c:#0000b2;s:0.8;f:30;sg:0.5");
 return [blk_turtle_list_P2];
 }};
@@ -105,89 +105,7 @@ $macros[$L.macros.coords3D] = {
     }
 };
 
-// $macros[$L.macros.area3D] = {
-// 	id: "area3D",
-//     name: $L.macros.area3D,
-//     parameters: ["area"],
-// 	exec: function(pol) {
-//         function crossProduct(v1, v2) {
-//             return [
-//                 v1[1] * v2[2] - v1[2] * v2[1],
-//                 v1[2] * v2[0] - v1[0] * v2[2],
-//                 v1[0] * v2[1] - v1[1] * v2[0]
-//             ];
-//         }
 
-//         function magnitude(vector) {
-//             return Math.sqrt(vector[0]**2 + vector[1]**2 + vector[2]**2);
-//         }
-
-//         function calculatePolygonArea(vertices) {
-//             const n = vertices.length;
-            
-//             if (n < 3) return 0;
-
-//             let referencePoint = vertices[0];
-//             let sumCrossProducts = [0, 0, 0];
-
-//             for (let i = 1; i < n - 1; i++) {
-//                 const v1 = [
-//                     vertices[i][0] - referencePoint[0],
-//                     vertices[i][1] - referencePoint[1],
-//                     vertices[i][2] - referencePoint[2]
-//                 ];
-
-//                 const v2 = [
-//                     vertices[i + 1][0] - referencePoint[0],
-//                     vertices[i + 1][1] - referencePoint[1],
-//                     vertices[i + 1][2] - referencePoint[2]
-//                 ];
-
-//                 const crossProd = crossProduct(v1, v2);
-//                 sumCrossProducts = sumCrossProducts.map((val, idx) => val + crossProd[idx]);
-//             }
-
-//             return 0.5 * magnitude(sumCrossProducts);
-//         }
-//         vertPol=Expression("vertPol","","","","tab=[];\nlet poli="+pol+".getPtab();\nfor(i=0;i<poli.length;i++){\ntab.push(poli[i].getXYZ())\n};\ntab","-4.764705882352941","-1.5");
-        
-//         let poligono = GetExpressionValue("vertPol");
-//         console.log(poligono)
-//         barycenter3D = function(Ptab) {
-//             var len = Ptab.length;
-//             var xg = 0,
-//               yg = 0,
-//               zg = 0;
-//             for (var i = 0; i < len; i++) {
-//               var t = Ptab[i];
-//               console.log(t)
-//               xg += t[0];
-              
-//               yg += t[1];
-              
-//               zg += t[2];
-              
-//             }
-            
-//             return [xg / len, yg / len, zg / len];
-//           };
-          
-//         console.log(barycenter3D(poligono));
-//         const area = calculatePolygonArea(poligono);
-        
-        
-        
-//         E5=Expression("E5","","","",\"barycenter3D(poligono)\","-4.5588235294117645","-1.4558823529411764");
-//         blk_turtle_exp_P2=Expression("blk_turtle_exp_P2","","","","var bl_bidfbdffd=function(){\nTURTLE_INIT(\"P2\",P2);\nTURTLE_UP(true);\n\nTURTLE_JOIN_PT((E5));\nTURTLE_RESET();\nTURTLE_PRINT(("+area+"));\nreturn TURTLE_RESULT()\n};\nbl_bidfbdffd()","-4.5588235294117645","-0.4264705882352941");
-//         blk_turtle_list_P2=List("blk_turtle_list_P2",blk_turtle_exp_P2);
-//         STL(blk_turtle_exp_P2,"c:#780013;h:2;s:7;f:24;p:2;cL:200;cPT:YzojNzgwMDEzO2g6MjtzOjEwO2Y6MzA=");
-//         STL(blk_turtle_list_P2,"c:#0000b2;s:0;f:30;p:0;nmi:true;sg:1");
-       
-           
-
-//         return [blk_turtle_list_P2];
-//     }
-// };
 
 
 $macros[$L.macros.dist3D] = {
@@ -231,12 +149,12 @@ $macros[$L.macros.perp3D] = {
         E2 = Expression("E2", "", "", "", "var _a=A,_c=-v[0]*_a[0]-v[1]*_a[1]-v[2]*_a[2],_m=M1,_k=(-_c-v[0]*_m[0]-v[1]*_m[1]-v[2]*_m[2])/(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);[_k*v[0]+_m[0],_k*v[1]+_m[1],_k*v[2]+_m[2]]", "-1.2353666434556096", "-2.7895375819965382");
         P3 = Point("P3", "M1+v*2", "0");
         P2 = Point("P2", "E2", "0");
-        L1 = Line("L1", M1, P3);
+        L1 = Line("r1", M1, P3);
         M2 = Point("M2", "(P2+M1)/2", 0);
-        C5 = Circle("C5", M2, P3);
+        C5 = Circle("c5", M2, P3);
         P4 = OrderedIntersection("P4", L1, C5, 1, P3);
-        Symc4 = Point("Symc4", "2*M2-P4", 0);
-        S1 = Segment("S1", P4, Symc4);
+        Symc4 = Point("P5", "2*M2-P4", 0);
+        S1 = Segment("s1", P4, P5);
         STL(P2, "c:#0000b2;s:6;f:30");
         STL(S1, "c:#006633;s:1;f:24");
         return [P2, S1];
@@ -248,7 +166,7 @@ $macros[$L.macros.circle3D3pts] = {
     name: $L.macros.circle3D3pts,
     parameters: ["point", "point", "point"],
     exec: function(P2, P1, P3) {
-        C1 = Circle3pts3D("C1", P2, P1, P3);
+        C1 = Circle3pts3D("c1", P2, P1, P3);
         STL(C1, "c:#cc66cc;s:1;f:30;p:0");
         return [C1];
     }
@@ -459,15 +377,15 @@ $macros[$L.macros.inscribedcircle] = {
     name: $L.macros.inscribedcircle,
     parameters: ["point", "point", "point"],
     exec: function(A, B, C) {
-        S1 = Segment(A, B);
-        S2 = Segment(B, C);
-        S3 = Segment(A, C);
-        R1 = AngleBisector(A, B, C);
-        R2 = AngleBisector(B, C, A);
+        S1 = Segment("s1",A, B);
+        S2 = Segment("s2", B, C);
+        S3 = Segment("s3", A, C);
+        R1 = AngleBisector("r1",A, B, C);
+        R2 = AngleBisector("r2", B, C, A);
         D = OrderedIntersection(R1, R2, 0);
-        Perp1 = Perpendicular(S2, D);
+        Perp1 = Perpendicular("r3", S2, D);
         E = OrderedIntersection(Perp1, S2, 0);
-        C1 = Circle(D, E);
+        C1 = Circle("c1", D, E);
         return [D, C1, S1, S2, S3];
     }
 };
@@ -478,10 +396,10 @@ $macros[$L.macros.isosceles_triangle] = {
     parameters: ["point", "point"],
     exec: function(P1, P2) {
         L1 = PerpendicularBisector("L1", P1, P2);
-        S2 = Segment("S2", P1, P2);
+        S2 = Segment("s2", P1, P2);
         P3 = PointOn("P3", L1, -212.58676521613583);
-        S1 = Segment("S1", P3, P1);
-        S3 = Segment("S3", P2, P3);
+        S1 = Segment("s1", P3, P1);
+        S3 = Segment("s3", P2, P3);
         return [S2, P3, S1, S3];
     }
 };
@@ -491,11 +409,11 @@ $macros[$L.macros.right_triangle] = {
     name: $L.macros.right_triangle,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
-        S1 = Segment("S1", P1, P2);
-        Perp1 = Perpendicular("Perp1", S1, P1);
+        S1 = Segment("s1", P1, P2);
+        Perp1 = Perpendicular("r1", S1, P1);
         P3 = PointOn("P3", Perp1, 133.44154404910768);
-        S2 = Segment("S2", P1, P3);
-        S3 = Segment("S3", P3, P2);
+        S2 = Segment("s2", P1, P3);
+        S3 = Segment("s3", P3, P2);
         return [S1, P3, S2, S3];
     }
 };
@@ -505,12 +423,12 @@ $macros[$L.macros.equilateral_triangle] = {
     name: $L.macros.equilateral_triangle,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
-        C1 = Circle("C1", P1, P2);
-        C2 = Circle("C2", P2, P1);
-        S3 = Segment("S3", P2, P1);
+        C1 = Circle("c1", P1, P2);
+        C2 = Circle("c2", P2, P1);
+        S3 = Segment("s3", P2, P1);
         P3 = OrderedIntersection("P3", C2, C1, 1);
-        S1 = Segment("S1", P1, P3);
-        S2 = Segment("S2", P3, P2);
+        S1 = Segment("s1", P1, P3);
+        S2 = Segment("s2", P3, P2);
         return [S3, P3, S1, S2];
     }
 };
@@ -520,15 +438,15 @@ $macros[$L.macros.carre] = {
     name: $L.macros.carre,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
-        S1 = Segment("S1", P1, P2);
-        C1 = Circle("C1", P2, P1);
-        Perp1 = Perpendicular("Perp1", S1, P2);
+        S1 = Segment("s1", P1, P2);
+        C1 = Circle("c1", P2, P1);
+        Perp1 = Perpendicular("r1", S1, P2);
         P3 = OrderedIntersection("P3", Perp1, C1, 0);
-        M1 = MidPoint("M1", P3, P1);
-        S2 = Segment("S2", P2, P3);
-        Symc1 = Symmetry("Symc1", M1, P2);
-        S3 = Segment("S3", P3, Symc1);
-        S4 = Segment("S4", Symc1, P1);
+        M1 = MidPoint("P4", P3, P1);
+        S2 = Segment("s2", P2, P3);
+        Symc1 = Symmetry("P5", M1, P2);
+        S3 = Segment("s3", P3, Symc1);
+        S4 = Segment("s4", Symc1, P1);
         STL(S1, "c:#006633;s:1;f:24");
         STL(P3, "c:#0000b2;s:6;f:30");
         STL(S2, "c:#006633;s:1;f:24");
@@ -545,14 +463,14 @@ $macros[$L.macros.rectangle] = {
     name: $L.macros.rectangle,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
-        S1 = Segment("S1", P1, P2);
-        Perp1 = Perpendicular("Perp1", S1, P1);
+        S1 = Segment("s1", P1, P2);
+        Perp1 = Perpendicular("r1", S1, P1);
         P3 = PointOn("P3", Perp1, 139.09461041920926);
-        M1 = MidPoint("M1", P3, P2);
-        S2 = Segment("S2", P1, P3);
-        Symc1 = Symmetry("Symc1", M1, P1);
-        S3 = Segment("S3", P3, Symc1);
-        S4 = Segment("S4", Symc1, P2);
+        M1 = MidPoint("P4", P3, P2);
+        S2 = Segment("s2", P1, P3);
+        Symc1 = Symmetry("P5", M1, P1);
+        S3 = Segment("s3", P3, Symc1);
+        S4 = Segment("s4", Symc1, P2);
         STL(S1, "c:#006633;s:1;f:24");
         STL(P3, "c:#0000b2;s:6;f:30");
         STL(S2, "c:#006633;s:1;f:24");
@@ -570,71 +488,17 @@ $macros[$L.macros.tangent] = {
     parameters: ["circle", "point"],
     exec: function(C1, P2) {
         P1 = Center("P1", C1);
-        M1 = MidPoint("M1", P2, P1);
-        C2 = Circle("C2", M1, P1);
+        M1 = MidPoint("P2", P2, P1);
+        C2 = Circle("c2", M1, P1);
         P3 = OrderedIntersection("P3", C2, C1, 1);
         P4 = OrderedIntersection("P4", C2, C1, 0);
-        L1 = Line("L1", P2, P3);
-        L2 = Line("L2", P2, P4);
+        L1 = Line("r1", P2, P3);
+        L2 = Line("r2", P2, P4);
         return [L1, L2];
     }
 };
 
-/* $macros[$L.macros.translation] = {
-	id: "tr
-    name: $L.macros.translation,
-    parameters: ["point", "point", "point"],
-    exec: function(P1, P2, P3) {
-        P4 = Point("P4", "P3+P2-P1", "0");
-        STL(P4, "c:#0000b2;s:6;f:30");
-        return [P4];
-    }
-};
 
-
-$macros[$L.macros.rotation5] = {
-    name: $L.macros.rotation5,
-    parameters: ["point", "point", "point", "point", "point"],
-    exec: function(O, C, B, A, M) {
-        P1 = Point("P1", "O+((M-O)*(top.$U.cpx=(A-B)/(C-B)))/mod(top.$U.cpx)", "0");
-        STL(P1, "c:#0000b2;s:6;f:30");
-        return [P1];
-    }
-};
-
-
-$macros[$L.macros.rotationD] = {
-    name: $L.macros.rotationD,
-    parameters: ["point", "point"],
-    exec: function(O, M) {
-        var a = Input($L.macro_rotationDialog_message);
-        P1 = Point("P1", "O+((M-O)*(cos(" + a + ")+i*sin(" + a + ")))", "0");
-        STL(P1, "c:#0000b2;s:6;f:30");
-        return [P1];
-    }
-};
-
-
-$macros[$L.macros.dilation] = {
-    name: $L.macros.dilation,
-    parameters: ["point", "point", "expression"],
-    exec: function(P1, P2, E1) {
-        P3 = Point("P3", "P1+E1*(P2-P1)", "0");
-        STL(P3, "c:#0000b2;s:6;f:30");
-        return [P3];
-    }
-};
-
-$macros[$L.macros.dilationdlog] = {
-    name: $L.macros.dilationdlog,
-    parameters: ["point", "point"],
-    exec: function(P1, P2) {
-        var r = prompt($L.macro_dilation_message, "2");
-        P3 = Point("P3", "P1+" + r + "*(P2-P1)", "0");
-        STL(P3, "c:#0000b2;s:6;f:30");
-        return [P3];
-    }
-}; */
 
 $macros[$L.macros.inversion] = {
 	id: "inversion",
@@ -642,14 +506,14 @@ $macros[$L.macros.inversion] = {
     parameters: ["circle", "point"],
     exec: function(C1, P2) {
         P1 = Center("P1", C1);
-        L1 = Line("L1", P2, P1);
-        C2 = Circle("C2", P1, P2);
+        L1 = Line("r1", P2, P1);
+        C2 = Circle("c2", P1, P2);
         Perp1 = Perpendicular("Perp1", L1, P1);
         P4 = OrderedIntersection("P4", L1, C1, 1);
         P3 = OrderedIntersection("P3", Perp1, C2, 0);
         P5 = OrderedIntersection("P5", Perp1, C1, 0);
-        L2 = Line("L2", P3, P4);
-        Par1 = Parallel("Par1", L2, P5);
+        L2 = Line("r2", P3, P4);
+        Par1 = Parallel("r3", L2, P5);
         P6 = OrderedIntersection("P6", Par1, L1, 0);
         STL(P6, "c:#0000b2;s:6;f:30");
         return [P6];
@@ -675,8 +539,8 @@ $macros[$L.macros.testparal]={
 	exec:
 	function(r3,r1,P6){
 Find(P6).setShape(1);
-blk_turtle_exp_P6=Expression("blk_turtle_exp_P6","","","","var bl_ccdbgehid=function(){\nTURTLE_INIT(\"P5\",P5);\nif ((r3.getCode()) == TURTLE_TEXT('segment')) {\n  blockly_var_article = TURTLE_TEXT($L.macros.testparal_segment);\n  blockly_var_adjective = TURTLE_TEXT($L.macros.testparal_adjectivem);\n}\nif ((r3.getCode()) == TURTLE_TEXT('line')) {\n  blockly_var_article = TURTLE_TEXT($L.macros.testparal_line);\n  blockly_var_adjective = TURTLE_TEXT($L.macros.testparal_adjectivef);\n}\nif ((r3.getCode()) == TURTLE_TEXT('ray')) {\n  blockly_var_article = TURTLE_TEXT($L.macros.testparal_ray);\n  blockly_var_adjective = TURTLE_TEXT($L.macros.testparal_adjectivef);\n}\nif ((r1.getCode()) == TURTLE_TEXT('segment')) {\n  blockly_var_article2 = TURTLE_TEXT($L.macros.testparal_segment);\n}\nif ((r1.getCode()) == TURTLE_TEXT('line')) {\n  blockly_var_article2 = TURTLE_TEXT($L.macros.testparal_line);\n}\nif ((r1.getCode()) == TURTLE_TEXT('ray')) {\n  blockly_var_article2 = TURTLE_TEXT($L.macros.testparal_ray);\n}\nif (Math.abs(Math.minus((r3.getNDX()),(r1.getNDX()))) <= 0.0001 && Math.abs(Math.minus((r3.getNDY()),(r1.getNDY()))) <= 0.0001) {\n  TURTLE_PRINT(([blockly_var_article,(r3.getName()),TURTLE_TEXT(' es '),blockly_var_adjective,blockly_var_article2,(r1.getName())].join('')));\n} else {\n  TURTLE_PRINT(([blockly_var_article,(r3.getName()),TURTLE_TEXT(' no es '),blockly_var_adjective,blockly_var_article2,(r1.getName())].join('')));\n}\nreturn TURTLE_RESULT()\n};\nbl_ccdbgehid()","-14.21875","6.421875");
-blk_turtle_list_P6=List("blk_turtle_list_P5",blk_turtle_exp_P6);
+blk_turtle_exp__P6=Expression("blk_turtle_exp__P6","","","","var bl_ccdbgehid=function(){\nTURTLE_INIT(\"P5\",P5);\nif ((r3.getCode()) == TURTLE_TEXT('segment')) {\n  blockly_var_article = TURTLE_TEXT($L.macros.testparal_segment);\n  blockly_var_adjective = TURTLE_TEXT($L.macros.testparal_adjectivem);\n}\nif ((r3.getCode()) == TURTLE_TEXT('line')) {\n  blockly_var_article = TURTLE_TEXT($L.macros.testparal_line);\n  blockly_var_adjective = TURTLE_TEXT($L.macros.testparal_adjectivef);\n}\nif ((r3.getCode()) == TURTLE_TEXT('ray')) {\n  blockly_var_article = TURTLE_TEXT($L.macros.testparal_ray);\n  blockly_var_adjective = TURTLE_TEXT($L.macros.testparal_adjectivef);\n}\nif ((r1.getCode()) == TURTLE_TEXT('segment')) {\n  blockly_var_article2 = TURTLE_TEXT($L.macros.testparal_segment);\n}\nif ((r1.getCode()) == TURTLE_TEXT('line')) {\n  blockly_var_article2 = TURTLE_TEXT($L.macros.testparal_line);\n}\nif ((r1.getCode()) == TURTLE_TEXT('ray')) {\n  blockly_var_article2 = TURTLE_TEXT($L.macros.testparal_ray);\n}\nif (Math.abs(Math.minus((r3.getNDX()),(r1.getNDX()))) <= 0.0001 && Math.abs(Math.minus((r3.getNDY()),(r1.getNDY()))) <= 0.0001) {\n  TURTLE_PRINT(([blockly_var_article,(r3.getName()),TURTLE_TEXT(' es '),blockly_var_adjective,blockly_var_article2,(r1.getName())].join('')));\n} else {\n  TURTLE_PRINT(([blockly_var_article,(r3.getName()),TURTLE_TEXT(' no es '),blockly_var_adjective,blockly_var_article2,(r1.getName())].join('')));\n}\nreturn TURTLE_RESULT()\n};\nbl_ccdbgehid()","-14.21875","6.421875");
+blk_turtle_list_P6=List("blk_turtle_list_P5",blk_turtle_exp__P6);
 STL(blk_turtle_list_P6,"c:#0000b2;s:0;f:30;p:0;nmi:true;sg:1");
 return [blk_turtle_list_P6];
 }};
@@ -724,8 +588,8 @@ $macros[$L.macros.pingpong] = {
     name: $L.macros.pingpong,
     parameters: ["point", "point"],
     exec: function(P1, P2) {
-        Symc1 = Symmetry("Symc1", P2, P1);
-        Symc2 = Symmetry("Symc2", P2, Symc1);
+        Symc1 = Symmetry("P3", P2, P1);
+        Symc2 = Symmetry("P4", P2, Symc1);
         STL(Symc2, "c:#0000b2;s:6;f:30");
         return [Symc2];
     }
@@ -741,7 +605,7 @@ $macros[$L.macros.segmentB1] = {
         B = DefinitionPoint("B", S1, 1);
         P1 = Point("P1", "(A+B)/2+(10/(2*pixel()*d(A,B)))*(B-A)*(1+i*sqrt(3))", "0");
         P3 = Point("P3", "(A+B)/2+(10/(2*pixel()*d(A,B)))*(A-B)*(1+i*sqrt(3))", "0");
-        S2 = Segment("S2", P1, P3);
+        S2 = Segment("s2", P1, P3);
         var s1 = Find(S1),
             s2 = Find(S2),
             oldSetSize = s1.setSize,
@@ -772,8 +636,8 @@ $macros[$L.macros.segmentB2] = {
         P2 = Point("P2", "(A+B)/2+(10/(2*pixel()*d(A,B)))*(A-B)*(1+i*sqrt(3))+5*(B-A)/(d(A,B)*pixel())", "0");
         P1 = Point("P1", "(A+B)/2+(10/(2*pixel()*d(A,B)))*(B-A)*(1+i*sqrt(3))-5*(B-A)/(d(A,B)*pixel())", "0");
         P3 = Point("P3", "(A+B)/2+(10/(2*pixel()*d(A,B)))*(A-B)*(1+i*sqrt(3))-5*(B-A)/(d(A,B)*pixel())", "0");
-        S2 = Segment("S2", P1, P3);
-        S3 = Segment("S3", E, P2);
+        S2 = Segment("s2", P1, P3);
+        S3 = Segment("s3", E, P2);
         var s1 = Find(S1),
             s2 = Find(S2),
             s3 = Find(S3),
@@ -810,9 +674,9 @@ $macros[$L.macros.segmentB3] = {
         P3 = Point("P3", "(A+B)/2+(10/(2*pixel()*d(A,B)))*(A-B)*(1+i*sqrt(3))", "0");
         P4 = Point("P4", "(A+B)/2+(10/(2*pixel()*d(A,B)))*(B-A)*(1+i*sqrt(3))-10*(B-A)/(d(A,B)*pixel())", "0");
         P5 = Point("P5", "(A+B)/2+(10/(2*pixel()*d(A,B)))*(A-B)*(1+i*sqrt(3))-10*(B-A)/(d(A,B)*pixel())", "0");
-        S2 = Segment("S2", P1, P3);
-        S3 = Segment("S3", E, P2);
-        S4 = Segment("S3", P4, P5);
+        S2 = Segment("s2", P1, P3);
+        S3 = Segment("s3", E, P2);
+        S4 = Segment("s3", P4, P5);
         var s1 = Find(S1),
             s2 = Find(S2),
             s3 = Find(S3),
@@ -855,10 +719,10 @@ $macros[$L.macros.segmentB4] = {
         P5 = Point("P5", "(A+B)/2+(10/(2*pixel()*d(A,B)))*(A-B)*(1+i*sqrt(3))-5*(B-A)/(d(A,B)*pixel())", "0");
         P6 = Point("P6", "(A+B)/2+(10/(2*pixel()*d(A,B)))*(B-A)*(1+i*sqrt(3))-15*(B-A)/(d(A,B)*pixel())", "0");
         P7 = Point("P7", "(A+B)/2+(10/(2*pixel()*d(A,B)))*(A-B)*(1+i*sqrt(3))-15*(B-A)/(d(A,B)*pixel())", "0");
-        S2 = Segment("S2", P1, P3);
-        S3 = Segment("S3", E, P2);
-        S4 = Segment("S4", P4, P5);
-        S5 = Segment("S5", P6, P7);
+        S2 = Segment("s2", P1, P3);
+        S3 = Segment("s3", E, P2);
+        S4 = Segment("s4", P4, P5);
+        S5 = Segment("s5", P6, P7);
         var s1 = Find(S1),
             s2 = Find(S2),
             s3 = Find(S3),
@@ -897,8 +761,8 @@ $macros[$L.macros.segmentBO] = {
     exec: function(S1) {
         P1 = DefinitionPoint("P1", S1, 0);
         P2 = DefinitionPoint("P2", S1, 1);
-        M1 = MidPoint("M1", P2, P1);
-        C1 = Circle1("C1", M1, "10/pixel()");
+        M1 = MidPoint("P3", P2, P1);
+        C1 = Circle1("c1", M1, "10/pixel()");
         var s1 = Find(S1),
             c1 = Find(C1),
             oldSetSize = s1.setSize,
@@ -929,8 +793,8 @@ $macros[$L.macros.segmentBZ] = {
         P2 = Point("P2", "(A+B)/2+(12/(2*pixel()*d(A,B)))*(A-B)*(1+i*sqrt(3))+12*(B-A)/(d(A,B)*pixel())", "0");
         P4 = Point("P4", "(A+B)/2+(12/(2*pixel()*d(A,B)))*(B-A)*(1+i*sqrt(3))-12*(B-A)/(d(A,B)*pixel())", "0");
         P5 = Point("P5", "(A+B)/2+(12/(2*pixel()*d(A,B)))*(A-B)*(1+i*sqrt(3))-12*(B-A)/(d(A,B)*pixel())", "0");
-        S2 = Segment("S2", E, P5);
-        S3 = Segment("S3", E, P2);
+        S2 = Segment("s2", E, P5);
+        S3 = Segment("s3", E, P2);
         S4 = Segment("S3", P4, P5);
         var s1 = Find(S1),
             s2 = Find(S2),

@@ -69,24 +69,7 @@ Blockly.Blocks['dgpad_global_set'] = {
     }
 };
 
-// Blockly.Blocks['dgpad_global_inc'] = {
-//     init: function() {
-//         var menu = new Blockly.FieldDropdown(Blockly.getGlobalDropdown(), function(option) {
-//             Blockly.globalDropdownChange(menu, option);
-//         });
-//         this.appendValueInput("NAME")
-//             .setCheck(null)
-//             .appendField($L.blockly.globales_increment)
-//             .appendField(menu, "VAR")
-//             .appendField($L.blockly.globales_by);
-//         this.setInputsInline(false);
-//         this.setPreviousStatement(true, null);
-//         this.setNextStatement(true, null);
-//         this.setColour(200);
-//         this.setTooltip('');
-//         this.setHelpUrl('');
-//     }
-// };
+
 
 
 Blockly.Blocks['dgpad_global_inc'] = {

@@ -29,9 +29,26 @@ function CallHide() {
         return true;
     };
 
+    // this.createObj = function(zc, ev) {
+    //     this.getC(0).setHidden(1);
+    // };
     this.createObj = function(zc, ev) {
-        this.getC(0).setHidden(1);
-    };
+        const obj = this.getC(0);
+        if (!obj || obj.isSuperHidden()) return;
+
+        // Si ya estaba oculto, no registres nada
+        if (obj.isHidden()) return;
+
+        // Obtener el canvas real (ajusta si zc no es el canvas en tu app)
+        const canvas = zc?.canvas || zc?.getCanvas?.() || zc;
+        const um = canvas?.undoManager;
+
+        if (um && !um.isApplying && typeof um.recordVisibility === "function") {
+            um.recordVisibility(obj, true); // old: visible -> new: hidden
+        }
+
+        obj.setHidden(1);
+        };
 
     this.selectCreatePoint = function(zc, ev) {};
 

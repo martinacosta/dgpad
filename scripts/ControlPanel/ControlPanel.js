@@ -57,8 +57,18 @@ function ControlPanel(_canvas) {
     var checkMode = function(_i) {
         if (canvas.getMode() === _i) {
             modeGroup.deselect();
-            canvas.setMode(0);
+            if(canvas.getMode()!==1){
+                canvas.setMode(1);
+                arrowBtn.setActive(1);
+            }else{canvas.setMode(0)};
             canvas.paint();
+            // Al cambiar de modo, eliminar objetos ocultos si salimos del modo 2
+        if (!_i === 2) {
+            var frame = canvas.getConstruction().getFrame();
+            if (frame && typeof frame.removeHiddenObjectsFromProtocol === 'function') {
+                frame.removeHiddenObjectsFromProtocol();  // Eliminar los objetos ocultos del protocolo
+            }
+        }
             return true;
         } else
             return false;
@@ -71,6 +81,10 @@ function ControlPanel(_canvas) {
             return;
         canvas.setMode(1);
         canvas.paint();
+        var frame = canvas.getConstruction().getFrame();
+        if (frame && typeof frame.showHiddenObjectsInProtocol === 'function') {
+            frame.removeHiddenObjectsFromProtocol();  // Eliminar los objetos ocultos del protocolo
+        }
     };
     var fingerMode = function() {
         //        fingerBtn.select();
@@ -78,13 +92,27 @@ function ControlPanel(_canvas) {
             return;
         canvas.setMode(7);
         canvas.paint();
+        var frame = canvas.getConstruction().getFrame();
+        if (frame && typeof frame.showHiddenObjectsInProtocol === 'function') {
+            frame.removeHiddenObjectsFromProtocol();  // Eliminar los objetos ocultos del protocolo
+        }
     };
+    
+
     var hideMode = function() {
-        if (checkMode(2))
-            return;
+        if (checkMode(2)) return;
+    
+        // Cambiar al modo 2 (mostrar objetos ocultos)
         canvas.setMode(2);
         canvas.paint();
+    
+        // Después de cambiar la visibilidad, actualizar el protocolo
+        var frame = canvas.getConstruction().getFrame();
+        if (frame && typeof frame.showHiddenObjectsInProtocol === 'function') {
+            frame.showHiddenObjectsInProtocol();  // Añadir los objetos ocultos al protocolo
+        }
     };
+    
     var trashMode = function() {
         if (checkMode(3))
             return;
@@ -231,102 +259,7 @@ function ControlPanel(_canvas) {
     //JDIAZ end
 
 
-    // var downloadProc = function() {
-      // const apikey = 'Apcx13KffRBSNtSzza1toz';
-      // const client = filestack.init(apikey);
-
-        // filepicker.pick({
-                // extensions: ['.txt', '.dgp'],
-                // mimetype: 'text/plain',
-                // openTo: $U.getFilePickerDefaultBox()
-            // },
-            // function(FPFile) {
-                // filepicker.read(FPFile, function(data) {
-                    // canvas.OpenFile("", $U.utf8_decode(data));
-                    // if ($FPICKERFRAME !== null) {
-                        // $FPICKERFRAME.close();
-                        // $FPICKERFRAME = null;
-                    // }
-                // });
-            // });
-        // client.pick({
-                // accept: ['.txt', '.dgp'],
-                // mimetype: 'text/plain',
-                // openTo: $U.getFilePickerDefaultBox(),
-                // onOpen: $U.getFilePickerDefaultBox(),
-            // }).then((res) => {
-              // canvas.OpenFile("", $U.utf8_decode(data));
-            // });
-    // };
-
-    // var uploadProc = function() {
-        // if (canvas.getConstruction().isEmpty())
-            // return;
-        // var source = canvas.macrosManager.getSource() + canvas.getConstruction().getSource() + canvas.textManager.getSource();
-
-
-
-        // filepicker.exportFile(
-            // "http://dgpad.net/scripts/NotPacked/thirdParty/temp.txt", {
-                // suggestedFilename: "",
-                // extension: ".dgp",
-                // services: ['DROPBOX', 'GOOGLE_DRIVE', 'BOX', 'SKYDRIVE', 'EVERNOTE', 'FTP', 'WEBDAV'],
-                // openTo: $U.getFilePickerDefaultBox()
-            // },
-            // function(InkBlob) {
-                // console.log(InkBlob.url);
-                // filepicker.write(
-                    // InkBlob,
-                    // source, {
-                        // base64decode: false,
-                        // mimetype: 'text/plain'
-                    // },
-                    // $U.base64_encode(source), {
-                        // base64decode: true,
-                        // mimetype: 'text/plain'
-                    // },
-                    // function(InkBlob) {
-                        // if ($FPICKERFRAME !== null) {
-                            // $FPICKERFRAME.close();
-                            // $FPICKERFRAME = null;
-                        // }
-                    // },
-                    // function(FPError) {
-                        // console.log(FPError.toString());
-                    // }
-                // );
-            // },
-            // function(FPError) {
-                // console.log(FPError.toString());
-            // }
-        // );
-
-               // filepicker.store(
-                       // $U.base64_encode(source),
-                       // {
-                           // base64decode: true,
-                           // mimetype: 'text/plain'
-                       // },
-               // function(InkBlob) {
-                   // filepicker.exportFile(
-                           // InkBlob,
-                           // {suggestedFilename:"",extension: ".txt",openTo: $U.getFilePickerDefaultBox()},
-                   // function(InkBlob) {
-                       // if ($FPICKERFRAME !== null) {
-                           // $FPICKERFRAME.close();
-                           // $FPICKERFRAME = null;
-                       // }
-                   // },
-                           // function(FPError) {
-                               // console.log(FPError.toString());
-                           // }
-                   // );
-               // },
-                       // function(FPError) {
-                           // console.log(FPError.toString());
-                       // }
-               // );
-    // };
+    
 
 
 
@@ -384,29 +317,7 @@ function ControlPanel(_canvas) {
     addSpaceRight(hspace);
     var undoBtn = addBtnRight("undo", true, null, undoProc, $L.button_title_undo, true);
 
-    //    this.selectBtn = function(_mode) {
-    //        switch (_mode) {
-    //            case 1:
-    //                arrowBtn.select();
-    //                break;
-    //            case 2:
-    //                gommeBtn.select();
-    //                break;
-    //            case 3:
-    //                trashBtn.select();
-    //                break;
-    //            case 4:
-    //                macrosBtn.select();
-    //                break;
-    //            case 5:
-    //                macrosBtn.select();
-    //                break;
-    //            case 6:
-    //                propBtn.select();
-    //                break;
-    //        }
-    //    }
-
+    
     this.selectPropBtn = function() {
         
 		propBtn.select();
@@ -452,75 +363,7 @@ function ControlPanel(_canvas) {
 }
 
 
-// function FilePickerDIV(_c) {
-    // var me = this;
-    // var canvas = _c;
-    // var ParentDOM = _c.getDocObject().parentNode;
-    // var FPDiv = document.createElement("div");
-    // FPDiv.setAttribute('width', canvas.getBounds().width);
-    // FPDiv.setAttribute('height', canvas.getBounds().height);
-    // FPDiv.style.position = "absolute";
-    // FPDiv.style.left = (canvas.getBounds().left) + "px";
-    // FPDiv.style.top = (canvas.getBounds().top) + "px";
-    // FPDiv.style.width = (canvas.getBounds().width) + "px";
-    // FPDiv.style.height = (canvas.getBounds().height) + "px";
-    // FPDiv.style.backgroundColor = "rgba(0,0,0,0.75)";
 
-    // var FPsize = {
-        // width: 820,
-        // height: 520
-    // };
-    // var FPFrame = document.createElement("iframe");
-    // FPFrame.setAttribute("ID", "FP_" + canvas.getID());
-    // FPFrame.setAttribute('width', FPsize.width);
-    // FPFrame.setAttribute('height', FPsize.height);
-    // FPFrame.setAttribute('frameborder', 0);
-    // FPFrame.setAttribute('marginheight', 0);
-    // FPFrame.setAttribute('marginwidth', 0);
-    // FPFrame.style.position = "absolute";
-    // FPFrame.style.left = (canvas.getBounds().width - FPsize.width) / 2 + "px";
-    // FPFrame.style.top = (canvas.getBounds().height - FPsize.height) / 2 + "px";
-    // FPFrame.style.width = FPsize.width + "px";
-    // FPFrame.style.height = FPsize.height + "px";
-    // FPFrame.style.overflow = "hidden";
-
-    // var FPClose = document.createElement("img");
-    // FPClose.style.position = "absolute";
-    // FPClose.style.margin = "0px";
-    // FPClose.style.padding = "0px";
-    // FPClose.setAttribute('src', $APP_PATH + "NotPacked/images/dialog/closebox.svg");
-    // FPClose.style.left = ((canvas.getBounds().width + FPsize.width) / 2 - 10) + "px";
-    // FPClose.style.top = ((canvas.getBounds().height - FPsize.height) / 2 - 20) + "px";
-    // FPClose.style.width = "30px";
-    // FPClose.style.height = "30px";
-    // FPClose.addEventListener('click', function(ev) {
-        // ParentDOM.removeChild(FPDiv);
-    // });
-
-    // FPDiv.appendChild(FPFrame);
-    // FPDiv.appendChild(FPClose);
-
-    // me.div = function() {
-        // return FPDiv;
-    // };
-
-    // me.id = function() {
-        // return ("FP_" + canvas.getID());
-    // };
-
-    // me.frame = function() {
-        // return FPFrame;
-    // };
-
-    // me.show = function() {
-        // ParentDOM.appendChild(FPDiv);
-    // };
-
-    // me.close = function() {
-        // ParentDOM.removeChild(FPDiv);
-    // };
-
-// }
 
 
 function windowOpenIFrame(url) {

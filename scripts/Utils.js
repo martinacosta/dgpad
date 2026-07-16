@@ -22,12 +22,16 @@ $U.lang = function() {
 
 
 $U.katexLoaded = function(_callback, _args) {
+    
+
     if (typeof katex === 'undefined') {
         if ((_callback) && ($U.katexLoaded.callbacks.indexOf(_callback) === -1)) {
             $U.katexLoaded.callbacks.push(_callback);
+            
             $U.katexLoaded.args.push(_args);
         }
         if (!$U.katexLoaded.loaded) {
+            
             var parent = document.getElementsByTagName("head")[0];
             var lnk = document.createElement("link");
             lnk.rel = "stylesheet";
@@ -52,6 +56,7 @@ $U.katexLoaded = function(_callback, _args) {
             parent.appendChild(lnk);
             parent.appendChild(script);
             $U.katexLoaded.loaded = true;
+            
         }
         return false;
     }
@@ -63,30 +68,7 @@ $U.katexLoaded.callbacks = [];
 $U.katexLoaded.args = [];
 
 
-// $U.loadKaTeX = function(_callback) {
-//     if (!$U.loadKaTeX.loaded) {
-//         var parent = document.getElementsByTagName("head")[0];
-//         var lnk = document.createElement("link");
-//         lnk.rel = "stylesheet";
-//         lnk.href = $APP_PATH + "NotPacked/thirdParty/katex.min.css";
-//         //        lnk.href = "http://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.1.1/katex.min.css";
-//         var script = document.createElement("script");
-//         script.type = "text/javascript";
-//         script.src = $APP_PATH + "NotPacked/thirdParty/katex.min.js";
-//         //        script.src = "http://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.1.1/katex.min.js";
-//         script.onload = function() {
-//             if (_callback) _callback();
-//             //            script.id = "MathJax";
-//         }
-//         parent.appendChild(lnk);
-//         parent.appendChild(script);
-//         $U.loadKaTeX.loaded = true;
-//         return false;
-//     }
-//     return true;
-// }
 
-// $U.loadKaTeX.loaded = false;
 
 
 $U.native2ascii = function(str) {
@@ -363,13 +345,16 @@ $U.computeArcParams = function(xA, yA, xB, yB, xC, yC) {
 };
 
 $U.computeAngleParams = function(xA, yA, xO, yO, xC, yC) {
+    
     var xOC = xC - xO,
         xOA = xA - xO;
     var yOC = yC - yO,
         yOA = yA - yO;
 
     var startangle = $U.angleH(xOA, yOA);
+    
     var endangle = $U.angleH(xOC, yOC);
+    
     var trigo = (xOA * yOC < yOA * xOC);
 
 
@@ -378,8 +363,10 @@ $U.computeAngleParams = function(xA, yA, xO, yO, xC, yC) {
 
     // Calcul de la mesure de l'angle AOC orienté trigo (dans [0;2π]) :
 	// Cálculo de la medida del ángulo AOC orientado trigo (en [0;2π]) :
-     if(Math.abs(xA-xO+yA-yO)<0.01||Math.abs(xC-xO+yC-yO)<0.01){var AOC=NaN} else{
-	 AOC = endangle - startangle;}
+    //  if(Math.abs(xA-xO+yA-yO)<0.01||Math.abs(xC-xO+yC-yO)<0.01){var AOC=NaN} else{
+	//  AOC = endangle - startangle;}
+    AOC = endangle - startangle;
+     
     AOC += ((AOC < 0) - (AOC > $U.doublePI)) * $U.doublePI;
 
     // Calcul de la mesure de l'angle AOC (dans [0;π]) :
@@ -831,68 +818,7 @@ $U.base64_decode = function(_data) {
     return decodeURIComponent(escape(window.atob(_data)));
 };
 
-// $U.base64_encode = function(_data) {
-//     var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-//     var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
-//         ac = 0,
-//         enc = "",
-//         tmp_arr = [];
 
-//     if (!_data) {
-//         return _data;
-//     }
-
-//     do { // pack three octets into four hexets
-//         o1 = _data.charCodeAt(i++);
-//         o2 = _data.charCodeAt(i++);
-//         o3 = _data.charCodeAt(i++);
-//         bits = o1 << 16 | o2 << 8 | o3;
-//         h1 = bits >> 18 & 0x3f;
-//         h2 = bits >> 12 & 0x3f;
-//         h3 = bits >> 6 & 0x3f;
-//         h4 = bits & 0x3f;
-//         // use hexets to index into b64, and append result to encoded string
-//         tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
-//     } while (i < _data.length);
-//     enc = tmp_arr.join('');
-//     var r = _data.length % 3;
-//     return (r ? enc.slice(0, r - 3) : enc) + '==='.slice(r || 3);
-// };
-
-
-// $U.base64_decode = function(_data) {
-//     var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-//     var o1, o2, o3, h1, h2, h3, h4, bits, i = 0,
-//         ac = 0,
-//         dec = "",
-//         tmp_arr = [];
-//     if (!_data) {
-//         return _data;
-//     }
-//     _data += '';
-//     do { // unpack four hexets into three octets using index points in b64
-//         h1 = b64.indexOf(_data.charAt(i++));
-//         h2 = b64.indexOf(_data.charAt(i++));
-//         h3 = b64.indexOf(_data.charAt(i++));
-//         h4 = b64.indexOf(_data.charAt(i++));
-//         bits = h1 << 18 | h2 << 12 | h3 << 6 | h4;
-//         o1 = bits >> 16 & 0xff;
-//         o2 = bits >> 8 & 0xff;
-//         o3 = bits & 0xff;
-//         if (h3 === 64) {
-//             tmp_arr[ac++] = String.fromCharCode(o1);
-//         } else if (h4 === 64) {
-//             tmp_arr[ac++] = String.fromCharCode(o1, o2);
-//         } else {
-//             tmp_arr[ac++] = String.fromCharCode(o1, o2, o3);
-//         }
-//     } while (i < _data.length);
-//     dec = tmp_arr.join('');
-//     dec = $U.utf8_decode(dec);
-//     return dec;
-// };
-
-// For mouse wheel :
 $U.extractDelta = function(e) {
     var n = null;
     if (e.wheelDelta)
@@ -922,13 +848,21 @@ $U.addDomUtils = function(el) {
     el.att = function(_a, _v) {
         el[_a] = _v;
     };
+    
     el.stls = function(_st) {
+        if (typeof _st !== "string") {
+            console.warn("❗️stls recibió valor no válido:", _st);
+            return;
+        }
         var t = _st.split(";");
-        for (var i = 0, len = t.length; i < len; i++) {
+        for (var i = 0; i < t.length; i++) {
             var a = t[i].split(":");
-            el.stl(a[0].replace(/^\s+|\s+$/g, ''), a[1].replace(/^\s+|\s+$/g, ''));
+            if (a.length === 2) {
+                el.stl(a[0].trim(), a[1].trim());
+            }
         }
     };
+    
     el.bnds = function(l, t, w, h) {
         el.stls("left:" + l + "px;top:" + t + "px;width:" + w + "px;height:" + h + "px");
     };
@@ -995,59 +929,233 @@ $U.button = function(_mess, _proc) {
     window.document.body.appendChild(wrapper);
 };
 
-$U.alert = function(_mess, _w, _h) {
-    var w = _w ? _w : 350;
-    var h = _h ? _h : 165;
-    var t = 40;
-    var msg_height = 50; // Message height
-    var msg_width = 300; // Message width
-    var msg_top = 0; // Distance from message to top
-    var ok_top = 120; // Ok btn top
-    var ok_width = 80; // Ok btn width
-    var ok_height = 30; // Ok btn height
-    var ok_right = 23; // Ok btn right margin
 
-    var scrn = $U.createDiv();
-    var wp = $U.createDiv();
-    var msg = $U.createDiv();
-    var ok = $U.createDiv();
+// $U.alert = function(_mess, _w, _h, _font, _size, _style, _align) {
+//     const font = _font || "Arial";
+//     const size = _size || "24";
+//     const style = _style || "normal";
+//     const align = _align || "center";
 
-    scrn.stls("position:absolute;z-index:10000;overflow:hidden;background-color:rgba(50,50,50,0.7)");
-    wp.stls("position:absolute;border-radius:5px;font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;font-weight: 300;letter-spacing: 1.2px;overflow:hidden;border: 1px solid #b4b4b4;transition:transform 0.2s linear;transform:translate(0px,-200px);background-color:rgba(255,255,255,1)");
-    msg.stls("position:relative;text-align:center;display:table-cell;vertical-align:bottom;color:#797979;font-size:16px;white-space: pre-wrap;margin:0px;overflow:hidden");
-    ok.stls("position:absolute;text-align:center;vertical-align:middle;background-color:#8CD4F5;color:white;border:none;box-shadow:none;font-size:17px;font-weight:500;-webkit-border-radius:4px;border-radius:5px;cursor: pointer");
-    var winW = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-    var winH = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-    scrn.bnds(0, 0, winW, winH);
-    wp.bnds((winW - w) / 2, t, w, h);
-    msg.bnds((w - msg_width) / 2, msg_top, msg_width, msg_height);
-    msg.innerHTML = _mess.replace(/\\n/g, "<br>");
-    ok.bnds(w - ok_width - ok_right, ok_top, ok_width, ok_height);
-    ok.innerHTML = $L.blockly.prompt_ok;
-    ok.stl("line-height", ok_height + "px");
+//     const scrn = $U.createDiv();
+//     const wp = $U.createDiv();
+//     const msg = $U.createDiv();
+//     const ok = $U.createDiv();
 
-    var valid = function(ev) {
-        ev.preventDefault();
-        scrn.innerHTML = "";
-        window.document.body.removeChild(scrn);
+//     scrn.stls(`
+//         position:fixed;
+//         z-index:10000;
+//         overflow:auto;
+//         background-color:rgba(50,50,50,0.7);
+//         left:0;
+//         top:0;
+//         width:100vw;
+//         height:100vh;
+//         display:flex;
+//         justify-content:center;
+//         align-items:center;
+//     `);
 
-    };
-    scrn.md(function(ev) {
-        ev.stopPropagation();
-    });
-    ok.mu(valid);
-    ok.mm(function(ev) {
-        ok.stl("background-color", "#1EAAD0");
-        ev.stopPropagation();
-    });
-    wp.add(msg);
-    wp.add(ok);
-    scrn.add(wp);
-    window.document.body.appendChild(scrn);
-    setTimeout(function() {
-        wp.stls("transform:translate(0px,0px)");
-    }, 1);
-}
+//     wp.stls(`
+//         background-color:white;
+//         border-radius:10px;
+//         padding:20px;
+//         font-family:${font};
+//         font-style:${style};
+//         color:#444;
+//         text-align:${align};
+//         max-width:90vw;
+//         min-width:300px;
+//         box-shadow:0 2px 8px rgba(0,0,0,0.2);
+//     `);
+
+//     msg.stls(`
+//         font-size:${size}px;
+//         margin-bottom:20px;
+//         white-space:pre-wrap;
+//         word-wrap:break-word;
+//     `);
+
+//     msg.innerHTML = _mess.replace(/\\n/g, "<br>");
+
+//     ok.stls(`
+//         display:inline-block;
+//         padding:10px 20px;
+//         background-color:#8CD4F5;
+//         color:white;
+//         border:none;
+//         font-size:17px;
+//         font-weight:500;
+//         border-radius:5px;
+//         cursor:pointer;
+//     `);
+//     ok.innerHTML = $L.blockly.prompt_ok || "Ok";
+
+//     ok.onclick = () => {
+//         scrn.innerHTML = "";
+//         document.body.removeChild(scrn);
+//     };
+
+//     wp.add(msg);
+//     wp.add(ok);
+//     scrn.add(wp);
+//     document.body.appendChild(scrn);
+// };
+
+// utils: $U.alert
+$U.alert = function(_mess, _w, _h, _font, _size, _style, _align, _speaker) {
+  const font = _font || "Arial";
+  const size = _size || "24";
+  const style = _style || "normal";
+  const align = _align || "center";
+  const speakerEnabled = !!_speaker;
+
+  const scrn = $U.createDiv();
+  const wp = $U.createDiv();
+  const msg = $U.createDiv();
+  const ok = $U.createDiv();
+
+  // ✅ nuevo (botón altoparlante)
+  const spk = $U.createDiv();
+
+  let speaking = false;
+
+  function ttsSupported() {
+    return ("speechSynthesis" in window) && ("SpeechSynthesisUtterance" in window);
+  }
+
+  function normalizeText(t) {
+    return String(t == null ? "" : t).replace(/\s+/g, " ").trim();
+  }
+
+  function setSpeakerUI() {
+    spk.innerHTML = speaking ? "⏹️" : "🔊";
+    spk.setAttribute("title", speaking ? "Detener lectura" : "Leer en voz alta");
+    spk.setAttribute("aria-label", speaking ? "Detener lectura" : "Leer en voz alta");
+  }
+
+  function stopSpeak() {
+    try { window.speechSynthesis.cancel(); } catch(e) {}
+    speaking = false;
+    setSpeakerUI();
+  }
+
+  function toggleSpeak() {
+    if (!ttsSupported()) return;
+    const text = normalizeText(_mess);
+    if (!text) return;
+
+    if (speaking) {
+      stopSpeak();
+      return;
+    }
+
+    stopSpeak();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "es-CO";
+    u.rate = 1;
+    u.pitch = 1;
+    u.volume = 1;
+
+    u.onend = () => { speaking = false; setSpeakerUI(); };
+    u.onerror = () => { speaking = false; setSpeakerUI(); };
+
+    speaking = true;
+    setSpeakerUI();
+    window.speechSynthesis.speak(u);
+  }
+
+  scrn.stls(`
+    position:fixed;
+    z-index:10000;
+    overflow:auto;
+    background-color:rgba(50,50,50,0.7);
+    left:0;
+    top:0;
+    width:100vw;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  `);
+
+  wp.stls(`
+    background-color:white;
+    border-radius:10px;
+    padding:20px;
+    font-family:${font};
+    font-style:${style};
+    color:#444;
+    text-align:${align};
+    max-width:90vw;
+    min-width:300px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.2);
+  `);
+
+  msg.stls(`
+    font-size:${size}px;
+    margin-bottom:20px;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+  `);
+
+  msg.innerHTML = String(_mess).replace(/\\n/g, "<br>");
+
+  ok.stls(`
+    display:inline-block;
+    padding:10px 20px;
+    background-color:#8CD4F5;
+    color:white;
+    border:none;
+    font-size:17px;
+    font-weight:500;
+    border-radius:5px;
+    cursor:pointer;
+  `);
+  ok.innerHTML = $L.blockly.prompt_ok || "Ok";
+
+  // ✅ footer row para OK + 🔊
+  const footer = $U.createDiv();
+  footer.stls(`
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:10px;
+  `);
+
+  if (speakerEnabled && ttsSupported()) {
+    spk.stls(`
+      display:inline-flex;
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      justify-content:center;
+      align-items:center;
+      cursor:pointer;
+      user-select:none;
+      background:rgba(140,212,245,0.2);
+      font-size:18px;
+    `);
+    setSpeakerUI();
+    spk.onclick = () => toggleSpeak();
+    footer.add(spk);
+  }
+
+  ok.onclick = () => {
+    stopSpeak(); // ✅ por si está leyendo
+    scrn.innerHTML = "";
+    document.body.removeChild(scrn);
+  };
+
+  wp.add(msg);
+  footer.add(ok);
+  wp.add(footer);
+  scrn.add(wp);
+  document.body.appendChild(scrn);
+};
+
+
+
+
 
 $U.prompt = function(_mess, _default, _type, _proc, _w, _h, _inp_w) {
     var w = _w ? _w : 350;
@@ -1156,91 +1264,1305 @@ $U.prompt = function(_mess, _default, _type, _proc, _w, _h, _inp_w) {
     }, 200);
 }
 //MEAG
-$U.confirm = function(_mess,  _w, _h) {
 
-    return new Promise((resolve, reject) => {
 
-        var w = _w ? _w : 350;
-        var h = _h ? _h : 165;
-        var t = 40;
-        var msg_height = 50; // Message height
-        var msg_width = 300; // Message width
-        var msg_top = 0; // Distance from message to top
 
-        var ok_top = 120; // Ok btn top
-        var ok_width = 80; // Ok btn width
-        var ok_height = 30; // Ok btn height
-        var ok_right = 23; // Ok btn right margin
-        var cancel_left = 23; // Cancel btn left margin
+$U.confirm = function (_mess, _w, _h, _font, _size, _style, _align, _yes = "Sí", _no = "No", _speaker = false) {
+  return new Promise((resolve) => {
+    const w = _w || 450;
+    const h = _h || 200;
 
-        var scrn = $U.createDiv();
-        var wp = $U.createDiv();
-        var msg = $U.createDiv();
+    const font = _font || "Arial";
+    const size = _size || "24";
+    const style = _style || "normal";
+    const align = _align || "center";
+    const speakerEnabled = !!_speaker;
 
-        var ok = $U.createDiv();
-        var cancel = $U.createDiv();
-        var answer=null;
+    const scrn = $U.createDiv();
+    const wp = $U.createDiv();
+    const msg = $U.createDiv();
+    const btnContainer = $U.createDiv();
+    const ok = $U.createDiv();
+    const cancel = $U.createDiv();
 
-        scrn.stls("position:absolute;z-index:10000;overflow:hidden;background-color:rgba(50,50,50,0.7)");
-        wp.stls("position:absolute;border-radius:5px;font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;font-weight: 300;letter-spacing: 1.2px;overflow:hidden;border: 1px solid #b4b4b4;transition:transform 0.2s linear;transform:translate(0px,-200px);background-color:rgba(255,255,255,1)");
-        msg.stls("position:relative;text-align:center;display:table-cell;vertical-align:bottom;color:#797979;font-size:16px;white-space: pre-wrap;margin:0px;overflow:hidden");
-        //inw.stls("position:absolute;border: 0px;border: 1px solid #555");
-        ok.stls("position:absolute;text-align:center;vertical-align:middle;background-color:#8CD4F5;color:white;border:none;box-shadow:none;font-size:17px;font-weight:500;-webkit-border-radius:4px;border-radius:5px;cursor: pointer");
-        cancel.stls("position:absolute;text-align:center;vertical-align:middle;background-color:#C1C1C1;color:white;border:none;box-shadow:none;font-size:17px;font-weight:500;-webkit-border-radius:4px;border-radius:5px;cursor: pointer");
-        //inw.stl("line-height", inp_height + "px");
-        var winW = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-        var winH = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-        scrn.bnds(0, 0, winW, winH);
-        wp.bnds((winW - w) / 2, t, w, h);
-        msg.bnds((w - msg_width) / 2, msg_top, msg_width, msg_height);
-        msg.innerHTML = _mess;
-        //inw.bnds((w - inp_width) / 2, inp_top, inp_width, inp_height);
-        ok.bnds(w - ok_width - ok_right, ok_top, ok_width, ok_height);
-        ok.innerHTML = $L.blockly.import_ok;
-        ok.stl("line-height", ok_height + "px");
-        cancel.bnds(cancel_left, ok_top, ok_width, ok_height);
-        cancel.innerHTML = $L.blockly.import_cancel;
-        cancel.stl("line-height", ok_height + "px");
+    // Speaker (centro)
+    const spk = $U.createDiv();
+    let speaking = false;
 
-        scrn.kd(function(ev) {
-            if (ev.keyCode === 13) valid(ev);
+    function ttsSupported() {
+      return ("speechSynthesis" in window) && ("SpeechSynthesisUtterance" in window);
+    }
+
+    function normalizeText(t) {
+      return String(t == null ? "" : t).replace(/\s+/g, " ").trim();
+    }
+
+    function setSpeakerUI() {
+      spk.innerHTML = speaking ? "⏹️" : "🔊";
+      spk.setAttribute("title", speaking ? "Detener lectura" : "Leer en voz alta");
+      spk.setAttribute("aria-label", speaking ? "Detener lectura" : "Leer en voz alta");
+    }
+
+    function stopSpeak() {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+      speaking = false;
+      setSpeakerUI();
+    }
+
+    function toggleSpeak() {
+      if (!ttsSupported()) return;
+      const text = normalizeText(_mess);
+      if (!text) return;
+
+      if (speaking) {
+        stopSpeak();
+        return;
+      }
+
+      stopSpeak();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "es-CO";
+      u.rate = 1;
+      u.pitch = 1;
+      u.volume = 1;
+
+      u.onend = () => { speaking = false; setSpeakerUI(); };
+      u.onerror = () => { speaking = false; setSpeakerUI(); };
+
+      speaking = true;
+      setSpeakerUI();
+      window.speechSynthesis.speak(u);
+    }
+
+    scrn.stls("position:fixed;z-index:10000;overflow:hidden;background-color:rgba(50,50,50,0.7);left:0;top:0;width:100vw;height:100vh;");
+
+    wp.stls(`position:absolute;border-radius:5px;font-family:${font};font-style:${style};overflow:hidden;
+      border:1px solid #b4b4b4;transition:transform 0.2s linear;background-color:white;text-align:${align};
+      padding:20px;min-height:${h}px;min-width:${w}px;display:flex;flex-direction:column;justify-content:space-between;`);
+
+    msg.stls(`text-align:${align};color:#444;font-size:${size}px;font-style:${style};white-space:pre-wrap;
+      font-family:${font};margin-bottom:20px;`);
+
+    // ✅ Contenedor con 3 columnas: No | 🔊 | Sí
+    btnContainer.stls("display:flex;align-items:center;width:100%;");
+
+    const btnCommon = `text-align:center;border:none;box-shadow:none;font-weight:500;border-radius:5px;cursor:pointer;
+      font-family:${font};font-size:${size}px;font-style:${style};padding:10px 20px;`;
+
+    ok.stls(`${btnCommon}background-color:#1EAAD0;color:white;`);
+    cancel.stls(`${btnCommon}background-color:#C1C1C1;color:white;`);
+
+    msg.innerHTML = String(_mess).replace(/\\n/g, "<br>");
+    ok.innerHTML = _yes;
+    cancel.innerHTML = _no;
+
+    function closeWith(val) {
+      stopSpeak();
+      document.body.removeChild(scrn);
+      resolve(val);
+    }
+
+    ok.onclick = function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      closeWith(true);
+    };
+
+    cancel.onclick = function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      closeWith(false);
+    };
+
+    scrn.md(ev => ev.stopPropagation());
+
+    // ✅ 3 columnas con flex para centrar el speaker respecto a la caja modal
+    const left = $U.createDiv();
+    const center = $U.createDiv();
+    const right = $U.createDiv();
+
+    left.stls("flex:1;display:flex;justify-content:flex-start;align-items:center;");
+    center.stls("flex:0;display:flex;justify-content:center;align-items:center;min-width:60px;");
+    right.stls("flex:1;display:flex;justify-content:flex-end;align-items:center;");
+
+    left.add(cancel);
+    right.add(ok);
+
+    if (speakerEnabled && ttsSupported()) {
+      spk.stls(`
+        display:inline-flex;
+        width:40px;height:40px;
+        border-radius:10px;
+        justify-content:center;
+        align-items:center;
+        cursor:pointer;
+        user-select:none;
+        background:rgba(140,212,245,0.2);
+        font-size:18px;
+      `);
+      setSpeakerUI();
+      spk.onclick = () => toggleSpeak();
+      center.add(spk);
+    }
+
+    btnContainer.add(left);
+    btnContainer.add(center);
+    btnContainer.add(right);
+
+    wp.add(msg);
+    wp.add(btnContainer);
+    scrn.add(wp);
+    document.body.appendChild(scrn);
+
+    const winW = window.innerWidth;
+    const winH = window.innerHeight;
+    wp.stl("left", `${(winW - wp.offsetWidth) / 2}px`);
+    wp.stl("top", `${(winH - wp.offsetHeight) / 2}px`);
+
+    setTimeout(() => {
+      wp.stls(wp.style.cssText + "transform:translate(0px,0px);");
+    }, 1);
+  });
+};
+
+
+
+
+$U.createCustomInput = function(id, x, y, width, height, fontSize) {
+    let input;
+    const escala = $U.escala || 1; // Asegura que haya un valor
+
+    if (!document.getElementById(id)) {
+        input = document.createElement("input");
+        input.type = "text";
+        input.id = id;
+        document.body.appendChild(input);
+        if (!$U.inputs) $U.inputs = {};
+        $U.inputs[id] = input;
+        
+
+    } else {
+        input = $U.inputs[id];
+    }
+
+    // 🔧 Asignar todos los estilos juntos
+    input.style.cssText = `
+        position: absolute;
+        top: ${y}px;
+        left: ${x}px;
+        width: ${width * escala}px;
+        font-size: ${fontSize * escala}px;
+        height: ${(fontSize * escala) + 6}px;
+        line-height: ${fontSize * escala}px;
+        padding: 3px 6px;
+        border: 1px solid #888;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        display: block;
+    `;
+
+    // 📡 Listener para enviar mensaje
+    if (!input.dataset.listenerAdded) {
+        input.addEventListener("input", () => {
+            const iframe = document.querySelector("iframe[name=DGPad0]");
+            iframe?.contentWindow?.postMessage({
+                action: "update-input-value",
+                id: input.id,
+                value: input.value
+            }, "*");
         });
+        input.dataset.listenerAdded = "true";
+    }
+};
 
-        scrn.md(function(ev) {
-            ev.stopPropagation();
-        });
-        ok.mu(function(ev) {
-            answer=true;
-            window.document.body.removeChild(scrn);
-            resolve(answer);
-        });
-        ok.mm(function(ev) {
-            ok.stl("background-color", "#1EAAD0");
-            ev.stopPropagation();
-        });
-        cancel.mm(function(ev) {
-            cancel.stl("background-color", "#b9b9b9");
-            ev.stopPropagation();
-        });
-        cancel.mu(function() {
-            answer=false;
-            window.document.body.removeChild(scrn);
-            resolve(answer);
-        });
 
-        wp.add(msg);
-        //wp.add(inw);
-        wp.add(ok);
-        wp.add(cancel);
-        scrn.add(wp);
-        window.document.body.appendChild(scrn);
-        setTimeout(function() {
-            wp.stls("transform:translate(0px,0px)");
-        }, 1);
-    });
-}
+
+
+$U.createCustomNumberInput = function (id, x, y, width, fontSize, min, max, step) {
+  const escala = $U.escala || 1;
+
+  const inputId = String(id || "");
+  if (!inputId) return null;
+
+  let input = document.getElementById(inputId);
+
+  if (!input) {
+    input = document.createElement("input");
+    input.type = "number";
+    input.title = "";
+    input.id = inputId;
+
+    input.autocomplete = "off";
+    input.setAttribute("autocomplete", "off");
+    input.setAttribute("name", "fake" + Math.random()); // evita autofill
+
+    document.body.appendChild(input);
+  }
+
+  if (!$U.inputs) $U.inputs = {};
+  $U.inputs[inputId] = input;
+
+  // attrs numéricos
+  if (min != null) input.min = String(min);
+  if (max != null) input.max = String(max);
+  if (step != null) input.step = String(step);
+
+  // valor inicial razonable si está vacío
+  if (input.value === "" && min != null && max != null) {
+    const mn = Number(min);
+    const mx = Number(max);
+    if (Number.isFinite(mn) && Number.isFinite(mx)) {
+      input.value = String(Math.round((mn + mx) / 2));
+    }
+  }
+
+  // estilo
+  input.style.cssText = `
+    position: absolute;
+    top: ${y}px;
+    left: ${x}px;
+    width: ${Number(width) * escala}px;
+    font-size: ${Number(fontSize) * escala}px;
+    height: ${(Number(fontSize) * escala) + 6}px;
+    line-height: ${Number(fontSize) * escala}px;
+    padding: 3px 6px;
+    border: 1px solid #888;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    display: block;
+  `;
+
+  return input;
+};
+
+
+
 //MEAG
 $U.inputs={};
+
+$U.cronometros = {};
+
+
+$U.renamePointInInputMeta = function renamePointInInputMeta(oldName, newName) {
+  if (!$U.inputMeta) return;
+
+  const oldN = String(oldName || "");
+  const newN = String(newName || "");
+  if (!oldN || !newN || oldN === newN) return;
+
+  // 1) actualizar meta (labels de dropdowns)
+  for (const id of Object.keys($U.inputMeta)) {
+    const meta = $U.inputMeta[id];
+    if (meta && meta.pointName === oldN) meta.pointName = newN;
+  }
+
+  // 2) actualizar texto visible de expresiones numéricas (NO cambiar exprKey)
+  try {
+    const construction = window.$CANVAS?.getConstruction?.();
+    if (construction) {
+      for (const id of Object.keys($U.inputMeta)) {
+        const meta = $U.inputMeta[id];
+        if (!meta || meta.type !== "number" || !meta.exprKey) continue;
+
+        // solo las del punto renombrado (ya actualizado a newN)
+        if (meta.pointName !== newN) continue;
+
+        const exprObj = construction.find(meta.exprKey);
+        if (exprObj && typeof exprObj.setT === "function") {
+          exprObj.setT(`ValorListaNumeros${meta.pointName} ${meta.n}=`);
+          exprObj.compute?.();
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("No se pudieron actualizar textos de expresiones numéricas:", e);
+  }
+
+  // 3) opcional: avisar al iframe para actualizar TAB (numeración)
+  const iframe = document.querySelector('iframe[name="DGPad0"]');
+  iframe?.contentWindow?.postMessage({
+    action: "rename-point-for-tab",
+    oldName: oldN,
+    newName: newN
+  }, "*");
+};
+
+$U.renamePointInMathLiveMeta = function renamePointInMathLiveMeta(oldName, newName) {
+  if (!$U.mathLiveMeta) return;
+
+  const oldN = String(oldName || "");
+  const newN = String(newName || "");
+  if (!oldN || !newN || oldN === newN) return;
+
+  // 1) actualizar meta local (labels de dropdowns)
+  for (const id of Object.keys($U.mathLiveMeta)) {
+    const meta = $U.mathLiveMeta[id];
+    if (meta && meta.pointName === oldN) {
+      meta.pointName = newN;
+    }
+  }
+
+  // 2) avisar al iframe para actualizar TURTLE_VARS.TAB
+  const iframe = document.querySelector('iframe[name="DGPad0"]');
+  iframe?.contentWindow?.postMessage({
+    action: "rename-point-for-tab",
+    oldName: oldN,
+    newName: newN
+  }, "*");
+};
+
+
+$U.deleteCustomInputById = function deleteCustomInputById(id) {
+    
+
+  const inputId = String(id || "");
+  if (!inputId) return;
+
+  const meta = $U.inputMeta?.[inputId];
+  const exprKey = meta?.exprKey;
+
+  // 1) borrar input DOM
+  const el = ($U.inputs && $U.inputs[inputId]) || document.getElementById(inputId);
+  if (el?.parentNode) el.parentNode.removeChild(el);
+
+  // 2) borrar expresión asociada (si existe)
+  try {
+    const construction = window.$CANVAS?.getConstruction?.();
+    if (construction && exprKey) {
+      const exprObj = construction.find(exprKey);
+      if (exprObj) {
+        // Mejor: remove (evita recursión). Fallback: safelyDelete.
+        if (typeof construction.remove === "function") construction.remove(exprObj);
+        else construction.safelyDelete?.(exprObj);
+      }
+    }
+  } catch (e) {
+    console.warn("No se pudo borrar la expresión asociada:", exprKey, e);
+  }
+
+  // 3) limpiar registries
+  if ($U.inputs) delete $U.inputs[inputId];
+  if ($U.inputMeta) delete $U.inputMeta[inputId];
+
+  // 4) limpiar cache iframe
+  const iframe = document.querySelector('iframe[name="DGPad0"]');
+  iframe?.contentWindow?.postMessage({ action: "delete-input", id: inputId }, "*");
+};
+
+
+
+// Borra TODAS las casillas asociadas a un punto por nombre visible
+$U.deleteInputsForPointName = function deleteInputsForPointName(pointName) {
+  const name = String(pointName || "");
+  if (!name) return;
+
+  const meta = $U.inputMeta || {};
+  const idsToDelete = [];
+
+  for (const id of Object.keys(meta)) {
+    if (meta[id]?.pointName === name) idsToDelete.push(id);
+  }
+
+  for (const id of idsToDelete) $U.deleteCustomInputById(id);
+};
+
+$U.createCustomCronometro = function(id, x, y, fontSize = 20) {
+    const escala = $U.escala || 1;
+    if (!$U.cronometros) $U.cronometros = {};
+
+    let cronometro = document.getElementById(id);
+    const isNew = !cronometro;
+
+    if (isNew) {
+        cronometro = document.createElement("div");
+        cronometro.id = id;
+        document.body.appendChild(cronometro);
+
+        cronometro.dataset.time = "0";
+        cronometro.dataset.running = "false";
+        cronometro.dataset.startTime = "";
+        cronometro.textContent = "00:00";
+    }
+
+    // Siempre adjuntar los métodos, nuevo o no
+    function formatTime(ms) {
+        const totalSec = Math.floor(ms / 1000);
+        const min = Math.floor(totalSec / 60).toString().padStart(2, "0");
+        const sec = (totalSec % 60).toString().padStart(2, "0");
+        return `${min}:${sec}`;
+    }
+
+    cronometro.start = function () {
+        if (this.dataset.running === "false") {
+            this.dataset.startTime = Date.now().toString();
+            this.dataset.running = "true";
+        }
+    };
+
+    cronometro.stop = function () {
+        if (this.dataset.running === "true") {
+            const now = Date.now();
+            const start = parseInt(this.dataset.startTime);
+            const elapsed = now - start;
+            this.dataset.time = (parseInt(this.dataset.time) + elapsed).toString();
+            this.dataset.running = "false";
+        }
+    };
+
+    cronometro.reset = function () {
+        this.dataset.time = "0";
+        this.dataset.startTime = "";
+        this.dataset.running = "false";
+        this.textContent = "00:00";
+    };
+
+    cronometro.show = function () {
+        this.style.display = "block";
+    };
+
+    cronometro.hide = function () {
+        this.style.display = "none";
+    };
+
+    // Actualizar estilo y posición
+    cronometro.style.cssText = `
+        position: absolute;
+        top: ${y}px;
+        left: ${x}px;
+        padding: 4px 10px;
+        font-size: ${fontSize * escala}px;
+        font-family: Arial, sans-serif;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        border-radius: 6px;
+        text-align: center;
+        display: block;
+        z-index: 10000;
+    `;
+
+    // Iniciar el intervalo una sola vez
+    if (!$U.cronometroInterval) {
+        $U.cronometroInterval = setInterval(() => {
+            for (const id in $U.cronometros) {
+                const el = $U.cronometros[id];
+                if (el.dataset.running === "true") {
+                    const start = parseInt(el.dataset.startTime);
+                    const now = Date.now();
+                    const elapsed = parseInt(el.dataset.time) + (now - start);
+                    el.textContent = formatTime(elapsed);
+                }
+            }
+        }, 250);
+    }
+
+    $U.cronometros[id] = cronometro;
+};
+
+
+
+$U.createCustomSpeaker = function (id, x, y, size) {
+    if ($U.__suppressSpeakersUntil && Date.now() < $U.__suppressSpeakersUntil) return null;
+
+
+  let btn;
+  const escala = $U.escala || 1;
+
+  id = String(id || "");
+  if (!id) return null;
+
+  if (!$U.speakers) $U.speakers = {};
+
+  if (!document.getElementById(id)) {
+    btn = document.createElement("button");
+    btn.type = "button";
+    btn.id = id;
+
+    // ✅ marcas para poder borrarlos por selector
+    btn.dataset.dgpadSpeaker = "true";
+    btn.dataset.speakerId = id;
+
+    $U.speakers[id] = btn;
+
+    btn.innerHTML =
+      '<svg viewBox="0 0 24 24" width="70%" height="70%" aria-hidden="true" focusable="false">' +
+      '<path d="M3 10v4c0 .55.45 1 1 1h3l4 3c.66.5 1.6.03 1.6-.8V6.8c0-.83-.94-1.3-1.6-.8L7 9H4c-.55 0-1 .45-1 1z"></path>' +
+      '<path d="M16.5 8.5a1 1 0 0 1 1.41 0 7 7 0 0 1 0 9.9 1 1 0 1 1-1.41-1.41 5 5 0 0 0 0-7.07 1 1 0 0 1 0-1.42z"></path>' +
+      '<path d="M18.8 6.2a1 1 0 0 1 1.41 0 10 10 0 0 1 0 14.1 1 1 0 0 1-1.41-1.41 8 8 0 0 0 0-11.3 1 1 0 0 1 0-1.39z"></path>' +
+      "</svg>";
+
+    btn.setAttribute("aria-label", "Leer texto en voz alta");
+    btn.title = "Leer texto en voz alta";
+    document.body.appendChild(btn);
+  } else {
+    btn = $U.speakers[id] || document.getElementById(id);
+    $U.speakers[id] = btn;
+
+    // ✅ por si existía de antes sin dataset
+    btn.dataset.dgpadSpeaker = "true";
+    btn.dataset.speakerId = id;
+  }
+
+  const px = Number(x) || 0;
+  const py = Number(y) || 0;
+  const baseSize = Math.max(24, Number(size) || 56);
+  const scaledSize = baseSize * escala;
+
+  btn.style.cssText = `
+    position: absolute;
+    left: ${px}px;
+    top: ${py}px;
+    width: ${scaledSize}px;
+    height: ${scaledSize}px;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0,0,0,.18);
+    background: rgba(255,255,255,.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    z-index: 999999;
+    user-select: none;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    touch-action: manipulation;
+  `;
+
+  if (!btn.dataset.listenerAdded) {
+    let lastFire = 0;
+
+    const speakNow = (ev) => {
+      const now = Date.now();
+      if (now - lastFire < 350) return;
+      lastFire = now;
+
+      if (ev && ev.type !== "click") ev.preventDefault?.();
+
+      const st = btn.__ttsState || {};
+      const text = String(st.text || "").trim();
+      if (!text) return;
+
+      if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) return;
+
+      const u = new SpeechSynthesisUtterance(text);
+      const opts = st.opts || {};
+
+      if (opts.lang && opts.lang !== "auto") u.lang = opts.lang;
+
+      u.rate = Math.max(0.1, Math.min(10, Number(opts.rate || 1)));
+      u.pitch = Math.max(0, Math.min(2, Number(opts.pitch || 1)));
+      u.volume = Math.max(0, Math.min(1, Number(opts.volume || 1)));
+
+      try {
+        speechSynthesis.cancel();
+        speechSynthesis.resume?.();
+        setTimeout(() => speechSynthesis.speak(u), 0);
+      } catch (_) {}
+    };
+
+    btn.addEventListener("pointerdown", speakNow, { passive: false });
+    btn.addEventListener("touchend", speakNow, { passive: false });
+    btn.addEventListener("click", speakNow, { passive: true });
+
+    btn.dataset.listenerAdded = "true";
+  }
+
+  return btn;
+};
+
+// ✅ NUEVO: borrar uno por id (limpia DOM + registry)
+$U.removeCustomSpeaker = function (id) {
+  id = String(id || "");
+  if (!id) return;
+
+  const btn = ($U.speakers && $U.speakers[id]) || document.getElementById(id);
+  if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
+
+  if ($U.speakers) delete $U.speakers[id];
+};
+
+
+
+
+$U.clearCustomSpeakers = function () {
+  // ✅ evita recreaciones durante deleteAll/refresh/computeAll
+  $U.__suppressSpeakersUntil = Date.now() + 1500;
+
+  const hardRemove = () => {
+    // borra por registry
+    if ($U?.speakers) {
+      Object.keys($U.speakers).forEach((id) => {
+        const el = $U.speakers[id];
+        try { el?.parentNode?.removeChild(el); } catch (_) {}
+      });
+      $U.speakers = {};
+    }
+
+    // borra por DOM (huérfanos)
+    try {
+      document.querySelectorAll('button[id^="spk_"]').forEach(el => el.remove());
+      document.querySelectorAll('button[data-dgpad-speaker="true"]').forEach(el => el.remove());
+    } catch (_) {}
+  };
+
+  hardRemove();
+
+  // ✅ por si computeAll/refresh re-crea en el siguiente tick
+  setTimeout(hardRemove, 0);
+  setTimeout(hardRemove, 50);
+  setTimeout(hardRemove, 250);
+
+  try { window.speechSynthesis?.cancel?.(); } catch (_) {}
+};
+
+
+
+
+$U.renamePointInSpeakerMeta = function renamePointInSpeakerMeta(oldName, newName) {
+  if (!$U.speakerMeta) return;
+
+  const oldN = String(oldName || "");
+  const newN = String(newName || "");
+  if (!oldN || !newN || oldN === newN) return;
+
+  for (const id of Object.keys($U.speakerMeta)) {
+    const meta = $U.speakerMeta[id];
+    if (meta && meta.pointName === oldN) meta.pointName = newN;
+  }
+};
+
+$U.deleteCustomSpeakerById = function deleteCustomSpeakerById(id) {
+  const speakerId = String(id || "");
+  if (!speakerId) return;
+
+  const el = ($U.speakers && $U.speakers[speakerId]) || document.getElementById(speakerId);
+  if (el?.parentNode) el.parentNode.removeChild(el);
+
+  if ($U.speakers) delete $U.speakers[speakerId];
+  if ($U.speakerMeta) delete $U.speakerMeta[speakerId];
+
+  const iframe = document.querySelector('iframe[name="DGPad0"]');
+  iframe?.contentWindow?.postMessage({ action: "delete-speaker", id: speakerId }, "*");
+};
+
+$U.deleteSpeakersForPointName = function deleteSpeakersForPointName(pointName) {
+  const name = String(pointName || "");
+  if (!name) return;
+
+  const meta = $U.speakerMeta || {};
+  const idsToDelete = [];
+
+  for (const id of Object.keys(meta)) {
+    if (meta[id]?.pointName === name) idsToDelete.push(id);
+  }
+
+  for (const id of idsToDelete) $U.deleteCustomSpeakerById(id);
+};
+
+
+
+$U.setCustomSpeakerVisible = function (id, visible) {
+  if (!$U.speakers) $U.speakers = {};
+  const el = $U.speakers[id] || document.getElementById(id);
+  if (!el) return;
+  el.style.display = visible ? "flex" : "none";
+};
+
+$U.removeCustomSpeaker = function (id) {
+  if (!$U.speakers) $U.speakers = {};
+  const el = $U.speakers[id] || document.getElementById(id);
+  if (el) el.remove();
+  delete $U.speakers[id];
+};
+
+$U.mathLiveLoaded = function(_callback, _args) {
+    if (typeof MathfieldElement === 'undefined') {
+        if ((_callback) && ($U.mathLiveLoaded.callbacks.indexOf(_callback) === -1)) {
+            $U.mathLiveLoaded.callbacks.push(_callback);
+            $U.mathLiveLoaded.args.push(_args);
+        }
+
+        if (!$U.mathLiveLoaded.loaded) {
+            var parent = document.getElementsByTagName("head")[0];
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = $APP_PATH + "NotPacked/thirdParty/mathlive.min.js";
+
+            script.onload = function() {
+                if (typeof MathfieldElement !== "undefined") {
+                    MathfieldElement.fontsDirectory = $APP_PATH + "NotPacked/thirdParty/fonts";
+                }
+                for (var i = 0; i < $U.mathLiveLoaded.callbacks.length; i++) {
+                    if ($U.mathLiveLoaded.callbacks[i]) {
+                        var proc = $U.mathLiveLoaded.callbacks[i];
+                        var args = $U.mathLiveLoaded.args[i];
+                        proc.apply(null, args || []);
+                    }
+                }
+            };
+
+            parent.appendChild(script);
+            $U.mathLiveLoaded.loaded = true;
+        }
+        return false;
+    }
+    return true;
+};
+
+$U.mathLiveLoaded.loaded = false;
+$U.mathLiveLoaded.callbacks = [];
+$U.mathLiveLoaded.args = [];
+
+
+
+$U.mathLiveFields = $U.mathLiveFields || {};
+$U.mathLiveMeta = $U.mathLiveMeta || Object.create(null);
+
+
+
+
+
+$U.setMathLivePartsColor = function(id, color) {
+    const styleId = "mathlive-style-" + id;
+    let styleEl = document.getElementById(styleId);
+
+    if (!styleEl) {
+        styleEl = document.createElement("style");
+        styleEl.id = styleId;
+        document.head.appendChild(styleEl);
+    }
+
+    styleEl.textContent = `
+        math-field#${id}::part(content) {
+            color: ${color};
+        }
+        math-field#${id}::part(prompt) {
+            color: ${color};
+        }
+    `;
+};
+
+
+// $U.createCustomMathLive = function(id, x, y, width, height, latex, options) {
+    
+
+//     const fieldId = String(id || "");
+//     if (!fieldId) return null;
+
+//     const escala = $U.escala || 1;
+//     const opts = options || {};
+//     const readOnly = !!opts.readOnly;
+//     const virtualKeyboardMode = opts.virtualKeyboardMode || "manual";
+//     const promptNames = Array.isArray(opts.promptNames) ? opts.promptNames : [];
+
+//     function dgpadColorIndexToCss(index) {
+//         const COLS = 7;
+//         const PALETTE = [
+//             ["#ffffff", "#cccccc", "#c0c0c0", "#999999", "#666666", "#333333", "#000000"],
+//             ["#ffcccc", "#ff6666", "#ff0000", "#cc0000", "#990000", "#660000", "#330000"],
+//             ["#ffcc99", "#ff9966", "#ff9900", "#ff6600", "#cc6600", "#993300", "#663300"],
+//             ["#ffff99", "#ffff66", "#ffcc66", "#ffcc33", "#cc9933", "#996633", "#663333"],
+//             ["#ffffcc", "#ffff33", "#ffff00", "#ffcc00", "#999900", "#666600", "#333300"],
+//             ["#99ff99", "#66ff99", "#33ff33", "#33cc00", "#009900", "#006600", "#003300"],
+//             ["#99ffff", "#33ffff", "#66cccc", "#00cccc", "#339999", "#336666", "#003333"],
+//             ["#ccffff", "#66ffff", "#33ccff", "#3366ff", "#3333ff", "#000099", "#000066"],
+//             ["#ccccff", "#9999ff", "#6666cc", "#6633ff", "#6600cc", "#333399", "#330099"],
+//             ["#ffccff", "#ff99ff", "#cc66cc", "#cc33cc", "#993399", "#663366", "#330033"]
+//         ];
+//         const raw = Number(index);
+//         const n = Math.max(1, Math.min(Number.isFinite(raw) ? raw : 1, PALETTE.length * COLS));
+//         const zeroBased = n - 1;
+//         const row = Math.floor(zeroBased / COLS);
+//         const col = zeroBased % COLS;
+//         return PALETTE[row][col];
+//     }
+
+//     const color = dgpadColorIndexToCss(opts.colorIndex);
+    
+
+//     const fontFamily = opts.fontFamily || "Arial";
+//     const fontSize = Number(opts.fontSize) || 28;
+//     const fontStyle = opts.fontStyle || "normal";
+//     const fontAlign = opts.fontAlign || "izquierda";
+
+//     const cssFontStyle = fontStyle === "cursiva" ? "italic" : "normal";
+//     const cssFontWeight = fontStyle === "negrita" ? "bold" : "normal";
+//     const cssTextAlign =
+//         fontAlign === "centrado" ? "center" :
+//         fontAlign === "derecha" ? "right" :
+//         "left";
+
+//     const applyMathLive = function() {
+        
+
+//         if (typeof MathfieldElement === "undefined") {
+//             console.error("[Utils] MathfieldElement undefined");
+//             return;
+//         }
+
+//         let mf = document.getElementById(fieldId);
+//         if (mf) mf.remove();
+
+//         mf = document.createElement("math-field");
+//         mf.id = fieldId;
+
+//         if (readOnly) mf.setAttribute("read-only", "");
+//         else mf.removeAttribute("read-only");
+
+//         const coloredLatex = `\\textcolor{${color}}{${String(latex || "")}}`;
+        
+
+//         mf.textContent = coloredLatex;
+//         document.body.appendChild(mf);
+
+        
+
+//         $U.mathLiveFields[fieldId] = mf;
+//         mf.virtualKeyboardMode = virtualKeyboardMode;
+
+//         const finalFontSize = fontSize * escala;
+//         const minWidth = Math.max(Number(width) * escala, finalFontSize * 2);
+//         const minHeight = Math.max(Number(height) * escala, finalFontSize * 1.6);
+
+//         mf.style.cssText = `
+//             position: absolute;
+//             left: ${x}px;
+//             top: ${y}px;
+//             min-width: ${minWidth}px;
+//             min-height: ${minHeight}px;
+//             box-sizing: border-box;
+//             display: inline-block;
+//             background: transparent;
+//             border: none;
+//             outline: none;
+//             z-index: 9999;
+//             color: ${color};
+//             font-family: ${fontFamily};
+//             font-size: ${finalFontSize}px;
+//             font-style: ${cssFontStyle};
+//             font-weight: ${cssFontWeight};
+//             text-align: ${cssTextAlign};
+//             overflow: visible;
+//             padding: 4px 6px;
+//             white-space: nowrap;
+//         `;
+
+//         requestAnimationFrame(function() {
+//             const rect = mf.getBoundingClientRect();
+            
+
+//             const finalWidth = Math.max(minWidth, Math.ceil(rect.width));
+//             const finalHeight = Math.max(minHeight, Math.ceil(rect.height));
+
+//             mf.style.width = finalWidth + "px";
+//             mf.style.height = finalHeight + "px";
+//             mf.style.top = (y - finalHeight / 2) + "px";
+
+//             if (mf.executeCommand) {
+//                 mf.executeCommand("moveToNextPlaceholder");
+//             }
+//         });
+
+//         if (!mf.dataset.listenerAdded) {
+//             mf.addEventListener("input", function() {
+//                 const iframe = document.querySelector('iframe[name="DGPad0"]');
+//                 if (!iframe || !iframe.contentWindow) return;
+
+//                 const payload = {
+//                     action: "update-mathlive-value",
+//                     id: mf.id,
+//                     value: mf.value,
+//                     prompts: {}
+//                 };
+
+//                 if (typeof mf.getPromptValue === "function" && promptNames.length) {
+//                     for (let i = 0; i < promptNames.length; i++) {
+//                         const name = String(promptNames[i]);
+//                         payload.prompts[name] = mf.getPromptValue(name);
+//                     }
+//                 }
+
+//                 iframe.contentWindow.postMessage(payload, "*");
+//             });
+
+//             mf.dataset.listenerAdded = "true";
+//         }
+//     };
+
+//     if ($U.mathLiveLoaded(null, [])) {
+        
+//         applyMathLive();
+//     } else {
+        
+//         $U.mathLiveLoaded(applyMathLive, []);
+//     }
+
+//     return fieldId;
+// };
+
+$U.createCustomMathLive = function(id, x, y, width, height, latex, options) {
+    const fieldId = String(id || "");
+    if (!fieldId) return null;
+
+    const escala = $U.escala || 1;
+    const opts = options || {};
+    const readOnly = !!opts.readOnly;
+    const virtualKeyboardMode = opts.virtualKeyboardMode || "manual";
+    const promptNames = Array.isArray(opts.promptNames) ? opts.promptNames : [];
+    const isVisible = opts.visible !== false;
+
+    function dgpadColorIndexToCss(index) {
+        const COLS = 7;
+
+        const PALETTE = [
+            ["#ffffff", "#cccccc", "#c0c0c0", "#999999", "#666666", "#333333", "#000000"],
+            ["#ffcccc", "#ff6666", "#ff0000", "#cc0000", "#990000", "#660000", "#330000"],
+            ["#ffcc99", "#ff9966", "#ff9900", "#ff6600", "#cc6600", "#993300", "#663300"],
+            ["#ffff99", "#ffff66", "#ffcc66", "#ffcc33", "#cc9933", "#996633", "#663333"],
+            ["#ffffcc", "#ffff33", "#ffff00", "#ffcc00", "#999900", "#666600", "#333300"],
+            ["#99ff99", "#66ff99", "#33ff33", "#33cc00", "#009900", "#006600", "#003300"],
+            ["#99ffff", "#33ffff", "#66cccc", "#00cccc", "#339999", "#336666", "#003333"],
+            ["#ccffff", "#66ffff", "#33ccff", "#3366ff", "#3333ff", "#000099", "#000066"],
+            ["#ccccff", "#9999ff", "#6666cc", "#6633ff", "#6600cc", "#333399", "#330099"],
+            ["#ffccff", "#ff99ff", "#cc66cc", "#cc33cc", "#993399", "#663366", "#330033"]
+        ];
+
+        const raw = Number(index);
+        const n = Math.max(1, Math.min(Number.isFinite(raw) ? raw : 1, PALETTE.length * COLS));
+        const zeroBased = n - 1;
+        const row = Math.floor(zeroBased / COLS);
+        const col = zeroBased % COLS;
+
+        return PALETTE[row][col];
+    }
+
+    const color = dgpadColorIndexToCss(opts.colorIndex);
+    const fontFamily = opts.fontFamily || "Arial";
+    const fontSize = Number(opts.fontSize) || 28;
+    const fontStyle = opts.fontStyle || "normal";
+    const fontAlign = opts.fontAlign || "izquierda";
+
+    const cssFontStyle =
+        fontStyle === "cursiva" ? "italic" : "normal";
+
+    const cssFontWeight =
+        fontStyle === "negrita" ? "bold" : "normal";
+
+    const cssTextAlign =
+        fontAlign === "centrado" ? "center" :
+        fontAlign === "derecha" ? "right" :
+        "left";
+
+    const applyMathLive = function() {
+        if (typeof MathfieldElement === "undefined") {
+            console.error("MathLive no está disponible");
+            return;
+        }
+
+        let mf = document.getElementById(fieldId);
+        if (mf) {
+            mf.remove();
+        }
+
+        mf = document.createElement("math-field");
+        mf.id = fieldId;
+
+        if (readOnly) {
+            mf.setAttribute("read-only", "");
+        } else {
+            mf.removeAttribute("read-only");
+        }
+
+        const coloredLatex = `\\textcolor{${color}}{${String(latex || "")}}`;
+        mf.textContent = coloredLatex;
+        document.body.appendChild(mf);
+
+        $U.mathLiveFields = $U.mathLiveFields || {};
+        $U.mathLiveFields[fieldId] = mf;
+
+        mf.virtualKeyboardMode = virtualKeyboardMode;
+
+        const finalFontSize = fontSize * escala;
+        const minWidth = Math.max(Number(width) * escala, finalFontSize * 2);
+        const minHeight = Math.max(Number(height) * escala, finalFontSize * 1.6);
+
+        mf.style.cssText = `
+            position: absolute;
+            left: ${x}px;
+            top: ${y}px;
+            min-width: ${minWidth}px;
+            min-height: ${minHeight}px;
+            box-sizing: border-box;
+            display: inline-block;
+            background: transparent;
+            border: none;
+            outline: none;
+            z-index: 9999;
+            color: ${color};
+            font-family: ${fontFamily};
+            font-size: ${finalFontSize}px;
+            font-style: ${cssFontStyle};
+            font-weight: ${cssFontWeight};
+            text-align: ${cssTextAlign};
+            overflow: visible;
+            padding: 4px 6px;
+            white-space: nowrap;
+        `;
+
+        mf.style.display = isVisible ? "inline-block" : "none";
+
+        const updateBox = function() {
+            const rect = mf.getBoundingClientRect();
+            const finalWidth = Math.max(minWidth, Math.ceil(rect.width));
+            const finalHeight = Math.max(minHeight, Math.ceil(rect.height));
+
+            mf.style.width = finalWidth + "px";
+            mf.style.height = finalHeight + "px";
+            mf.style.top = (y - finalHeight / 2) + "px";
+        };
+
+        requestAnimationFrame(function() {
+            updateBox();
+
+            if (mf.executeCommand) {
+                mf.executeCommand("moveToNextPlaceholder");
+            }
+
+            requestAnimationFrame(updateBox);
+
+            setTimeout(updateBox, 50);
+            setTimeout(updateBox, 150);
+            setTimeout(updateBox, 300);
+        });
+
+        if (!mf.dataset.listenerAdded) {
+            mf.addEventListener("input", function() {
+                const iframe = document.querySelector('iframe[name="DGPad0"]');
+                if (!iframe || !iframe.contentWindow) return;
+
+                const payload = {
+                    action: "update-mathlive-value",
+                    id: mf.id,
+                    value: mf.value,
+                    prompts: {}
+                };
+
+                if (typeof mf.getPromptValue === "function" && promptNames.length) {
+                    for (let i = 0; i < promptNames.length; i++) {
+                        const name = String(promptNames[i]);
+                        payload.prompts[name] = mf.getPromptValue(name);
+                    }
+                }
+
+                iframe.contentWindow.postMessage(payload, "*");
+            });
+
+            mf.dataset.listenerAdded = "true";
+        }
+    };
+
+    if ($U.mathLiveLoaded(null, [])) {
+        applyMathLive();
+    } else {
+        $U.mathLiveLoaded(applyMathLive, []);
+    }
+
+    return fieldId;
+};
+
+$U.refreshAllCustomMathLives = function () {
+    const meta = $U.mathLiveMeta || {};
+    const ids = Object.keys(meta);
+
+    for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        const m = meta[id];
+        if (!m) continue;
+
+        $U.createCustomMathLive(
+            id,
+            Number(m.x) || 0,
+            Number(m.y) || 0,
+            Number(m.width) || 120,
+            Number(m.height) || 40,
+            String(m.latex || ""),
+            {
+                readOnly: !!m.readOnly,
+                virtualKeyboardMode: "manual",
+                promptNames: Array.isArray(m.prompts) ? m.prompts.slice() : [],
+                colorIndex: Number(m.colorIndex) || 7,
+                fontFamily: String(m.fontFamily || "Arial"),
+                fontSize: Number(m.fontSize) || 28,
+                fontStyle: String(m.fontStyle || "normal"),
+                fontAlign: String(m.fontAlign || "izquierda"),
+                visible: m.visible !== false
+            }
+        );
+    }
+};
+
+$U.setCustomMathLiveValue = function (id, latex, readOnly) {
+  const fieldId = String(id || "");
+  if (!fieldId) return;
+
+  $U.mathLiveLoaded(function () {
+    const mf = $U.mathLiveFields[fieldId] || document.getElementById(fieldId);
+    if (!mf) return;
+
+    if (typeof readOnly === "boolean") {
+      mf.readOnly = readOnly;
+    }
+
+    mf.value = String(latex || "");
+    $U.mathLiveFields[fieldId] = mf;
+  }, []);
+};
+
+$U.moveCustomMathLive = function (id, x, y, width, height) {
+  const fieldId = String(id || "");
+  if (!fieldId) return;
+
+  const escala = $U.escala || 1;
+  const mf = $U.mathLiveFields[fieldId] || document.getElementById(fieldId);
+  if (!mf) return;
+
+  if (x != null) mf.style.left = `${x}px`;
+  if (y != null) mf.style.top = `${y}px`;
+  if (width != null) mf.style.width = `${Number(width) * escala}px`;
+  if (height != null) mf.style.height = `${Number(height) * escala}px`;
+};
+
+$U.deleteCustomMathLiveById = function (id) {
+  const fieldId = String(id || "");
+  if (!fieldId) return;
+
+  const el = $U.mathLiveFields[fieldId] || document.getElementById(fieldId);
+  if (el && el.parentNode) {
+    el.parentNode.removeChild(el);
+  }
+
+  delete $U.mathLiveFields[fieldId];
+  delete $U.mathLiveMeta[fieldId];
+
+  const iframe = document.querySelector('iframe[name="DGPad0"]');
+  iframe?.contentWindow?.postMessage({
+    action: "delete-mathlive",
+    id: fieldId
+  }, "*");
+};
+
+$U.deleteMathLiveForPointName = function (pointName) {
+    
+  const name = String(pointName || "");
+  if (!name) return;
+
+  const meta = $U.mathLiveMeta || {};
+  const idsToDelete = [];
+
+  for (const id of Object.keys(meta)) {
+    if (meta[id] && meta[id].pointName === name) {
+      idsToDelete.push(id);
+    }
+  }
+
+  for (let i = 0; i < idsToDelete.length; i++) {
+    $U.deleteCustomMathLiveById(idsToDelete[i]);
+  }
+};
+
+
+
+$U.deleteAllCustomMathLives = function () {
+    const fields = document.querySelectorAll("math-field");
+    
+
+    for (let i = 0; i < fields.length; i++) {
+        const el = fields[i];
+        const id = el.id || "";
+
+        
+
+        if (el.parentNode) {
+            el.parentNode.removeChild(el);
+        }
+
+        if ($U.mathLiveFields && id) delete $U.mathLiveFields[id];
+        if ($U.mathLiveMeta && id) delete $U.mathLiveMeta[id];
+    }
+
+    
+
+    
+
+    if ($U.mathliveValues) {
+        const ids = Object.keys($U.mathliveValues);
+        for (let j = 0; j < ids.length; j++) {
+            delete $U.mathliveValues[ids[j]];
+        }
+    }
+
+    const iframe = document.querySelector('iframe[name="DGPad0"]');
+    iframe?.contentWindow?.postMessage({
+        action: "delete-all-mathlive"
+    }, "*");
+};
+
+$U.resetCustomMathLive = function(id) {
+    const fieldId = String(id || "");
+    if (!fieldId) return;
+
+    const meta = $U.mathLiveMeta && $U.mathLiveMeta[fieldId];
+    if (!meta) return;
+
+    $U.createCustomMathLive(
+        fieldId,
+        Number(meta.x) || 0,
+        Number(meta.y) || 0,
+        Number(meta.width) || 120,
+        Number(meta.height) || 40,
+        String(meta.latex || ""),
+        {
+            readOnly: !!meta.readOnly,
+            virtualKeyboardMode: "manual",
+            promptNames: Array.isArray(meta.prompts) ? meta.prompts.slice() : [],
+            colorIndex: Number(meta.colorIndex) || 7,
+            fontFamily: String(meta.fontFamily || "Arial"),
+            fontSize: Number(meta.fontSize) || 28,
+            fontStyle: String(meta.fontStyle || "normal"),
+            fontAlign: String(meta.fontAlign || "izquierda")
+        }
+    );
+
+    const iframe = document.querySelector('iframe[name="DGPad0"]');
+    iframe?.contentWindow?.postMessage({
+        action: "delete-mathlive",
+        id: fieldId
+    }, "*");
+};
+
+$U.setCustomMathLiveVisible = function(id, visible) {
+    const fieldId = String(id || "");
+    if (!fieldId) return;
+
+    const el = ($U.mathLiveFields && $U.mathLiveFields[fieldId]) || document.getElementById(fieldId);
+    if (!el) return;
+
+    el.style.display = visible ? "inline-block" : "none";
+
+    if ($U.mathLiveMeta && $U.mathLiveMeta[fieldId]) {
+        $U.mathLiveMeta[fieldId].visible = !!visible;
+    }
+};
+
+$U.showCustomMathLive = function(id) {
+    $U.setCustomMathLiveVisible(id, true);
+};
+
+$U.hideCustomMathLive = function(id) {
+    $U.setCustomMathLiveVisible(id, false);
+};
 
 $U.clearOneLocalStorage = function() {
     // On parcours le localstorage tant qu'on rencontre un élément verrouillé :
@@ -1276,25 +2598,6 @@ $U.shiftLocalStorages = function() {
     }
 };
 
-// $U.setFilePickerDefaultBox = function(_s) {
-    // localStorage.setItem("FilePickerDefaultBox", _s);
-// };
-
-// $U.getFilePickerDefaultBox = function() {
-    // var box = localStorage.getItem("FilePickerDefaultBox");
-    // if (box)
-        // return box;
-    // else
-        // return "";
-// };
-
-// $U.set$FPICKERFRAME = function(_p) {
-    // $FPICKERFRAME = _p
-// }
-
-// $U.get$FPICKERFRAME = function() {
-    // return $FPICKERFRAME
-// }
 
 
 
@@ -1387,6 +2690,124 @@ $U.timers = function(_dlay) {
     };
 };
 
+//cronómetro
+(function () {
+    let interval = null;
+    let startTime = null;
+    let visible = false;
+
+    const div = document.createElement("div");
+    div.id = "dgpad-cronometro";
+    div.style.cssText = `
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 20px;
+        padding: 5px 10px;
+        border-radius: 6px;
+        display: none;
+        z-index: 9999;
+    `;
+    document.body.appendChild(div);
+
+    function updateDisplay() {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const min = String(Math.floor(elapsed / 60)).padStart(2, "0");
+        const sec = String(elapsed % 60).padStart(2, "0");
+        div.textContent = `${min}:${sec}`;
+    }
+
+    $U.cronometro = {
+        start: function () {
+            if (interval) clearInterval(interval);
+            startTime = Date.now();
+            interval = setInterval(updateDisplay, 1000);
+            div.style.display = "block";
+            visible = true;
+        },
+        stop: function () {
+            clearInterval(interval);
+            interval = null;
+        },
+        reset: function () {
+            $U.cronometro.stop();
+            startTime = Date.now();
+            div.textContent = "00:00";
+        },
+        hide: function () {
+            div.style.display = "none";
+            visible = false;
+        },
+        show: function () {
+            if (visible) div.style.display = "block";
+        },
+        getSeconds: function () {
+            if (!startTime) return 0;
+            return Math.floor((Date.now() - startTime) / 1000);
+        }
+    };
+})();
+//fin cronómetro
+
+
+
+// ------------------------------------------------------------
+// Magnet locks (global shared state)
+// ------------------------------------------------------------
+$U.magnet = $U.magnet || {};
+
+// List slot owners: WeakMap<ListObject, Map<slotIndex, PointObject>>
+$U.magnet.listSlotOwners = $U.magnet.listSlotOwners || new WeakMap();
+
+$U.magnet.getSlotMap = function(listObj) {
+  var wm = $U.magnet.listSlotOwners;
+  var m = wm.get(listObj);
+  if (!m) {
+    m = new Map();
+    wm.set(listObj, m);
+  }
+  return m;
+};
+
+$U.magnet.getSlotOwner = function(listObj, idx) {
+  var m = $U.magnet.listSlotOwners.get(listObj);
+  return m ? (m.get(idx) || null) : null;
+};
+
+
+
+$U.magnet.lockSlot = function(listObj, idx, owner) {
+  var m = $U.magnet.getSlotMap(listObj);
+  var cur = m.get(idx);
+
+  // Si ya está ocupado por otro, NO se puede lockear:
+  if (cur && cur !== owner) {
+    console.log("[MAGNET][LOCK-FAIL] list=", listObj.getName?.(), "slot=", idx,
+                "owner=", owner.getName?.(), "occupiedBy=", cur.getName?.());
+    return false;
+  }
+
+  m.set(idx, owner);
+  console.log("[MAGNET][LOCK-OK] list=", listObj.getName?.(), "slot=", idx, "owner=", owner.getName?.());
+  return true;
+};
+
+
+
+
+$U.magnet.unlockSlot = function(listObj, idx, owner) {
+  var m = $U.magnet.listSlotOwners.get(listObj);
+  if (!m) return false;
+  if (m.get(idx) === owner) {
+    m.delete(idx);
+    
+    return true;
+  }
+  return false;
+};
 
 
 
@@ -1433,17 +2854,7 @@ $U.isMobile = {
     mobilePhone: function() {
         return $MOBILE_PHONE;
     },
-    //    mobilePhone: function() {
-    //        return true;
-    //    },
-    //    mobilePhone: function() {
-    //        return (function(a) {
-    //            if (/android.+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|e\-|e\/|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(di|rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|xda(\-|2|g)|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4)))
-    //                return true;
-    //            else
-    //                return false;
-    //        })(navigator.userAgent || navigator.vendor || window.opera);
-    //    },
+    
     any: function() {
         return ($U.isMobile.android() || $U.isMobile.blackberry() || $U.isMobile.ios() || $U.isMobile.opera() || $U.isMobile.windows());
     }
@@ -1607,8 +3018,9 @@ $U.initCanvas = function(_id) {
     ZC.addTool(new BlocklyConstructor());
     ZC.addTool(new DocEvalConstructor());
     ZC.addTool(new DGScriptNameConstructor());
-    // MEAG start herramientas ocultar, medida, traslación
+    // MEAG start herramientas ocultar, medida, traslación, widget de Edición
     ZC.addTool(new CallHide());
+    ZC.addTool(new CallEditWidget());
     ZC.addTool(new CallValue());
 	ZC.addTool(new TranslationConstructor());
     // MEAG end
@@ -1625,14 +3037,7 @@ $U.initCanvas = function(_id) {
 
 
 
-    // ZC.blocklyManager.show();
-
-    // new Names_panel(window.document.body,ZC.getConstruction().getNames);
-
-    //    var eee=new SymbolicCompute();
-    ////    var sss=eee.simplify("times(3,pow(x,minus(3,1)))");
-    //    var sss=eee.simplify("power(x,minus(3,1))");
-    //    console.log(sss);
+    
 
 
 };

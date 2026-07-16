@@ -171,6 +171,7 @@ $INCLUDE("Constructors/CallList.js");
 $INCLUDE("Constructors/CallTrash.js");
 // MEAG start iconos ocultar y medida en menú contextual
 $INCLUDE("Constructors/CallHide.js");
+$INCLUDE("Constructors/CallEditWidget.js");
 $INCLUDE("Constructors/CallValue.js");
 // MEAG end
 //JDIAZ START

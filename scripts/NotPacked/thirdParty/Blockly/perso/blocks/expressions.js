@@ -110,6 +110,32 @@ Blockly.Blocks['dgpad_return'] = {
     }
 };
 
+Blockly.Blocks['dgpad_lastObject'] = {
+    init: function() {
+        this.appendValueInput()
+            .appendField($L.blockly.var_lastObject);
+            this.setOutput(true, null);
+            
+        // this.setInputsInline(true);
+        this.setColour(20);
+        this.setTooltip('');
+        this.setHelpUrl('');
+    }
+};
+
+Blockly.Blocks['dgpad_name'] = {
+    init: function() {
+        this.appendValueInput("OBJ")
+            .appendField("Nombre de");
+            this.setOutput(true, null);
+            
+        // this.setInputsInline(true);
+        this.setColour(20);
+        this.setTooltip('');
+        this.setHelpUrl('');
+    }
+};
+
 
 Blockly.Blocks['dgpad_set_object'] = {
     init: function() {
@@ -190,8 +216,12 @@ Blockly.Blocks['dgpad_set_object'] = {
 Blockly.dgpad_get_short = function(_v, _col) {
     return ({
         init: function() {
+            // this.appendDummyInput('obj_name')
+            //     .appendField(Blockly.dgpad.objectPopup(_v), "NAME")
             this.appendDummyInput('obj_name')
-                .appendField(Blockly.dgpad.objectPopup(_v), "NAME")
+                .appendField($L.blockly.expressions_object)  // 👉 Texto fijo
+                .appendField(Blockly.dgpad.objectPopup(_v), "NAME");  // 👉 Menú desplegable
+
             this.setOutput(true, null);
             this.setColour(_col);
             this.setTooltip('');
@@ -205,6 +235,7 @@ Blockly.dgpad_get_short = function(_v, _col) {
 
 Blockly.Blocks['dgpad_get_object_short'] = Blockly.dgpad_get_short("any", 20);
 Blockly.Blocks['dgpad_get_point_short'] = Blockly.dgpad_get_short("point", 20);
+Blockly.Blocks['dgpad_get_list_short'] = Blockly.dgpad_get_short("list", 20);
 Blockly.Blocks['dgpad_get_point_short_turtle'] = Blockly.dgpad_get_short("point", 180);
 
 
@@ -260,6 +291,24 @@ Blockly.Blocks['dgpad_get_object'] = {
         this.getInput('obj_name').fieldRow[0].setValue(_o.getName());
     }
 };
+
+
+Blockly.Blocks['dgpad_value_of'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("valor de");
+
+    this.appendValueInput("NAME")
+      .setCheck(null);
+
+    this.setInputsInline(true);
+    this.setOutput(true, null);
+    this.setColour(20);
+    this.setTooltip("");
+    this.setHelpUrl("");
+  }
+};
+
 
 Blockly.Blocks['dgpad_expression_input'] = {
     init: function() {
@@ -325,59 +374,206 @@ Blockly.Blocks['dgpad_print'] = {
 
 
 
-Blockly.Blocks['dgpad_inputs_value'] = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField($L.blockly.expressions_InputValue)
-            .appendField(new Blockly.FieldDropdown(this.updateDropdownOptions.bind(this)), "NAME");
+window.DG = window.DG || {};
+DG.expressions = DG.expressions || {};
 
-        this.setInputsInline(true);
-        this.setOutput(true);
-        this.setColour(47);
-        this.setTooltip('Selecciona el valor de una casilla disponible');
-        this.setHelpUrl('');
+DG.expressions.buildInputOptions = function buildInputOptions() {
+  const inputs = window.$U?.inputs || {};
+  const meta = window.$U?.inputMeta || {};
+  const ids = Object.keys(inputs);
 
-        this.listaInputs = [];
-        this.listaIds = [];
-        this.listaNumerados = [];
-        this.updateDropdownOptions();
-    },
+  if (!ids.length) return [[$L.blockly.aspect_deleteValue2, ""]];
 
-   
-    updateDropdownOptions: function() {
-        if (parent.$U.inputs && Object.keys(parent.$U.inputs).length > 0) {
-            let nombreInput = Object.keys(parent.$U.inputs);
-            this.listaInputs = [];
-            this.listaIds = [];
-    
-            nombreInput.forEach(nom => {
-                let [input, id] = nom.split("-");
-                this.listaInputs.push(input);
-                this.listaIds.push(id);
-            });
-    
-            this.listaNumerados = this.listaInputs.map((item, index) => {
-                let count = this.listaInputs.slice(0, index).filter(x => x === item).length;
-                return count > 0 ? `${item}_${count}` : item;
-            });
-    
-            return this.listaNumerados.map(inputName => [inputName, inputName]);
-        } else {
-            return [[$L.blockly.aspect_deleteValue2, $L.blockly.aspect_deleteValue2]];
-        }
-    },
-    
+  const items = ids.map((id) => {
+    const m = meta[id];
+    const label = (m?.n && m?.pointName) ? `casilla ${m.n} ${m.pointName}` : id;
+    const point = m?.pointName || "ZZZ";
+    const n = Number(m?.n ?? Number.POSITIVE_INFINITY);
+    return { id, label, point, n };
+  });
 
-    getSelectedId: function() {
-        let selectedValue = this.getFieldValue("NAME");
-        let index = this.listaNumerados.indexOf(selectedValue);
-        if (index !== -1) {
-            return this.listaIds[index];
-        } else {
-            return null;
-        }
-    }
+  items.sort((a, b) => {
+    if (a.point !== b.point) return a.point.localeCompare(b.point);
+    if (a.n !== b.n) return a.n - b.n;
+    return a.id.localeCompare(b.id);
+  });
+
+  return items.map((x) => [x.label, x.id]);
 };
+
+
+// definición corta: usa el id tal cual como label y value
+Blockly.Blocks['dgpad_inputs_value'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField($L.blockly.expressions_InputValue)
+      .appendField(new Blockly.FieldDropdown(() => DG.expressions.buildInputOptions()), "ID");
+
+    this.setOutput(true, null);
+    this.setColour(47);
+  }
+};
+
+
+window.DG = window.DG || {};
+DG.expressions = DG.expressions || {};
+
+/**
+ * Lista desplegable de MathLive existentes.
+ * Label legible: "fórmula 1 A", etc.
+ */
+DG.expressions.buildMathLiveOptions = function buildMathLiveOptions() {
+  const meta = window.$U?.mathLiveMeta || {};
+  const ids = Object.keys(meta);
+
+  if (!ids.length) return [["(sin fórmulas)", ""]];
+
+  const items = ids.map((id) => {
+    const m = meta[id] || {};
+    const point = String(m.pointName || "ZZZ");
+    const n = Number(m.n ?? Number.POSITIVE_INFINITY);
+    const label = (m.pointName && m.n)
+      ? `fórmula ${m.n} ${m.pointName}`
+      : id;
+
+    return { id, label, point, n };
+  });
+
+  items.sort((a, b) => {
+    if (a.point !== b.point) return a.point.localeCompare(b.point);
+    if (a.n !== b.n) return a.n - b.n;
+    return a.id.localeCompare(b.id);
+  });
+
+  return items.map((x) => [x.label, x.id]);
+};
+
+Blockly.Blocks["mathlive_value"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("valor MathLive")
+      .appendField(
+        new Blockly.FieldDropdown(() => DG.expressions.buildMathLiveOptions()),
+        "ID"
+      );
+    this.setOutput(true, "String");
+    this.setColour(47);
+    this.setTooltip("Devuelve el valor completo del MathLive.");
+    this.setHelpUrl("");
+  }
+};
+
+
+
+
+DG.expressions.buildAllMathLivePromptOptions = function buildAllMathLivePromptOptions() {
+  const meta = window.$U?.mathLiveMeta || {};
+  const ids = Object.keys(meta);
+
+  if (!ids.length) return [["(sin casillas)", ""]];
+
+  const formulaItems = ids.map((id) => {
+    const m = meta[id] || {};
+    const point = String(m.pointName || "ZZZ");
+    const n = Number(m.n ?? Number.POSITIVE_INFINITY);
+    const formulaLabel = (m.pointName && m.n)
+      ? `fórmula ${m.n} ${m.pointName}`
+      : id;
+
+    return { id, point, n, formulaLabel, prompts: Array.isArray(m.prompts) ? m.prompts : [] };
+  });
+
+  formulaItems.sort((a, b) => {
+    if (a.point !== b.point) return a.point.localeCompare(b.point);
+    if (a.n !== b.n) return a.n - b.n;
+    return a.id.localeCompare(b.id);
+  });
+
+  const options = [];
+
+  formulaItems.forEach((item) => {
+    for (let i = 0; i < item.prompts.length; i++) {
+      const promptName = String(item.prompts[i]);
+      options.push([`${item.formulaLabel} · casilla ${i + 1}`, promptName]);
+    }
+  });
+
+  return options.length ? options : [["(sin casillas)", ""]];
+};
+
+Blockly.Blocks["mathlive_prompt_value"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("valor casilla MathLive")
+      .appendField(
+        new Blockly.FieldDropdown(() => DG.expressions.buildMathLiveOptions()),
+        "ID"
+      )
+      .appendField("casilla")
+      .appendField(
+        new Blockly.FieldDropdown(() => DG.expressions.buildAllMathLivePromptOptions()),
+        "PROMPT"
+      );
+
+    this.setOutput(true, "String");
+    this.setColour(47);
+    this.setTooltip("Devuelve el valor escrito en una casilla concreta del MathLive.");
+    this.setHelpUrl("");
+  }
+};
+
+
+Blockly.Blocks['dgpad_cronometro_valor'] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField($L.blockly.expressions_cronValue)
+      .appendField(new Blockly.FieldDropdown(this.updateDropdownOptions.bind(this)), "ID");
+
+    this.setOutput(true, "Number");
+    this.setColour(47);
+    this.setTooltip("Devuelve el tiempo actual del cronómetro (en segundos)");
+    this.setHelpUrl("");
+
+    this.updateDropdownOptions();
+  },
+
+  updateDropdownOptions: function () {
+    if (window.$U && window.$U.cronometros && Object.keys(window.$U.cronometros).length > 0) {
+      const crons = window.$U.cronometros;
+      const keys = Object.keys(crons);
+
+      const counts = {};
+      const options = keys.map((fullId) => {
+        const parts = fullId.split("-");
+        const pointName = parts[0];
+
+        counts[pointName] = (counts[pointName] || 0) + 1;
+        const number = counts[pointName];
+        const label = `cronómetro ${number} ${pointName}`;
+        return [label, fullId];
+      });
+
+      return options;
+    } else {
+      return [["(sin cronómetros)", ""]];
+    }
+  },
+
+  getSelectedId: function () {
+    return this.getFieldValue("ID");
+  }
+};
+
+
+
+  
+  
+
+  
+
+
+
+
 
   Blockly.Blocks['dgpad_compute'] = {
     init: function() {

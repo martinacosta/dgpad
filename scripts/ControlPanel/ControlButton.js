@@ -15,17 +15,7 @@ function ControlButton(owner, l, t, w, h, src, _isOn, _group, _proc, _title) {  
             "width": w,
             "height": h
         };
-        //        var cb = owner.getBounds();
-        //        var cw = w;
-        //        var ch = h;
-        //        var ct = cb.top + t;
-        //        var cl = cb.left + l;
-        //        return {
-        //            "left": cl,
-        //            "top": ct,
-        //            "width": cw,
-        //            "height": ch
-        //        };
+        
     };
 
     this.setActive = function(_bool) {

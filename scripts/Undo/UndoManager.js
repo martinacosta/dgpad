@@ -1,149 +1,204 @@
+// UndoManager.js - versión extendida con acciones MODIFY
+
 function UndoManager(_canvas) {
-    var canvas = _canvas;
-    var Cn = canvas.getConstruction();
-    var actions = [];
-    var cursor = 0;
-    var me = this;
-    var Cmarker = null; // Marqueur pour les objets de la construction
-    var Tmarker = null; // Marqueur pour les textes
+    const canvas = _canvas;
+    const Cn = canvas.getConstruction();
+    const actions = [];
+    let cursor = 0;
+    const me = this;
+    this.isApplying = false; //para no registrar cambios al deshacer
 
-    var ADD = true,
-        REMOVE = false;
+    const ADD = 'ADD', REMOVE = 'REMOVE', MODIFY = 'MODIFY', VISIBILITY = 'VISIBILITY';
 
-    var isLeft = function() {
-        return (cursor === 0);
-    };
+    let Cmarker = null, Tmarker = null;
 
-    var isRight = function() {
-        return (cursor === actions.length);
-    };
-
-    var refreshCanvas = function() {
-        var simulatedEvent = document.createEvent("MouseEvent");
+    const refreshCanvas = () => {
+        
+        const simulatedEvent = document.createEvent("MouseEvent");
         simulatedEvent.initMouseEvent("mouseup", true, true, window, 1, -100, -100, -100, -100, false,
             false, false, false, 0, null);
         Cn.validate(simulatedEvent);
         Cn.computeAll();
         canvas.paint(simulatedEvent);
+        if (typeof canvas.propertiesPanel?.refreshValues === "function") {
+        canvas.propertiesPanel.refreshValues();
+        }
+
         me.setBtns();
-    };
+        //para actualizar los valores en el panel de propiedades
+        // después de undo_redo(...) y antes de showProperties/refreshValues:
+            const p = canvas.propertiesPanel;
+            const obj = p?.obj;
+            if (obj?.getSize) console.log('[undo] size after apply =', obj.getSize());
 
-    var add = function(_o) {
-        var _el = _o;
-        if (_o instanceof TextObject) {
-            _el = canvas.textManager.add(_o)
-        } else {
-            Cn.add(_o);
-            _o.setParentList(_o.getParent());
+        if (typeof canvas.propertiesPanel?.showProperties === 'function') {
+            const obj = canvas.propertiesPanel.obj || canvas.propertiesPanel.getObj?.();
+            if (obj) canvas.propertiesPanel.showProperties(obj);
         }
-        return _el;
-    };
-
-    var remove = function(_o) {
-        if (_o instanceof TextObject) {
-            canvas.textManager.deleteTeX(_o);
-        } else {
-            Cn.remove(_o);
+        if (typeof canvas.propertiesPanel?.refreshValues === "function") {
+        canvas.propertiesPanel.refreshValues();
         }
+        canvas.propertiesManager.refresh();
+
     };
 
+    const add = (_o) => {
+        return (_o instanceof TextObject) ? canvas.textManager.add(_o) : (Cn.add(_o), _o.setParentList(_o.getParent()), _o);
+    };
 
-    var undo_redo = function(k) {
-        var t = actions[k];
-        t.add = !t.add;
-        var tab = ($U.isArray(t.target)) ? t.target : [t.target];
-        var len = tab.length;
-        for (var i = 0; i < len; i++) {
-            if (t.add)
-                tab[i] = add(tab[i]);
-            //                Cn.add(tab[i]);
-            else
-                remove(tab[i]);
-            //                Cn.remove(tab[i]);
-            //            if (t.add)
-            //                tab[i].setParentList(tab[i].getParent());
+    const remove = (_o) => {
+        (_o instanceof TextObject) ? canvas.textManager.deleteTeX(_o) : Cn.remove(_o);
+    };
+
+    
+
+    const applyProperty = (obj, prop, value) => {
+        if (!obj) return;
+
+
+        // 1) Intentar llamar el método EXACTO que recibimos:
+        const direct = obj[prop];
+        if (typeof direct === "function") {
+        direct.call(obj, value);
+        return;
         }
-
-    };
-
-    me.clear = function() {
-        actions = [];
-        cursor = 0;
-        refreshCanvas();
-    };
+    }
 
 
-    this.record = function(_t, _add) {
-        if (cursor < actions.length) {
-            me.clear();
+    
+
+    const undo_redo = (k) => {
+        const t = actions[k];
+
+        switch (t.type) {
+            case ADD: {
+            (Array.isArray(t.target) ? t.target : [t.target]).forEach(remove);
+            t.type = REMOVE;                 // ✅ toggle para que redo lo añada
+            break;
+            }
+
+            case REMOVE: {
+            t.target = (Array.isArray(t.target) ? t.target : [t.target]).map(add);
+            t.type = ADD;                    // ✅ toggle para que redo lo quite
+            break;
+            }
+
+            case MODIFY: {
+            applyProperty(t.target, t.prop, t.oldValue);
+            [t.oldValue, t.newValue] = [t.newValue, t.oldValue];
+            break;
+            }
+            case VISIBILITY: {
+            for (let i = 0; i < t.targets.length; i++) {
+                setHiddenState(t.targets[i], t.oldStates[i]);
+            }
+            [t.oldStates, t.newStates] = [t.newStates, t.oldStates];
+            break;
+            }
         }
+        };
+    const getHiddenState = (o) => !!o?.isHidden?.(); // en tu motor sí existe
+    const setHiddenState = (o, h) => o?.setHidden?.(!!h);
+
+    this.recordVisibility = (obj, nextHidden) => {
+    actions.splice(cursor);
+    actions.push({
+        type: VISIBILITY,
+        targets: [obj],
+        oldStates: [getHiddenState(obj)],
+        newStates: [!!nextHidden],
+    });
+    cursor++;
+    this.setBtns();
+    };
+
+    this.recordAdd = (elts) => {
+        actions.splice(cursor);
+        actions.push({ type: ADD, target: elts });
         cursor++;
-        actions.push({
-            add: _add,
-            target: _t
-        });
         this.setBtns();
     };
 
-    this.undo = function() {
-        if (cursor > 0) {
-            undo_redo(cursor - 1);
-            cursor--;
-        }
-        refreshCanvas();
+    this.recordRemove = (elts) => {
+        actions.splice(cursor);
+        actions.push({ type: REMOVE, target: elts });
+        cursor++;
+        this.setBtns();
     };
 
-    this.redo = function() {
+    this.recordPropertyChange = (obj, prop, oldValue, newValue) => {
+        actions.splice(cursor);
+        actions.push({
+            type: MODIFY,
+            target: obj,
+            prop,
+            oldValue,
+            newValue
+        });
+        
+        cursor++;
+        this.setBtns();
+    };
+
+    this.undo = function () {
+        me.isApplying = true;
+        if (cursor > 0) {
+            cursor--;
+            undo_redo(cursor);
+            refreshCanvas();
+        }
+        me.isApplying = false;
+    };
+
+    this.redo = function () {
+        me.isApplying = true;
         if (cursor < actions.length) {
             undo_redo(cursor);
             cursor++;
+            refreshCanvas();
         }
-        refreshCanvas();
+        me.isApplying = false;
     };
 
-
-    this.beginAdd = function() {
+    this.beginAdd = () => {
         Cmarker = Cn.elements().length;
         Tmarker = canvas.textManager.elements().length;
     };
 
-    this.endAdd = function() {
-        if ((Cmarker === null) && (Tmarker === null))
-            return;
-        var v = Cn.elements();
-        var t = canvas.textManager.elements();
-        var elts = [];
-        for (var m = Cmarker; m < v.length; m++) {
-            elts.push(v[m]);
-        }
-        for (var m = Tmarker; m < t.length; m++) {
-            elts.push(t[m]);
-        }
-        if (elts.length > 0) {
-            this.record(elts, true);
-        }
-
-
-
+    this.endAdd = () => {
+        if (Cmarker === null && Tmarker === null) return;
+        const newObjs = Cn.elements().slice(Cmarker).concat(canvas.textManager.elements().slice(Tmarker));
+        if (newObjs.length > 0) this.recordAdd(newObjs);
         Cmarker = null;
         Tmarker = null;
     };
 
-    this.deleteObjs = function(_t) {
-        if (_t.length > 0)
-            this.record(_t, false);
+    this.clear = () => {
+        actions.length = 0;
+        cursor = 0;
+        refreshCanvas();
     };
 
-    this.swap = function(_o) {
-        for (var i = 0; i < actions.length; i++) {
-            var tab = ($U.isArray(actions[i].target)) ? actions[i].target : [actions[i].target];
-            if ((tab.length === 1) && (tab[0] === _o))
-                actions[i].add = !actions[i].add;
+    // this.deleteObjs = function(_t) {
+    //     if (_t.length > 0) this.record(_t, REMOVE);
+    //     };
+
+    this.deleteObjs = function (_t) {
+        if (_t?.length > 0) this.recordRemove(_t);
+        };
+
+
+    this.setBtns = () => {
+        canvas.setUndoBtn(cursor > 0);
+        canvas.setRedoBtn(cursor < actions.length);
+    };
+
+    this.swap = (_o) => {
+        for (const act of actions) {
+            const tab = Array.isArray(act.target) ? act.target : [act.target];
+            if (tab.length === 1 && tab[0] === _o) act.type = act.type === ADD ? REMOVE : ADD;
         }
     };
-
-    this.setBtns = function() {
-        canvas.setUndoBtn(!isLeft());
-        canvas.setRedoBtn(!isRight());
-    };
 }
+
+

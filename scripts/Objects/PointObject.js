@@ -39,6 +39,147 @@ function PointObject(_construction, _name, _x, _y) {
 
   var currentMagnet = null; // Para controlar los cambios de magnetismo: usado para
   // las trazas de objetos.
+  // path: PointObject.js
+
+  // --- Exclusive magnet target (lock) ---------------------------------------
+  var exclusiveMagnetTarget = false;
+  var magnetLockOwner = null;
+
+  this.setExclusiveMagnetTarget = function(_b) {
+    exclusiveMagnetTarget = !!_b;
+    
+    if (!exclusiveMagnetTarget) magnetLockOwner = null;
+  };
+
+  this.isExclusiveMagnetTarget = function() {
+    return exclusiveMagnetTarget;
+  };
+
+  this.getMagnetLockOwner = function() {
+    return magnetLockOwner;
+  };
+
+  // this.lockMagnet = function(_owner) {
+  //   if (!exclusiveMagnetTarget) return;
+  //   magnetLockOwner = _owner || null;
+  // };
+
+  // this.unlockMagnet = function(_owner) {
+  //   if (!exclusiveMagnetTarget) return;
+  //   if (magnetLockOwner === _owner) magnetLockOwner = null;
+  // };
+
+  this.lockMagnet = function(_owner) {
+  if (!exclusiveMagnetTarget) return;
+
+  var changed = magnetLockOwner !== (_owner || null);
+    magnetLockOwner = _owner || null;
+
+    if (changed) {
+      this.computeChilds();
+    }
+  };
+
+  this.unlockMagnet = function(_owner) {
+    if (!exclusiveMagnetTarget) return;
+
+    if (magnetLockOwner === _owner) {
+      magnetLockOwner = null;
+      this.computeChilds();
+    }
+  };
+  
+  this.isOccupied = function() {
+    return !!magnetLockOwner;
+  };
+
+  this.getOccupant = function() {
+    return magnetLockOwner;
+  };
+
+  this.getOccupantName = function() {
+    return magnetLockOwner ? magnetLockOwner.getName() : null;
+  };
+
+  var xMinBound = null,
+    xMaxBound = null,
+    yMinBound = null,
+    yMaxBound = null;
+
+  var normalizeBound = function(v) {
+    return (typeof v === "number" && !isNaN(v)) ? v : null;
+  };
+
+  var sortBounds = function(minv, maxv) {
+    if (minv !== null && maxv !== null && minv > maxv) {
+      var t = minv;
+      minv = maxv;
+      maxv = t;
+    }
+    return [minv, maxv];
+  };
+
+  var clampIncrement = function(px, py) {
+    if (me.getParentLength() !== 0) return [px, py];
+
+    var x = Cn.coordsSystem.x(px);
+    var y = Cn.coordsSystem.y(py);
+
+    if (xMinBound !== null && x < xMinBound) x = xMinBound;
+    if (xMaxBound !== null && x > xMaxBound) x = xMaxBound;
+    if (yMinBound !== null && y < yMinBound) y = yMinBound;
+    if (yMaxBound !== null && y > yMaxBound) y = yMaxBound;
+
+    return [Cn.coordsSystem.px(x), Cn.coordsSystem.py(y)];
+  };
+
+  this.setBounds = function(xmin, xmax, ymin, ymax) {
+    xMinBound = normalizeBound(xmin);
+    xMaxBound = normalizeBound(xmax);
+    yMinBound = normalizeBound(ymin);
+    yMaxBound = normalizeBound(ymax);
+
+    var xb = sortBounds(xMinBound, xMaxBound);
+    var yb = sortBounds(yMinBound, yMaxBound);
+
+    xMinBound = xb[0];
+    xMaxBound = xb[1];
+    yMinBound = yb[0];
+    yMaxBound = yb[1];
+  };
+
+  this.setXBounds = function(xmin, xmax) {
+    xmin = normalizeBound(xmin);
+    xmax = normalizeBound(xmax);
+    var xb = sortBounds(xmin, xmax);
+    xMinBound = xb[0];
+    xMaxBound = xb[1];
+  };
+
+  this.setYBounds = function(ymin, ymax) {
+    ymin = normalizeBound(ymin);
+    ymax = normalizeBound(ymax);
+    var yb = sortBounds(ymin, ymax);
+    yMinBound = yb[0];
+    yMaxBound = yb[1];
+  };
+
+  this.clearBounds = function() {
+    xMinBound = null;
+    xMaxBound = null;
+    yMinBound = null;
+    yMaxBound = null;
+  };
+
+  this.getBounds = function() {
+    return {
+      xmin: xMinBound,
+      xmax: xMaxBound,
+      ymin: yMinBound,
+      ymax: yMaxBound
+    };
+  };
+
   
   this.pointsIn=0;
   
@@ -46,7 +187,8 @@ function PointObject(_construction, _name, _x, _y) {
 	  return this.pointsIn;
   };
 
-  this.blocks.setMode(["onlogo", "onmousedown", "ondrag", "onmouseup", "oncompute"], "ondrag");
+  // this.blocks.setMode(["onlogo", "onmousedown", "ondrag", "onmouseup", "oncompute"], "ondrag");
+  this.blocks.setMode(["onlogo", "onmousedown", "ondrag", "onmouseup"], "ondrag");
 
   // ****************************************
   // **** Unicamente para las animaciones ****
@@ -237,18 +379,22 @@ function PointObject(_construction, _name, _x, _y) {
     return inc;
   };
 
+  
+
   this.computeIncrement = function(_x, _y) {
-    if (inc) {
-      var x = this.getCn().coordsSystem.x(_x);
-      var y = this.getCn().coordsSystem.y(_y);
-      x = inc * Math.round(x / inc);
-      y = inc * Math.round(y / inc);
-      x = this.getCn().coordsSystem.px(x);
-      y = this.getCn().coordsSystem.py(y);
-      this.setXY(x, y);
-    } else {
-      this.setXY(_x, _y);
-    }
+  var px = _x, py = _y;
+
+  if (inc) {
+    var x = this.getCn().coordsSystem.x(_x);
+    var y = this.getCn().coordsSystem.y(_y);
+    x = inc * Math.round(x / inc);
+    y = inc * Math.round(y / inc);
+    px = this.getCn().coordsSystem.px(x);
+    py = this.getCn().coordsSystem.py(y);
+  }
+
+  var p = clampIncrement(px, py);
+    this.setXY(p[0], p[1]);
   };
 
   this.isInstanceType = function(_c) {
@@ -519,6 +665,8 @@ function PointObject(_construction, _name, _x, _y) {
     }
   };
 
+    
+
   this.computeDrag = function() {
     this.compute();
     this.computeChilds();
@@ -539,44 +687,326 @@ function PointObject(_construction, _name, _x, _y) {
       return (a[1] - b[1]);
   }
 
-  this.computeMagnets = function() {
-    var mgObj = null;
-    var t = this.getMagnets();
+  
+var getNearestSlotIndexByXY = function(listObj, x, y) {
+  if (!listObj || !listObj.getMagnetSlotCount || !listObj.getMagnetSlotXY) return null;
+
+  var n = listObj.getMagnetSlotCount();
+  if (!n) return null;
+
+  var best = null, bestD2 = Infinity;
+  for (var i = 0; i < n; i++) {
+    var xy = listObj.getMagnetSlotXY(i);
+    if (!xy) continue;
+    var dx = xy[0] - x, dy = xy[1] - y;
+    var d2 = dx*dx + dy*dy;
+    if (d2 < bestD2) { bestD2 = d2; best = i; }
+  }
+  return best;
+};
+
+
+
+this.computeMagnets = function () {
+  var mgObj = null;
+  var t = this.getMagnets();
+  if (!t || t.length === 0) return;
+
+  var reps = [];
+  var lastDirX = 1,
+    lastDirY = 0;
+
+  // Dirección estable basada en el último movimiento (fallback si d=0)
+  var dxm = X - lastX;
+  var dym = Y - lastY;
+  var l2m = dxm * dxm + dym * dym;
+  if (l2m > 1e-12) {
+    var lm = Math.sqrt(l2m);
+    lastDirX = dxm / lm;
+    lastDirY = dym / lm;
+  }
+
+  function isAreaObj(obj) {
+    return (
+      obj &&
+      obj.getCode &&
+      obj.getCode() === "area" &&
+      typeof obj.containsXY === "function" &&
+      typeof obj.projectXY === "function"
+    );
+  }
+
+  function normalizeDir(dx, dy, fallbackX, fallbackY) {
+    var l2 = dx * dx + dy * dy;
+    if (l2 > 1e-12) {
+      var l = Math.sqrt(l2);
+      return [dx / l, dy / l];
+    }
+    // fallback
+    var f2 = fallbackX * fallbackX + fallbackY * fallbackY;
+    if (f2 > 1e-12) {
+      var f = Math.sqrt(f2);
+      return [fallbackX / f, fallbackY / f];
+    }
+    return [1, 0];
+  }
+
+  // Desde un punto de borde (bx,by), intenta empujar epsilon hacia adentro (4 direcciones).
+  function pushInsideFromBoundary(areaObj, bx, by, eps) {
+    var cand = [
+      [bx + eps, by],
+      [bx - eps, by],
+      [bx, by + eps],
+      [bx, by - eps],
+    ];
+    for (var i = 0; i < cand.length; i++) {
+      var cx = cand[i][0],
+        cy = cand[i][1];
+      if (areaObj.containsXY(cx, cy)) return [cx, cy];
+    }
+    return [bx, by]; // fallback: borde
+  }
+
+  // Garantiza: si (nx,ny) queda dentro del área y estamos en repulsión, lo expulsa.
+  function clampOutsideArea(areaObj, nx, ny, absR) {
+    if (!areaObj.containsXY(nx, ny)) return [nx, ny];
+
+    // Proyecta el punto "malo" al borde más cercano
+    var b = areaObj.projectXY(nx, ny);
+
+    // Vector desde borde hacia punto (si está dentro, apunta hacia adentro)
+    var inx = nx - b[0];
+    var iny = ny - b[1];
+
+    // Dirección hacia afuera = - (hacia adentro)
+    var dir = normalizeDir(-inx, -iny, -lastDirX, -lastDirY);
+    var dirX = dir[0],
+      dirY = dir[1];
+
+    // Empujar hacia afuera garantizado
+    var eps = 0.5;
+    var maxIters = 16;
+
+    var ox = b[0] + dirX * (absR + eps);
+    var oy = b[1] + dirY * (absR + eps);
+
+    for (var k = 0; k < maxIters && areaObj.containsXY(ox, oy); k++) {
+      eps *= 2;
+      ox = b[0] + dirX * (absR + eps);
+      oy = b[1] + dirY * (absR + eps);
+    }
+
+    return [ox, oy];
+  }
+
+  function evalTarget(obj, r) {
+    if (!obj) return;
+
+    var rr = Math.abs(r);
+
+    // Exclusividad (punto exclusivo con lock de otro => repulsión)
+    if (obj.isExclusiveMagnetTarget && obj.isExclusiveMagnetTarget()) {
+      var owner = obj.getMagnetLockOwner && obj.getMagnetLockOwner();
+      if (owner && owner !== me) r = -rr;
+      else r = rr;
+    }
+
+    // Elegir ancla (c) según target
+    var c;
+    var isArea = isAreaObj(obj);
+
     
-    if (t.length === 0)
-      return;
-    var reps = [];
-    for (var i = 0; i < t.length; i++) {
-      var c = t[i][0].projectXY(X, Y);
-      
-      var pt = new VirtualPointObject(c[0], c[1]);
-      t[i][0].setMagnetAlpha(pt);
-      t[i][0].projectMagnetAlpha(pt);
-      c[0] = pt.getX();
-      c[1] = pt.getY();
-      var d2 = (c[0] - X) * (c[0] - X) + (c[1] - Y) * (c[1] - Y);
-      // Si la distancia entre la proyección y el punto
-      // de coordenadas (_x,_y) es inferior al radio de atracción:
-      if (d2 < t[i][1] * t[i][1])
-        reps.push([t[i][0], d2, c[0], c[1]]);
+    if (isArea) {
+      var inside = obj.containsXY(X, Y);
+
+      if (r >= 0) {
+        // ATRACCIÓN: dentro => identidad, fuera => epsilon adentro desde borde
+        if (inside) {
+          c = [X, Y];
+        } else {
+          var e = (typeof obj.projectXYEdge === "function") ? obj.projectXYEdge(X, Y) : null;
+
+          if (!e) {
+            // fallback viejo
+            var b = obj.projectXY(X, Y);
+            c = pushInsideFromBoundary(obj, b[0], b[1], 10);
+          } else {
+            // normal del segmento ganador
+            var sx = e.x2 - e.x1;
+            var sy = e.y2 - e.y1;
+            var n2 = sx * sx + sy * sy;
+
+            if (n2 < 1e-12) {
+              c = [e.x, e.y];
+            } else {
+              var inv = 1 / Math.sqrt(n2);
+              // normal unitaria (dos posibles sentidos)
+              var nx = -sy * inv;
+              var ny = sx * inv;
+
+              var margin = 10; // tu margen deseado en px
+              var ax = e.x + nx * margin, ay = e.y + ny * margin;
+              var bx = e.x - nx * margin, by = e.y - ny * margin;
+
+              if (obj.containsXY(ax, ay)) c = [ax, ay];
+              else if (obj.containsXY(bx, by)) c = [bx, by];
+              else {
+                // si 10 es mucho/poco, intenta acercarte con “búsqueda” hacia adentro
+                var ok = false;
+                var m = margin;
+                for (var k = 0; k < 10; k++) {
+                  m *= 0.5;
+                  ax = e.x + nx * m; ay = e.y + ny * m;
+                  bx = e.x - nx * m; by = e.y - ny * m;
+                  if (obj.containsXY(ax, ay)) { c = [ax, ay]; ok = true; break; }
+                  if (obj.containsXY(bx, by)) { c = [bx, by]; ok = true; break; }
+                }
+                if (!ok) c = [e.x, e.y]; // último fallback: borde
+              }
+            }
+          }
+        }
+      } else {
+        // ✅ REPULSIÓN: si estás dentro, que SIEMPRE active el imán (d2=0)
+        if (inside) {
+          c = [X, Y];           // d2 = 0 => siempre entra al radio rr
+        } else {
+          c = obj.projectXY(X, Y);
+        }
+      }
+    } else {
+      c = obj.projectXY(X, Y);
     }
-    if (reps.length > 0) {
-      reps.sort(magnetsSortFilter);
-      mgObj = reps[0][0];
-      this.setXY(reps[0][2], reps[0][3]);
-      //            reps[0][0].setAlpha(this);
-      //            reps[0][0].projectAlpha(this);
-      this.computeChilds();
+
+    // Mantiene alpha/slot behavior
+    var pt = new VirtualPointObject(c[0], c[1]);
+    if (obj.setMagnetAlpha) obj.setMagnetAlpha(pt);
+    if (obj.projectMagnetAlpha) obj.projectMagnetAlpha(pt);
+    c[0] = pt.getX();
+    c[1] = pt.getY();
+
+    // Si está dentro del radio, agrega candidato
+    var vx = X - c[0];
+    var vy = Y - c[1];
+    var d2 = vx * vx + vy * vy;
+
+    if (d2 < rr * rr) {
+      reps.push([obj, d2, c[0], c[1], r, rr]);
     }
-    if (currentMagnet != mgObj) {
-      currentMagnet = mgObj;
-      lastX = X;
-      lastY = Y;
-      for (var i = 0, len = this.getChildLength(); i < len; i++) {
-        this.getChildAt(i).beginTrack();
+  }
+
+  
+  // Evalúa targets
+  for (var i = 0; i < t.length; i++) {
+    var obj = t[i][0];
+
+    var r_raw = t[i][1];          // puede ser positivo o negativo
+    var unit = t[i][2] || "px";   // "px" | "u"
+
+    var r = r_raw;
+
+    // ✅ Runtime conversion: u -> px según zoom actual
+    if (unit === "u") {
+      var cs =
+        (Cn && typeof Cn.getCoordsSystem === "function" ? Cn.getCoordsSystem() : null) ||
+        (Cn && Cn.coordsSystem ? Cn.coordsSystem : null);
+
+      var ppu = cs && typeof cs.getUnit === "function" ? Number(cs.getUnit()) : 1; // px/u
+
+      if (isFinite(ppu) && ppu > 0) r = r_raw * ppu;
+    }
+
+    // Si el target es lista con slots, evaluar slots
+    if (obj && typeof obj.getMagnetTargets === "function") {
+      var targets = obj.getMagnetTargets();
+      if (targets && targets.length) {
+        for (var j = 0; j < targets.length; j++) evalTarget(targets[j], r);
+        continue;
       }
     }
-  };
+
+    evalTarget(obj, r);
+  }
+
+  if (reps.length === 0) {
+  // ✅ si ya no hay magnet activo, liberar el lock del anterior
+    if (
+      currentMagnet &&
+      currentMagnet.isExclusiveMagnetTarget &&
+      currentMagnet.isExclusiveMagnetTarget()
+    ) {
+      currentMagnet.unlockMagnet(me);
+    }
+    currentMagnet = null;
+    return;
+  }
+
+  reps.sort(magnetsSortFilter);
+  mgObj = reps[0][0];
+
+  var projX = reps[0][2];
+  var projY = reps[0][3];
+  var signedR = reps[0][4];
+  var absR = reps[0][5];
+
+  if (signedR >= 0) {
+    // ATRACCIÓN
+    this.setXY(projX, projY);
+  } else {
+    // REPULSIÓN
+    var vx2 = X - projX;
+    var vy2 = Y - projY;
+
+    var dir = normalizeDir(vx2, vy2, lastDirX, lastDirY);
+    var dirX = dir[0],
+      dirY = dir[1];
+
+    // Propuesta inicial
+    var nx = projX + dirX * absR;
+    var ny = projY + dirY * absR;
+
+    // Regla dura: si el target es área, NO puede terminar dentro
+    if (isAreaObj(mgObj)) {
+      var out = clampOutsideArea(mgObj, nx, ny, absR);
+      nx = out[0];
+      ny = out[1];
+    }
+
+    this.setXY(nx, ny);
+  }
+
+  // Lock/Unlock solo si el imán activo ES punto exclusivo
+  if (mgObj && mgObj.isExclusiveMagnetTarget && mgObj.isExclusiveMagnetTarget()) {
+    if (signedR >= 0) mgObj.lockMagnet(me);
+    else mgObj.unlockMagnet(me);
+  }
+
+  this.computeChilds();
+
+  if (
+    currentMagnet &&
+    currentMagnet !== mgObj &&
+    currentMagnet.isExclusiveMagnetTarget &&
+    currentMagnet.isExclusiveMagnetTarget()
+  ) {
+    currentMagnet.unlockMagnet(me);
+  }
+
+  if (currentMagnet != mgObj) {
+    currentMagnet = mgObj;
+    lastX = X;
+    lastY = Y;
+    for (var k = 0, len = this.getChildLength(); k < len; k++) {
+      this.getChildAt(k).beginTrack();
+    }
+  }
+};
+
+
+
+
+
+
 
   this.checkMagnets = function() {
     if (this.getMagnets().length) {
@@ -628,8 +1058,7 @@ function PointObject(_construction, _name, _x, _y) {
   var computeFixed = function() {
     EXY.compute();
     var t = EXY.value();
-    // console.log(this.getParent());
-    //        if (this.getName()==="A") console.log("t="+t);
+    
     if (isArray(t)) {
       // Si es un punto 3D :
       if (t.length === 3) {
@@ -782,7 +1211,7 @@ function PointObject(_construction, _name, _x, _y) {
       case 1:
         // punto sobre objeto:
         src.geomWrite(false, this.getName(), "PointOn", this.getParentAt(0).getVarName(), Alpha);
-        //                src.geomWrite(false, this.getName(), "PointOn", this.getParentAt(0).getName(), x, y);
+        
         break;
       case 2:
         // punto de intersección:

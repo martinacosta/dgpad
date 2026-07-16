@@ -1,3 +1,274 @@
+// function MonkeyPanel(_canvas) {
+//     $U.extend(this, new Panel(_canvas.getDocObject()));
+//     var me = this;
+//     var _l = $P.MonkeyBounds.l,
+//         _t = $P.MonkeyBounds.t,
+//         _w = $P.MonkeyBounds.w,
+//         _h = $P.MonkeyBounds.w;
+//     var cW = $P.MonkeyBounds.captureWidth;
+//     me.setStyles("position:absolute;overflow:hidden;z-index:8;background-size:" + _w + "px " + _h + "px");
+//     me.setStyle("background-image", "url('" + $APP_PATH + "NotPacked/images/tools/mico.svg')");
+//     me.transition("scale", 0.2);
+
+//     var cnvs = new GUIElement(me, "canvas");
+//     cnvs.setStyles("position:absolute");
+//     cnvs.width = _w;
+//     cnvs.height = _h;
+//     me.addContent(cnvs);
+//     var ctx = cnvs.getDocObject().getContext('2d');
+
+//     var xx = 0,
+//         yy = 0;
+
+//     var dragmove = function(ev) {
+//         _l += (ev.pageX - xx);
+//         _t += (ev.pageY - yy);
+//         me.setStyle("left", _l + "px");
+//         me.setStyle("top", _t + "px");
+//         xx = ev.pageX;
+//         yy = ev.pageY;
+//     };
+
+//     var dragdown = function(ev) {
+//         xx = ev.pageX;
+//         yy = ev.pageY;
+//         me.addMoveEvent(dragmove, window);
+//         me.addUpEvent(dragup, window);
+//     };
+
+//     var dragup = function(ev) {
+//         me.removeMoveEvent(dragmove, window);
+//         me.removeUpEvent(dragup, window);
+//     };
+	
+	
+	
+// 	sacudir=function(freePoints,alea1,alea2){
+		
+		
+// 			for (i=0;i<freePoints.length;i++){
+// 				num1=alea1[i];
+// 				num2=alea2[i];
+				
+				
+// 				freePoints[i].setXY(freePoints[i].getX()+num1,freePoints[i].getY()+num2);
+// 				freePoints[i].compute();
+// 				freePoints[i].computeChilds();
+// 				_canvas.paint();
+// 				if(freePoints[i].getX()<0){
+					
+// 					num1=Math.round(Math.random()*10);
+// 					freePoints[i].setXY(freePoints[i].getX()+num1,freePoints[i].getY()+num2);
+// 					freePoints[i].compute();
+// 					freePoints[i].computeChilds();
+// 					_canvas.paint();
+// 					alea1[i]=num1
+// 				}
+// 				if(freePoints[i].getX()>_canvas.getConstruction().coordsSystem.wWindow()){
+					
+// 					num1=-Math.round(Math.random()*10);
+// 					freePoints[i].setXY(freePoints[i].getX()+num1,freePoints[i].getY()+num2);
+// 					freePoints[i].compute();
+// 					freePoints[i].computeChilds();
+// 					_canvas.paint();
+// 					alea1[i]=num1
+// 				}
+// 				if(freePoints[i].getY()<0){
+					
+// 					num2=Math.round(Math.random()*10);
+// 					freePoints[i].setXY(freePoints[i].getX()+num1,freePoints[i].getY()+num2);
+// 					freePoints[i].compute();
+// 					freePoints[i].computeChilds();
+// 					_canvas.paint();
+// 					alea2[i]=num2;
+// 				}
+// 				if(freePoints[i].getY()>_canvas.getConstruction().coordsSystem.hWindow()){
+					
+// 					num2=-Math.round(Math.random()*10);
+// 					freePoints[i].setXY(freePoints[i].getX()+num1,freePoints[i].getY()+num2);
+// 					freePoints[i].compute();
+// 					freePoints[i].computeChilds();
+// 					_canvas.paint();
+					
+// 					alea2[i]=num2;
+// 				};
+				
+// 			};
+		
+		
+		
+		
+// 	}
+		
+// 		var mico=function(freePoints){mico2=setInterval(sacudir, 100, freePoints,alea1,alea2)};
+
+// 	var alea1=[];
+// 		var alea2=[];
+// 	var onmousedown = function(ev) {
+
+// 		points=_canvas.getConstruction().getAllObjectsFromType("point");
+		
+// 		var freePoints=[];
+// 		for (i=0;i<points.length;i++){
+// 			if(points[i].getParent().length==0){
+// 				freePoints.push(points[i])
+// 			}
+// 		}
+		
+// 		for (i=0;i<freePoints.length;i++){
+// 			alea1.push(Math.round(Math.random()*10));
+// 			alea2.push(Math.round(Math.random()*10));
+// 		}
+// 		mico(freePoints);
+		
+// 	};
+	
+	
+	
+// 	var onmouseup = function(ev) {
+// 		clearInterval(mico2); 
+// 	};
+	
+// 	var mousemove = function(ev) {console.log("se movió");
+// 		clearInterval(mico2); 
+// 	};
+	
+	
+
+
+//     me.addDownEvent(onmousedown);
+// 	me.addUpEvent(onmouseup);
+// 	me.addMoveEvent(mousemove);
+
+//     _canvas.getDocObject().parentNode.appendChild(me.getDocObject());
+//     me.applyTransitionIN();
+
+
+//     me.getBounds = function() {
+//         return {
+//             "left": _l,
+//             "top": _t,
+//             "width": _w,
+//             "height": _h
+//         };
+//     };
+
+//     me.init = function() {
+//         me.setBounds(_l, _t, _w, _h);
+//     };
+
+//     me.magnifierPaint = function(coords) {
+//         ctx.beginPath();
+//         ctx.clearRect(0, 0, _w, _h);
+		
+//     };
+
+
+//     me.init();
+
+// }
+
+
+// function MonkeyPanel(_canvas) {
+//     $U.extend(this, new Panel(_canvas.getDocObject()));
+//     var me = this;
+//     var _l = $P.MonkeyBounds.l,
+//         _t = $P.MonkeyBounds.t,
+//         _w = $P.MonkeyBounds.w,
+//         _h = $P.MonkeyBounds.w;
+//     var cW = $P.MonkeyBounds.captureWidth;
+//     me.setStyles("position:absolute;overflow:hidden;z-index:8;background-size:" + _w + "px " + _h + "px");
+//     me.setStyle("background-image", "url('" + $APP_PATH + "NotPacked/images/tools/mico.svg')");
+//     me.transition("scale", 0.2);
+
+//     var cnvs = new GUIElement(me, "canvas");
+//     cnvs.setStyles("position:absolute");
+//     cnvs.width = _w;
+//     cnvs.height = _h;
+//     me.addContent(cnvs);
+//     var ctx = cnvs.getDocObject().getContext('2d');
+
+//     var mico2 = null;
+//     var isRunning = false;
+//     var alea1 = [];
+//     var alea2 = [];
+
+//     function sacudir(freePoints, alea1, alea2) {
+//         for (let i = 0; i < freePoints.length; i++) {
+//             let num1 = alea1[i];
+//             let num2 = alea2[i];
+
+//             freePoints[i].setXY(freePoints[i].getX() + num1, freePoints[i].getY() + num2);
+//             freePoints[i].compute();
+//             freePoints[i].computeChilds();
+//             _canvas.paint();
+
+//             if (freePoints[i].getX() < 0) {
+//                 num1 = Math.round(Math.random() * 10);
+//                 alea1[i] = num1;
+//             } else if (freePoints[i].getX() > _canvas.getConstruction().coordsSystem.wWindow()) {
+//                 num1 = -Math.round(Math.random() * 10);
+//                 alea1[i] = num1;
+//             }
+
+//             if (freePoints[i].getY() < 0) {
+//                 num2 = Math.round(Math.random() * 10);
+//                 alea2[i] = num2;
+//             } else if (freePoints[i].getY() > _canvas.getConstruction().coordsSystem.hWindow()) {
+//                 num2 = -Math.round(Math.random() * 10);
+//                 alea2[i] = num2;
+//             }
+
+//             freePoints[i].setXY(freePoints[i].getX() + num1, freePoints[i].getY() + num2);
+//             freePoints[i].compute();
+//             freePoints[i].computeChilds();
+//             _canvas.paint();
+//         }
+//     }
+
+//     function toggleMonkey(ev) {
+//         if (!isRunning) {
+//             let points = _canvas.getConstruction().getAllObjectsFromType("point");
+//             let freePoints = points.filter(p => p.getParent().length === 0);
+
+//             alea1 = freePoints.map(() => Math.round(Math.random() * 10));
+//             alea2 = freePoints.map(() => Math.round(Math.random() * 10));
+
+//             mico2 = setInterval(() => sacudir(freePoints, alea1, alea2), 100);
+//             isRunning = true;
+//         } else {
+//             clearInterval(mico2);
+//             mico2 = null;
+//             isRunning = false;
+//         }
+//     }
+
+//     me.addClickEvent(toggleMonkey);
+
+//     _canvas.getDocObject().parentNode.appendChild(me.getDocObject());
+//     me.applyTransitionIN();
+
+//     me.getBounds = function() {
+//         return {
+//             "left": _l,
+//             "top": _t,
+//             "width": _w,
+//             "height": _h
+//         };
+//     };
+
+//     me.init = function() {
+//         me.setBounds(_l, _t, _w, _h);
+//     };
+
+//     me.magnifierPaint = function(coords) {
+//         ctx.beginPath();
+//         ctx.clearRect(0, 0, _w, _h);
+//     };
+
+//     me.init();
+// }
+
 function MonkeyPanel(_canvas) {
     $U.extend(this, new Panel(_canvas.getDocObject()));
     var me = this;
@@ -6,8 +277,14 @@ function MonkeyPanel(_canvas) {
         _w = $P.MonkeyBounds.w,
         _h = $P.MonkeyBounds.w;
     var cW = $P.MonkeyBounds.captureWidth;
+
+    const imgStart = "/scripts/NotPacked/images/controls/anim_start.svg";
+const imgStop = "/scripts/NotPacked/images/controls/anim_stop.svg";
+
+
+
     me.setStyles("position:absolute;overflow:hidden;z-index:8;background-size:" + _w + "px " + _h + "px");
-    me.setStyle("background-image", "url('" + $APP_PATH + "NotPacked/images/tools/mico.svg')");
+    me.setStyle("background-image", `url('${imgStart}')`);
     me.transition("scale", 0.2);
 
     var cnvs = new GUIElement(me, "canvas");
@@ -17,132 +294,67 @@ function MonkeyPanel(_canvas) {
     me.addContent(cnvs);
     var ctx = cnvs.getDocObject().getContext('2d');
 
-    var xx = 0,
-        yy = 0;
+    var mico2 = null;
+    var isRunning = false;
+    var alea1 = [];
+    var alea2 = [];
 
-    var dragmove = function(ev) {
-        _l += (ev.pageX - xx);
-        _t += (ev.pageY - yy);
-        me.setStyle("left", _l + "px");
-        me.setStyle("top", _t + "px");
-        xx = ev.pageX;
-        yy = ev.pageY;
-    };
+    function sacudir(freePoints, alea1, alea2) {
+        for (let i = 0; i < freePoints.length; i++) {
+            let num1 = alea1[i];
+            let num2 = alea2[i];
 
-    var dragdown = function(ev) {
-        xx = ev.pageX;
-        yy = ev.pageY;
-        me.addMoveEvent(dragmove, window);
-        me.addUpEvent(dragup, window);
-    };
+            freePoints[i].setXY(freePoints[i].getX() + num1, freePoints[i].getY() + num2);
+            freePoints[i].compute();
+            freePoints[i].computeChilds();
+            _canvas.paint();
 
-    var dragup = function(ev) {
-        me.removeMoveEvent(dragmove, window);
-        me.removeUpEvent(dragup, window);
-    };
-	
-	
-	
-	sacudir=function(freePoints,alea1,alea2){
-		
-		
-			for (i=0;i<freePoints.length;i++){
-				num1=alea1[i];
-				num2=alea2[i];
-				
-				
-				freePoints[i].setXY(freePoints[i].getX()+num1,freePoints[i].getY()+num2);
-				freePoints[i].compute();
-				freePoints[i].computeChilds();
-				_canvas.paint();
-				if(freePoints[i].getX()<0){
-					
-					num1=Math.round(Math.random()*10);
-					freePoints[i].setXY(freePoints[i].getX()+num1,freePoints[i].getY()+num2);
-					freePoints[i].compute();
-					freePoints[i].computeChilds();
-					_canvas.paint();
-					alea1[i]=num1
-				}
-				if(freePoints[i].getX()>_canvas.getConstruction().coordsSystem.wWindow()){
-					
-					num1=-Math.round(Math.random()*10);
-					freePoints[i].setXY(freePoints[i].getX()+num1,freePoints[i].getY()+num2);
-					freePoints[i].compute();
-					freePoints[i].computeChilds();
-					_canvas.paint();
-					alea1[i]=num1
-				}
-				if(freePoints[i].getY()<0){
-					
-					num2=Math.round(Math.random()*10);
-					freePoints[i].setXY(freePoints[i].getX()+num1,freePoints[i].getY()+num2);
-					freePoints[i].compute();
-					freePoints[i].computeChilds();
-					_canvas.paint();
-					alea2[i]=num2;
-				}
-				if(freePoints[i].getY()>_canvas.getConstruction().coordsSystem.hWindow()){
-					
-					num2=-Math.round(Math.random()*10);
-					freePoints[i].setXY(freePoints[i].getX()+num1,freePoints[i].getY()+num2);
-					freePoints[i].compute();
-					freePoints[i].computeChilds();
-					_canvas.paint();
-					
-					alea2[i]=num2;
-				};
-				
-			};
-		
-		
-		
-		
-	}
-		
-		var mico=function(freePoints){mico2=setInterval(sacudir, 100, freePoints,alea1,alea2)};
+            if (freePoints[i].getX() < 0) {
+                num1 = Math.round(Math.random() * 10);
+                alea1[i] = num1;
+            } else if (freePoints[i].getX() > _canvas.getConstruction().coordsSystem.wWindow()) {
+                num1 = -Math.round(Math.random() * 10);
+                alea1[i] = num1;
+            }
 
-	var alea1=[];
-		var alea2=[];
-	var onmousedown = function(ev) {
+            if (freePoints[i].getY() < 0) {
+                num2 = Math.round(Math.random() * 10);
+                alea2[i] = num2;
+            } else if (freePoints[i].getY() > _canvas.getConstruction().coordsSystem.hWindow()) {
+                num2 = -Math.round(Math.random() * 10);
+                alea2[i] = num2;
+            }
 
-		points=_canvas.getConstruction().getAllObjectsFromType("point");
-		
-		var freePoints=[];
-		for (i=0;i<points.length;i++){
-			if(points[i].getParent().length==0){
-				freePoints.push(points[i])
-			}
-		}
-		
-		for (i=0;i<freePoints.length;i++){
-			alea1.push(Math.round(Math.random()*10));
-			alea2.push(Math.round(Math.random()*10));
-		}
-		mico(freePoints);
-		
-	};
-	
-	
-	
-	var onmouseup = function(ev) {
-		clearInterval(mico2); 
-	};
-	
-	var mousemove = function(ev) {console.log("se movió");
-		clearInterval(mico2); 
-	};
-	
-	
+            freePoints[i].setXY(freePoints[i].getX() + num1, freePoints[i].getY() + num2);
+            freePoints[i].compute();
+            freePoints[i].computeChilds();
+            _canvas.paint();
+        }
+    }
 
+    function toggleMonkey(ev) {
+        if (!isRunning) {
+            let points = _canvas.getConstruction().getAllObjectsFromType("point");
+            let freePoints = points.filter(p => p.getParent().length === 0);
 
-    me.addDownEvent(onmousedown);
-	me.addUpEvent(onmouseup);
-	me.addMoveEvent(mousemove);
+            alea1 = freePoints.map(() => Math.round(Math.random() * 10));
+            alea2 = freePoints.map(() => Math.round(Math.random() * 10));
+
+            mico2 = setInterval(() => sacudir(freePoints, alea1, alea2), 100);
+            isRunning = true;
+            me.setStyle("background-image", `url('${imgStop}')`);
+        } else {
+            clearInterval(mico2);
+            mico2 = null;
+            isRunning = false;
+            me.setStyle("background-image", `url('${imgStart}')`);
+        }
+    }
+
+    me.addClickEvent(toggleMonkey);
 
     _canvas.getDocObject().parentNode.appendChild(me.getDocObject());
     me.applyTransitionIN();
-
 
     me.getBounds = function() {
         return {
@@ -160,10 +372,7 @@ function MonkeyPanel(_canvas) {
     me.magnifierPaint = function(coords) {
         ctx.beginPath();
         ctx.clearRect(0, 0, _w, _h);
-		
     };
 
-
     me.init();
-
 }

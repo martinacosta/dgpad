@@ -7,27 +7,27 @@
   var y = 0;
 
   var newExp = function(_ex) {
-    var OBJ = new ExpressionObject(Cn, "_a", "", "", "", _ex, x, y);
+    var OBJTablero = new ExpressionObject(Cn, "_a", "", "", "", _ex, x, y);
     if (canvas.namesManager.isVisible())
-      canvas.namesManager.setName(OBJ);
+      canvas.namesManager.setName(OBJTablero);
     else
-      OBJ.setName(getName("abcdefghijklmnopqrsuvw"));
-    OBJ.setT("");
+      OBJTablero.setName(getName("abcdefghijklmnopqrsuvw"));
+    OBJTablero.setT("");
     var r = Math.random() * 128;
     var g = Math.random() * 128;
     var b = Math.random() * 128;
-    OBJ.setRGBColor(r, g, b);
-    canvas.addObject(OBJ);
-    return OBJ;
+    OBJTablero.setRGBColor(r, g, b);
+    canvas.addObject(OBJTablero);
+    return OBJTablero;
   };
 
   var newList = function(_ex) {
-    var OBJ = new ListObject(Cn, "_l", _ex);
-    OBJ.setSegmentsSize(0);
+    var OBJTablero = new ListObject(Cn, "_l", _ex);
+    OBJTablero.setSegmentsSize(0);
     var c = _ex.getColor();
-    OBJ.setRGBColor(c.getR(), c.getG(), c.getB());
-    canvas.addObject(OBJ);
-    return OBJ;
+    OBJTablero.setRGBColor(c.getR(), c.getG(), c.getB());
+    canvas.addObject(OBJTablero);
+    return OBJTablero;
   };
 
   var getList = function() {
@@ -62,11 +62,881 @@
   };
 
   var createExpSegs = function() {
-    var OBJ = newList(newExp(getList()));
-    OBJ.setSegmentsSize(1);
+    var OBJTablero = newList(newExp(getList()));
+    OBJTablero.setSegmentsSize(1);
     Cn.compute();
     canvas.paint();
   };
+
+
+var createTableroPuntos = function () {
+  // -------------------------
+  // Helpers
+  // -------------------------
+  function genId() {
+    return Math.random().toString(36).slice(2, 6) + Date.now().toString(36);
+  }
+
+  function forceComputeRotulosSync() {
+    // 1) Recalcula coords (si existe)
+    var e = Cn.getInterpreter().Interpret(
+      'var e=Find("FichasCoords");' +
+      'if(e&&e.compute)e.compute();'
+    );
+
+    // 2) Recalcula el turtle list del rotulador
+    Cn.getInterpreter().Interpret(
+      'var t=Find("blk_turtle_list_rotulaFichas");' +
+      'if(t&&t.compute)t.compute();'
+    );
+
+    // 3) IMPORTANTÍSIMO: repintar para que el TURTLE_PRINT se vea
+    canvas.paint();
+  }
+
+  // -------------------------
+  // Tablero + Textos
+  // -------------------------
+  var OBJTablero = new ExpressionObject(Cn, "Tablero", "", "", "", "[[0,0],[1,0],[0,1],[1,1]]", x, y);
+  canvas.addObject(OBJTablero);
+
+  var OBJlistaTextos = new ExpressionObject(Cn, "Textos", "", "", "", "['1','2','3','4']", x, y + 30);
+  
+  canvas.addObject(OBJlistaTextos);
+
+  var OBJTableroPtos = new ListObject(Cn, "TableroPtos", OBJTablero);
+  OBJTableroPtos.setSegmentsSize(0);
+  OBJTableroPtos.setHidden(1);
+  OBJTableroPtos.setMagnetSlotsExclusive(true);
+  canvas.addObject(OBJTableroPtos);
+
+  // -------------------------
+  // Control + Script -> fichasT
+  // -------------------------
+  var OBJControl = new ExpressionObject(Cn, "Control", "", "", "", "0", x, y + 20);
+  OBJControl.setHidden(true);
+  canvas.addObject(OBJControl);
+
+  var OBJScript = new ExpressionObject(
+    Cn,
+    "Script",
+    "",
+    "",
+    "",
+    `
+    if (Control) {
+      var L = Find("TableroPtos");
+      var occ = L.getExclusiveSlotOccupants(); // nombres de fichas en slots
+
+      // Mapa ficha -> texto usando el mismo orden de FichasCoords
+      var fichas = [];
+      var puntos = me.C.getObjectsFromType("point");
+      for (var i = 0; i < puntos.length; i++) {
+        var nm = puntos[i].getName();
+        if (nm && nm.indexOf("ficha") === 0 && nm.length > 5 && nm !== "ficha0") fichas.push(nm);
+      }
+      fichas.sort();
+
+      var textos = Textos;
+      if (!textos || typeof textos.length !== "number") textos = [];
+
+      var map = {};
+      var n = fichas.length;
+      if (textos.length < n) n = textos.length;
+      for (var j = 0; j < n; j++) map[fichas[j]] = "" + textos[j];
+
+      // Convertir ocupantes -> textos
+      var out = [];
+      for (var k = 0; k < occ.length; k++) {
+        var name = occ[k];
+        out.push(map.hasOwnProperty(name) ? map[name] : "");
+      }
+
+      GLOBAL_SET("fichasT", out);
+    };
+
+    0
+    `,
+    x,
+    y + 40
+  );
+  OBJScript.setHidden(true);
+  canvas.addObject(OBJScript);
+
+  // -------------------------
+  // Reservar nombres ficha / ficha0
+  // -------------------------
+  var PtoOculto1 = new PointObject(Cn, "ficha", 5000, 500);
+  var PtoOculto2 = new PointObject(Cn, "ficha0", 5000, 500);
+  PtoOculto1.setHidden(true);
+  PtoOculto2.setHidden(true);
+  canvas.addObject(PtoOculto1);
+  canvas.addObject(PtoOculto2);
+
+  // -------------------------
+  // Fichas iniciales
+  // -------------------------
+  var OBJficha1 = new PointObject(Cn, "ficha1", x, y - 100);
+  var OBJficha2 = new PointObject(Cn, "ficha2", x, y - 200);
+  var OBJficha3 = new PointObject(Cn, "ficha3", x, y - 300);
+  var OBJficha4 = new PointObject(Cn, "ficha4", x, y - 400);
+
+  var fichasInit = [OBJficha1, OBJficha2, OBJficha3, OBJficha4];
+  for (var i = 0; i < fichasInit.length; i++) {
+    fichasInit[i].setShowName(0);
+    fichasInit[i].setSize(18);
+    fichasInit[i].setLayer(-1);
+    fichasInit[i].setColor("#f6f6f9");
+    fichasInit[i].addMagnet(OBJTableroPtos, 100);
+    canvas.addObject(fichasInit[i]);
+  }
+
+  // -------------------------
+  // Expresión: coords2D de fichas (ordenadas)
+  // -------------------------
+  var OBJFichasCoords = new ExpressionObject(
+    Cn,
+    "FichasCoords",
+    "",
+    "",
+    "",
+    "var fichas=[];\n" +
+      "var fichasCoords=[];\n" +
+      "\n" +
+      "puntos=me.C.getObjectsFromType(\"point\");\n" +
+      "puntos.sort();\n" +
+      "for (i=0; i<puntos.length; i++){\n" +
+      " if(puntos[i].getName().includes(\"ficha\") && puntos[i].getName().length>5 && puntos[i].getName()!=\"ficha0\"){fichas.push(puntos[i].getName())}\n" +
+      "};\n" +
+      "fichas.sort();\n" +
+      "\n" +
+      "for (i=0; i<fichas.length; i++){\n" +
+      " fichasCoords.push(Find(fichas[i]).coords2D())\n" +
+      "};\n" +
+      "\n" +
+      "fichasCoords",
+    x,
+    y - 40
+  );
+  OBJFichasCoords.setHidden(true);
+  canvas.addObject(OBJFichasCoords);
+
+  // -------------------------
+  // Punto rotulador + BLK
+  // -------------------------
+  var rotulaFichas = new PointObject(Cn, "rotulaFichas", x + 2, y + 2);
+  rotulaFichas.setShowName(0);
+  rotulaFichas.setSize(10);
+  rotulaFichas.setHidden(1);
+  
+  canvas.addObject(rotulaFichas);
+
+  var xmlRotulaFichas = `
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="turtle_pen" id="${genId()}" x="25" y="-8">
+    <field name="PEN">penUp</field>
+    <next>
+      <block type="controls_for" id="${genId()}">
+        <field name="VAR">i</field>
+        <value name="FROM"><block type="math_number" id="${genId()}"><field name="NUM">0</field></block></value>
+        <value name="TO">
+          <block type="math_arithmetic" id="${genId()}">
+            <field name="OP">MINUS</field>
+            <value name="A">
+              <block type="lists_length" id="${genId()}">
+                <value name="VALUE">
+                  <block type="dgpad_get_object_short" id="${genId()}">
+                    <field name="NAME">FichasCoords</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <value name="B"><block type="math_number" id="${genId()}"><field name="NUM">1</field></block></value>
+          </block>
+        </value>
+        <value name="BY"><block type="math_number" id="${genId()}"><field name="NUM">1</field></block></value>
+        <statement name="DO">
+          <block type="turtle_join_pt" id="${genId()}">
+            <value name="VALUE">
+              <shadow type="dgpad_get_point_short_turtle" id="${genId()}"><field name="NAME">ficha1</field></shadow>
+              <block type="math_arithmetic" id="${genId()}">
+                <field name="OP">ADD</field>
+                <value name="A">
+                  <block type="dgpad_get_list" id="${genId()}">
+                    <value name="NAME">
+                      <block type="dgpad_get_object_short" id="${genId()}"><field name="NAME">FichasCoords</field></block>
+                    </value>
+                    <value name="INDEX"><block type="variables_get" id="${genId()}"><field name="VAR">i</field></block></value>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="dgpad_pt2d" id="${genId()}">
+                    <value name="a0"><block type="math_number" id="${genId()}"><field name="NUM">0</field></block></value>
+                    <value name="a1"><block type="math_number" id="${genId()}"><field name="NUM">-0.2</field></block></value>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="turtle_reset_angles" id="${genId()}">
+                <next>
+                  <block type="turtle_print" id="${genId()}">
+                    <value name="TEXT">
+                      <shadow type="text" id="${genId()}"><field name="TEXT">...</field></shadow>
+                      <block type="dgpad_get_list" id="${genId()}">
+                        <value name="NAME">
+                          <block type="dgpad_get_object_short" id="${genId()}"><field name="NAME">Textos</field></block>
+                        </value>
+                        <value name="INDEX"><block type="variables_get" id="${genId()}"><field name="VAR">i</field></block></value>
+                      </block>
+                    </value>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </next>
+  </block>
+</xml>`;
+
+  var syncRotula ="TURTLE_UP(true);\nfor (var blockly_var_i = 0 ; blockly_var_i <= Math.minus((FichasCoords).length,1) ; blockly_var_i = blockly_var_i + 1){\n  TURTLE_JOIN_PT((Math.plus(((FichasCoords)[blockly_var_i]),([0,-0.2]))));\n  TURTLE_RESET();\n  TURTLE_PRINT(((Textos)[blockly_var_i]));\n};"
+  ;
+
+  Cn.getInterpreter().BLK(rotulaFichas.getName(), {
+    onlogo: { xml: xmlRotulaFichas, sync: syncRotula, parents: ["FichasCoords", "Textos"] },
+    current: "onlogo",
+  });
+
+  Cn.getInterpreter().Interpret(
+    'var t=Find("blk_turtle_list_' + rotulaFichas.getName() + '");' +
+    'if(t&&t.compute)t.compute();'
+  );
+  // -------------------------
+  // Dibujo fichas (solo cuadrado) + ondrag/onmouseup recompute rotulos
+  // -------------------------
+  function turtleXMLForFicha(nombrePunto, lado, offset, fill) {
+    var ids = [];
+    for (var i = 0; i < 17; i++) ids.push(genId());
+    return `
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="turtle_pen" id="${ids[0]}" x="9" y="3">
+    <field name="PEN">penUp</field>
+    <next>
+      <block type="turtle_join_pt" id="${ids[1]}">
+        <value name="VALUE">
+          <shadow type="dgpad_get_point_short_turtle" id="${ids[2]}"><field name="NAME">${nombrePunto}</field></shadow>
+          <block type="math_arithmetic" id="${ids[3]}">
+            <field name="OP">ADD</field>
+            <value name="A"><block type="dgpad_get_object_short" id="${ids[4]}"><field name="NAME">${nombrePunto}</field></block></value>
+            <value name="B">
+              <block type="dgpad_pt2d" id="${ids[5]}">
+                <value name="a0"><block type="math_number" id="${ids[6]}"><field name="NUM">${offset}</field></block></value>
+                <value name="a1"><block type="math_number" id="${ids[7]}"><field name="NUM">${offset}</field></block></value>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="turtle_reset_angles" id="${ids[8]}">
+            <next>
+              <block type="turtle_pen" id="${ids[9]}">
+                <field name="PEN">penDown</field>
+                <next>
+                  <block type="controls_repeat_ext" id="${ids[10]}">
+                    <value name="TIMES"><block type="math_number" id="${ids[11]}"><field name="NUM">4</field></block></value>
+                    <statement name="DO">
+                      <block type="turtle_turn" id="${ids[12]}">
+                        <field name="DIR">turnRight</field>
+                        <value name="VALUE"><shadow type="turtle_angle_input" id="${ids[13]}"><field name="ANGLE">90</field></shadow></value>
+                        <next>
+                          <block type="turtle_move" id="${ids[14]}">
+                            <field name="DIR">moveForward</field>
+                            <field name="UNITS">un</field>
+                            <value name="VALUE"><shadow type="math_number" id="${ids[15]}"><field name="NUM">${lado}</field></shadow></value>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="turtle_fill" id="${ids[16]}">
+                        <value name="OP"><shadow type="math_number" id="${genId()}"><field name="NUM">${fill}</field></shadow></value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>`;
+  }
+
+  function turtleSYNCForFicha(nombrePunto, lado, offset, fill) {
+    return (
+      "TURTLE_UP(true);" +
+      "TURTLE_JOIN_PT((Math.plus((" + nombrePunto + "),([" + offset + "," + offset + "]))));" +
+      "TURTLE_RESET();" +
+      "TURTLE_UP(false);" +
+      "for (var k=1;k<=4;k++){TURTLE_TURN(-90);TURTLE_MV(" + lado + ",false);};" +
+      "TURTLE_FILL(" + fill + ");" +
+      "TURTLE_UP(true);"
+    );
+  }
+
+  function fichaOnDragXml(nombrePunto) {
+    var a = genId(), b = genId()
+    return `
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="dgpad_compute" id="${a}" x="18" y="18">
+    <field name="OBJECT">FichasCoords</field>
+    <next>
+      <block type="dgpad_compute" id="${b}">
+        <field name="OBJECT">blk_turtle_list_rotulaFichas</field>
+      </block>
+    </next>
+  </block>
+  
+</xml>`;
+  }
+
+  function fichaOnDragSync() {
+    return (
+      "FichasCoords.compute();" +
+      "FichasCoords.compute();" +
+    "var t=Find('blk_turtle_list_rotulaFichas'); if(t&&t.compute) t.compute();" +
+    "canvas.paint();"
+
+      
+    );
+  }
+
+  function fichaOnMouseUpXml() {
+    var a = genId(), b = genId(), c = genId(), d = genId(), e = genId(), f = genId();
+    return `
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="dgpad_set_object" id="${a}" x="33" y="261">
+    <field name="TYPE">expression</field>
+    <field name="NAME">Control</field>
+    <value name="obj_val"><block type="math_number" id="${b}"><field name="NUM">1</field></block></value>
+    <next>
+      <block type="dgpad_set_object" id="${c}">
+        <field name="TYPE">expression</field>
+        <field name="NAME">Control</field>
+        <value name="obj_val"><block type="math_number" id="${d}"><field name="NUM">0</field></block></value>
+        <next>
+          <block type="dgpad_compute" id="${e}">
+            <field name="OBJECT">FichasCoords</field>
+            <next>
+              <block type="dgpad_compute" id="${f}">
+                <field name="OBJECT">blk_turtle_list_rotulaFichas</field>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>`;
+  }
+
+  function fichaOnMouseUpSync() {
+    return (
+      "var blockly_var_temp_var = 1;\n" +
+      "SET_EXP(\"Control\",blockly_var_temp_var);\n" +
+      "var blockly_var_temp_var2 = 0;\n" +
+      "SET_EXP(\"Control\",blockly_var_temp_var2);\n" +
+      "FichasCoords.compute();\n" +
+      
+      "canvas.paint();"
+    );
+  }
+
+  function setFichaBLK(punto) {
+    var name = punto.getName();
+    Cn.getInterpreter().BLK(name, {
+      onlogo: {
+        xml: turtleXMLForFicha(name, 0.8, 0.4, 80),
+        sync: turtleSYNCForFicha(name, 0.8, 0.4, 80),
+      },
+      ondrag: {
+        xml: fichaOnDragXml(name),
+        sync: fichaOnDragSync(),
+        childs: ["blk_turtle_list_rotulaFichas","FichasCoords"]
+      },
+      onmouseup: {
+        xml: fichaOnMouseUpXml(),
+        sync: fichaOnMouseUpSync(),
+        childs: ["Control"],
+      },
+      current: "onlogo",
+    });
+    
+  }
+  
+
+  
+
+  setFichaBLK(OBJficha1);
+  setFichaBLK(OBJficha2);
+  setFichaBLK(OBJficha3);
+  setFichaBLK(OBJficha4);
+
+  
+  
+  
+
+  
+
+  // -------------------------
+  // Punto que dibuja el tablero
+  // -------------------------
+  var dibujaTablero = new PointObject(Cn, "dibujaTablero", -10, -6);
+  canvas.addObject(dibujaTablero);
+
+  var xmlTablero = `
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="turtle_pen" id="${genId()}" x="25" y="-8">
+    <field name="PEN">penUp</field>
+    <next>
+      <block type="controls_for" id="${genId()}">
+        <field name="VAR">i</field>
+        <value name="FROM"><block type="math_number" id="${genId()}"><field name="NUM">0</field></block></value>
+        <value name="TO">
+          <block type="math_arithmetic" id="${genId()}">
+            <field name="OP">MINUS</field>
+            <value name="A">
+              <block type="lists_length" id="${genId()}">
+                <value name="VALUE">
+                  <block type="dgpad_get_object_short" id="${genId()}"><field name="NAME">Tablero</field></block>
+                </value>
+              </block>
+            </value>
+            <value name="B"><block type="math_number" id="${genId()}"><field name="NUM">1</field></block></value>
+          </block>
+        </value>
+        <value name="BY"><block type="math_number" id="${genId()}"><field name="NUM">1</field></block></value>
+        <statement name="DO">
+          <block type="turtle_join_pt" id="${genId()}">
+            <value name="VALUE">
+              <shadow type="dgpad_get_point_short_turtle" id="${genId()}"><field name="NAME">ficha1</field></shadow>
+              <block type="math_arithmetic" id="${genId()}">
+                <field name="OP">ADD</field>
+                <value name="A">
+                  <block type="dgpad_get_list" id="${genId()}">
+                    <value name="NAME">
+                      <block type="dgpad_get_object_short" id="${genId()}"><field name="NAME">Tablero</field></block>
+                    </value>
+                    <value name="INDEX"><block type="variables_get" id="${genId()}"><field name="VAR">i</field></block></value>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="dgpad_pt2d" id="${genId()}">
+                    <value name="a0"><block type="math_number" id="${genId()}"><field name="NUM">0.5</field></block></value>
+                    <value name="a1"><block type="math_number" id="${genId()}"><field name="NUM">0.5</field></block></value>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="turtle_reset_angles" id="${genId()}">
+                <next>
+                  <block type="turtle_pen" id="${genId()}">
+                    <field name="PEN">penDown</field>
+                    <next>
+                      <block type="controls_repeat_ext" id="${genId()}">
+                        <value name="TIMES"><block type="math_number" id="${genId()}"><field name="NUM">4</field></block></value>
+                        <statement name="DO">
+                          <block type="turtle_turn" id="${genId()}">
+                            <field name="DIR">turnRight</field>
+                            <value name="VALUE"><shadow type="turtle_angle_input" id="${genId()}"><field name="ANGLE">90</field></shadow></value>
+                            <next>
+                              <block type="turtle_move" id="${genId()}">
+                                <field name="DIR">moveForward</field>
+                                <field name="UNITS">un</field>
+                                <value name="VALUE"><shadow type="math_number" id="${genId()}"><field name="NUM">1</field></shadow></value>
+                              </block>
+                            </next>
+                          </block>
+                        </statement>
+                        <next><block type="turtle_pen" id="${genId()}"><field name="PEN">penUp</field></block></next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </next>
+  </block>
+</xml>`;
+
+  var syncTablero =
+    "TURTLE_UP(true);" +
+    "for (var i=0;i<=Math.minus((Tablero).length,1);i=i+1){" +
+      "TURTLE_JOIN_PT((Math.plus(((Tablero)[i]),([0.5,0.5]))));" +
+      "TURTLE_RESET();" +
+      "TURTLE_UP(false);" +
+      "for (var c=1;c<=4;c++){TURTLE_TURN(-(90));TURTLE_MV(1,false);};" +
+      "TURTLE_UP(true);" +
+    "};";
+
+  Cn.getInterpreter().BLK(dibujaTablero.getName(), {
+    onlogo: { xml: xmlTablero, sync: syncTablero, parents: ["Tablero"] },
+    current: "onlogo",
+  });
+
+  // -------------------------
+  // Botón crear ficha + DGScript (crea ficha + agrega texto + recomputa rotulos)
+  // -------------------------
+  var OBJcontrolFichas = new ExpressionObject(Cn, "controlFichas", "", "", "", "0", x, y + 80);
+  OBJcontrolFichas.setHidden(true);
+  canvas.addObject(OBJcontrolFichas);
+
+  var OBJcreaFicha = new BlocklyButtonObject(Cn, "creaFicha", "creaNuevaFicha", x - 40, y);
+  canvas.addObject(OBJcreaFicha);
+  Cn.getInterpreter().BLK(OBJcreaFicha.getName(), {
+    onprogram: {
+      xml: "<xml xmlns=\"http://www.w3.org/1999/xhtml\"><block type=\"dgpad_set_object\" id=\"a\" x=\"38\" y=\"159\"><field name=\"TYPE\">expression</field><field name=\"NAME\">controlFichas</field><value name=\"obj_val\"><block type=\"math_number\" id=\"b\"><field name=\"NUM\">1</field></block></value><next><block type=\"dgpad_set_object\" id=\"c\"><field name=\"TYPE\">expression</field><field name=\"NAME\">controlFichas</field><value name=\"obj_val\"><block type=\"math_number\" id=\"d\"><field name=\"NUM\">0</field></block></value></block></next></block></xml>",
+      sync:
+        'var blockly_var_temp_var = 1 ;\n' +
+        'SET_EXP("controlFichas",blockly_var_temp_var);\n' +
+        'var blockly_var_temp_var2 = 0 ;\n' +
+        'SET_EXP("controlFichas",blockly_var_temp_var2);\n',
+        
+      childs: ["controlFichas"],
+      
+    },
+    current: "onprogram",
+  });
+  
+
+  var OBJscriptFichas = new ExpressionObject(Cn, "scriptFichas", "", "", "", "0", x, y - 60);
+  OBJscriptFichas.setHidden(true);
+  canvas.addObject(OBJscriptFichas);
+
+
+var script = `
+if (controlFichas) {
+  var nm = Point("ficha", Math.random()*3-4, Math.random()*3-4);
+  var p = Find(nm);
+  p.setShowName(0);
+  p.setSize(18);
+  p.setLayer(-1);
+  p.setColor("#f6f6f9");
+  p.addMagnet(Find("TableroPtos"), 100);
+
+  
+
+
+// -------------------------
+// Actualizar Textos (robusto: limpia \"...\" y fuerza operadores como string)
+// -------------------------
+var txt = Find("Textos");
+var src = (txt && txt.getE1 && txt.getE1().getSource) ? txt.getE1().getSource() : "[]";
+
+function parseListLiteral(s) {
+  if (typeof s !== "string") return [];
+  s = s.trim();
+
+  // si viene como Textos=[...]
+  var eq = s.indexOf("=");
+  if (eq !== -1) s = s.slice(eq + 1).trim();
+
+  if (!(s[0] === "[" && s[s.length - 1] === "]")) return [];
+
+  var body = s.slice(1, -1);
+  var out = [];
+  var token = "";
+  var inQ = false;
+  var q = "";
+
+  function pushTok(t) {
+    t = (t || "").trim();
+    if (!t) return;
+
+    var bs = String.fromCharCode(92); // '\'
+
+    // ✅ des-escapar \"  ->  "
+    t = t.split(bs + '"').join('"');
+
+    // ✅ si quedó quoted, es string
+    var a0 = t[0], a1 = t[t.length - 1];
+    if ((a0 === "'" && a1 === "'") || (a0 === '"' && a1 === '"')) {
+      out.push(t.slice(1, -1));
+      return;
+    }
+
+    if (t === "null") { out.push(null); return; }
+    if (t === "NaN") { out.push(NaN); return; }
+
+    // ✅ operadores sueltos => string
+    if (t === "+" || t === "-" || t === "*" || t === "/") { out.push(t); return; }
+
+    var n = Number(t);
+    if (!Number.isNaN(n)) { out.push(n); return; }
+
+    out.push(t);
+  }
+
+  for (var i = 0; i < body.length; i++) {
+    var ch = body[i];
+
+    if (inQ) {
+      token += ch;
+      if (ch === q) inQ = false;
+      continue;
+    }
+
+    if (ch === "'" || ch === '"') {
+      inQ = true;
+      q = ch;
+      token += ch;
+      continue;
+    }
+
+    if (ch === "," || ch === ";") {
+      pushTok(token);
+      token = "";
+      continue;
+    }
+
+    token += ch;
+  }
+
+  pushTok(token);
+  return out;
+}
+
+var arr = parseListLiteral(src);
+
+// ✅ añade nuevo texto (string)
+arr.push(String(arr.length + 1));
+
+// ✅ guardar SIEMPRE con comillas simples (sin escapes; usuario sin caracteres especiales)
+function toListLiteral(a) {
+  var out = [];
+  for (var i = 0; i < a.length; i++) {
+    var x = a[i];
+    if (typeof x === "string") out.push("'" + x + "'");
+    else if (typeof x === "number") out.push(isNaN(x) ? "NaN" : String(x));
+    else if (x == null) out.push("null");
+    else out.push("'" + String(x) + "'");
+  }
+  return "[" + out.join(",") + "]";
+}
+
+if (txt && txt.setE1) {
+  txt.setE1(toListLiteral(arr)); // -> ['A','(',')','+','-','6','7','8']
+  if (txt.compute) txt.compute();
+}
+    
+
+  // aplica BLK base (cuadrado) + ondrag/onmouseup con recompute de rotulos
+  var id = function(){return Math.random().toString(36).substr(2,4)+Date.now().toString(36);};
+
+  var onlogoXml =
+    '<xml xmlns="http://www.w3.org/1999/xhtml">' +
+    '<block type="turtle_pen" id="'+id()+'" x="9" y="3"><field name="PEN">penUp</field><next>' +
+      '<block type="turtle_join_pt" id="'+id()+'"><value name="VALUE">' +
+        '<shadow type="dgpad_get_point_short_turtle" id="'+id()+'"><field name="NAME">'+nm+'</field></shadow>' +
+        '<block type="math_arithmetic" id="'+id()+'"><field name="OP">ADD</field>' +
+          '<value name="A"><block type="dgpad_get_object_short" id="'+id()+'"><field name="NAME">'+nm+'</field></block></value>' +
+          '<value name="B"><block type="dgpad_pt2d" id="'+id()+'">' +
+            '<value name="a0"><block type="math_number" id="'+id()+'"><field name="NUM">0.4</field></block></value>' +
+            '<value name="a1"><block type="math_number" id="'+id()+'"><field name="NUM">0.4</field></block></value>' +
+          '</block></value>' +
+        '</block>' +
+      '</value><next>' +
+        '<block type="turtle_reset_angles" id="'+id()+'"><next>' +
+          '<block type="turtle_pen" id="'+id()+'"><field name="PEN">penDown</field><next>' +
+            '<block type="controls_repeat_ext" id="'+id()+'">' +
+              '<value name="TIMES"><block type="math_number" id="'+id()+'"><field name="NUM">4</field></block></value>' +
+              '<statement name="DO"><block type="turtle_turn" id="'+id()+'"><field name="DIR">turnRight</field>' +
+                '<value name="VALUE"><shadow type="turtle_angle_input" id="'+id()+'"><field name="ANGLE">90</field></shadow></value><next>' +
+                  '<block type="turtle_move" id="'+id()+'"><field name="DIR">moveForward</field><field name="UNITS">un</field>' +
+                    '<value name="VALUE"><shadow type="math_number" id="'+id()+'"><field name="NUM">0.8</field></shadow></value>' +
+                  '</block>' +
+                '</next></block></statement>' +
+              '<next><block type="turtle_fill" id="'+id()+'"><value name="OP"><shadow type="math_number" id="'+id()+'"><field name="NUM">80</field></shadow></value></block></next>' +
+            '</block>' +
+          '</next></block>' +
+        '</next></block>' +
+      '</next></block>' +
+    '</next></block></xml>';
+
+  var onlogoSync =
+    'TURTLE_UP(true);' +
+    'TURTLE_JOIN_PT((Math.plus((' + nm + '),([0.4,0.4]))));' +
+    'TURTLE_RESET();' +
+    'TURTLE_UP(false);' +
+    'for (var k=1;k<=4;k++){TURTLE_TURN(-90);TURTLE_MV(0.8,false);};' +
+    'TURTLE_FILL(80);' +
+    'TURTLE_UP(true);';
+
+  var ondragXml =
+    '<xml xmlns="http://www.w3.org/1999/xhtml">' +
+      '<block type="dgpad_compute" id="'+id()+'" x="18" y="18">' +
+        '<field name="OBJECT">FichasCoords</field>' +
+        '<next><block type="dgpad_compute" id="'+id()+'"><field name="OBJECT">blk_turtle_list_rotulaFichas</field></block></next>' +
+      '</block>' +
+    '</xml>';
+
+  var ondragSync =
+    "FichasCoords.compute();blk_turtle_list_rotulaFichas.compute();";
+
+  var onmouseupXml =
+    '<xml xmlns="http://www.w3.org/1999/xhtml">' +
+      '<block type="dgpad_set_object" id="'+id()+'" x="33" y="261">' +
+        '<field name="TYPE">expression</field><field name="NAME">Control</field>' +
+        '<value name="obj_val"><block type="math_number" id="'+id()+'"><field name="NUM">1</field></block></value>' +
+        '<next><block type="dgpad_set_object" id="'+id()+'">' +
+          '<field name="TYPE">expression</field><field name="NAME">Control</field>' +
+          '<value name="obj_val"><block type="math_number" id="'+id()+'"><field name="NUM">0</field></block></value>' +
+          '<next><block type="dgpad_compute" id="'+id()+'"><field name="OBJECT">FichasCoords</field>' +
+            '<next><block type="dgpad_compute" id="'+id()+'"><field name="OBJECT">blk_turtle_list_rotulaFichas</field></block></next>' +
+          '</block></next>' +
+        '</block></next>' +
+      '</block>' +
+    '</xml>';
+
+  var onmouseupSync =
+    "var v=1;SET_EXP('Control',v);var w=0;SET_EXP('Control',w);" +
+    "FichasCoords.compute();blk_turtle_list_rotulaFichas.compute();";
+
+  me.BLK(nm, {
+    onlogo: { xml: onlogoXml, sync: onlogoSync },
+    ondrag: { xml: ondragXml, sync: ondragSync },
+    onmouseup: { xml: onmouseupXml, sync: onmouseupSync, childs: ["Control"] },
+    current: "onlogo"
+  });
+  me.BLK(nm, { current: "ondrag" });
+me.BLK(nm, { current: "onlogo" });
+  var pp = Find(nm);
+  if (pp && pp.compute) pp.compute();
+  var te = Find("blk_turtle_exp__" + nm);
+if (te) {
+  if (te.compute) te.compute();
+  if (te.run) te.run(); // algunas builds lo necesitan
+}
+  var tl = Find("blk_turtle_list_" + nm);
+if (tl) {
+  if (tl.compute) tl.compute();
+  if (tl.run) tl.run();
+}
+  // refresca rótulos también (porque Textos/FichasCoords cambian)
+var fc = Find("FichasCoords");
+if (fc && fc.compute) fc.compute();
+
+var tr = Find("blk_turtle_list_rotulaFichas");
+if (tr) {
+  if (tr.compute) tr.compute();
+  if (tr.run) tr.run();
+}
+
+// y repinta
+canvas.paint();
+
+  // fuerza el rotulador ya que Textos cambió
+  FichasCoords.compute();
+  
+};
+0
+
+`;
+  OBJscriptFichas.setE1(script);
+
+  
+  Cn.computeAll();
+  // canvas.paint();
+  forceComputeRotulosSync();
+  $U.alert("TABLERO Y FICHAS\nUsted acaba de seleccionar la opci\u00f3n\n'crear Tablero y Fichas'. Esta opci\u00f3n\ncrea un tablero con cuatro casillas \nque est\u00e1n en la expresi\u00f3n 'Tablero', y\ncuatro puntos con el nombre 'ficha'.\nLas fichas est\u00e1n programadas para pegarse\na las casillas del tablero, de manera que\ndos fichas no pueden ocupar la misma casilla.\n\nPuede modificar, a\u00f1adir o eliminar casillas\neditando la expresi\u00f3n 'Tablero'.\nTambi\u00e9n puede a\u00f1adir m\u00e1s fichas con el botón creaFichaNueva\n\nTambién puede modificar la expresión 'Textos' para asignarle a cada ficha un n\u00famero o un s\u00edmbolo.\nEn la variable global 'FichasT' queda guardada una lista \ncon las posiciones de las casillas y el texto de la ficha\nque est\u00e1 en esa posici\u00f3n.")
+  
+};
+
+var createContenedorQ = function () {
+  
+
+  
+
+  var OP1 = new PointObject(Cn, "P", 100,100);
+  canvas.addObject(OP1);
+  var nP1 = OP1.getName();
+
+  
+
+  var OP2 = new PointObject(Cn, "P", 200,100);
+  canvas.addObject(OP2);
+  var nP2 = OP2.getName();
+  OP2.setExp("[windowcx()+windoww()/2,y(" + nP1 + ")]");
+  OP2.setHidden(2);
+
+  var OP3 = new PointObject(Cn, "P", 200,100);
+  canvas.addObject(OP3);
+  var nP3 = OP3.getName();
+  OP3.setExp("[x(" + nP1 + "),windowcy()-windowh()/2]");
+  OP3.setHidden(2);
+
+  var OP4 = new PointObject(Cn, "P", 200,100);
+  canvas.addObject(OP4);
+  var nP4 = OP4.getName();
+  OP4.setExp("[windowcx()+windoww()/2,windowcy()-windowh()/2]");
+  OP4.setHidden(2);
+  
+
+  var OMax = new ExpressionObject(Cn, "maximo", "", "", "", "3", x, y);
+  canvas.addObject(OMax);
+  var nMax = OMax.getName();
+  OMax.attachTo(OP1);
+
+  var OPol1 = new AreaObject(Cn, "pol", [OP1, OP2, OP4, OP3, OP1]);
+  canvas.addObject(OPol1);
+  var nPol1 = OPol1.getName();
+  OPol1.setHidden(2);
+
+  var OP5 = new PointObject(Cn, "P", 300, 250);
+  canvas.addObject(OP5);
+  var nP5 = OP5.getName();
+
+  OP5.setParent(OPol1);
+  OP5.setAlpha([-0.13465465512433, 0.3440352670069771]);
+  OP5.compute();
+
+  var OP6 = new PointObject(Cn, "P", 200,100);
+  canvas.addObject(OP6);
+  var nP6 = OP6.getName();
+  OP6.setExp("[x(" + nP1 + "),y(" + nP5 + ")]");
+  OP6.setHidden(2);
+
+  var OP7 = new PointObject(Cn, "P", 200,100);
+  canvas.addObject(OP7);
+  var nP7 = OP7.getName();
+  OP7.setExp("[x(" + nP5 + "),y(" + nP1 + ")]");
+  OP7.setHidden(2);
+
+  var OPol2 = new AreaObject(Cn, "container", [OP1, OP6, OP5, OP7, OP1]);
+  canvas.addObject(OPol2);
+  var nPol2 = OPol2.getName();
+  OPol2.setOpacity(0.3);
+
+
+
+  
+  Cn.computeAll();
+  canvas.paint();
+  
+
+  
+
+  Cn.computeAll();
+  canvas.paint();
+};
 
   var getName = function(_t) {
     var t = _t.match(/.{1,1}/g);
@@ -77,20 +947,20 @@
   }
 
   var createIntCursor = function() {
-    var OBJ = newExp("");
-    if (!canvas.namesManager.isVisible()) OBJ.setName(getName("nmkabcuvwrst"));
-    OBJ.setMin("0");
-    OBJ.setMax("10");
-    OBJ.setIncrement(1);
+    var OBJTablero = newExp("");
+    if (!canvas.namesManager.isVisible()) OBJTablero.setName(getName("nmkabcuvwrst"));
+    OBJTablero.setMin("0");
+    OBJTablero.setMax("10");
+    OBJTablero.setIncrement(1);
     Cn.compute();
     canvas.paint();
   };
 
   var createContCursor = function() {
-    var OBJ = newExp("0");
-    if (!canvas.namesManager.isVisible()) OBJ.setName(getName("nmkabcuvwrst"));
-    OBJ.setMin("-10");
-    OBJ.setMax("10");
+    var OBJTablero = newExp("0");
+    if (!canvas.namesManager.isVisible()) OBJTablero.setName(getName("nmkabcuvwrst"));
+    OBJTablero.setMin("-10");
+    OBJTablero.setMax("10");
     Cn.compute();
     canvas.paint();
   };
@@ -113,12 +983,12 @@
   var createBlocklyButton = function() {
     $U.prompt($L.create_blockly_program_change_message, $L.create_blockly_program_name, "text", function(_old, _new) {
       if (_new === "") _new = _old;
-      var OBJ = new BlocklyButtonObject(Cn, "blk_btn", _new, x, y);
-      OBJ.setOpacity(canvas.prefs.opacity.blockly_button);
-      canvas.addObject(OBJ);
+      var OBJTablero = new BlocklyButtonObject(Cn, "blk_btn", _new, x, y);
+      OBJTablero.setOpacity(canvas.prefs.opacity.blockly_button);
+      canvas.addObject(OBJTablero);
       Cn.compute();
       canvas.paint();
-      canvas.blocklyManager.edit(OBJ);
+      canvas.blocklyManager.edit(OBJTablero);
     }, 450, 165, 430);
   };
 
@@ -165,26 +1035,49 @@ var OpenFile = function (){
 		
 		}
 
+
+
 var SaveFile = async () => {
-	const options = {
-	   types: [
-		 {
-		   description: "archivos dgpad-colombia",
-		   accept: {
-			 "text/plain": [".txt"],
-		   },
-		 },
-	   ],
-	 };
- 
- const handle = await window.showSaveFilePicker(options);
- const writable = await handle.createWritable();
- 
- await writable.write(canvas.getSource());
- await writable.close();
- 
- return handle;
+	const fileContent = canvas.getSource();
+
+	if (window.showSaveFilePicker) {
+		const options = {
+			suggestedName: "archivo-dgpad.txt",
+			types: [
+				{
+					description: "archivos dgpad-colombia",
+					accept: { "text/plain": [".txt"] },
+				},
+			],
+		};
+
+		const handle = await window.showSaveFilePicker(options);
+		const writable = await handle.createWritable();
+		await writable.write(fileContent);
+		await writable.close();
+		return handle;
+	} else {
+		// Fallback: pedir nombre del archivo
+		let fileName = prompt("Nombre del archivo:", "archivo-dgpad.txt");
+		if (!fileName) return null; // cancelado
+
+		if (!fileName.endsWith(".txt")) fileName += ".txt";
+
+		const blob = new Blob([fileContent], { type: "text/plain" });
+		const url = URL.createObjectURL(blob);
+
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = fileName;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+
+		return null;
+	}
 };
+
 
 	
   var tab = [];
@@ -200,6 +1093,8 @@ var SaveFile = async () => {
     tab.push([$L.create_exp, createExp]);
     tab.push([$L.create_exp_pts, createExpPts]);
     tab.push([$L.create_exp_segs, createExpSegs]);
+    tab.push([$L.create_tableroPtos, createTableroPuntos]);
+    tab.push([$L.create_Contenedor, createContenedorQ]);
     tab.push([$L.create_cursor_int, createIntCursor]);
     tab.push([$L.create_cursor_cont, createContCursor]);
     tab.push([$L.create_widget_edit, createEditWidget]);

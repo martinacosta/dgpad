@@ -9,6 +9,8 @@ function PropertiesManager(_canvas) {
     var canvas = _canvas;
 
     var propsPanel = null;
+    // ✅ estado del panel: último objeto editado/mostrado
+    var currentObj = null;
 
 
     // On a cliqué sur l'icône Properties :
@@ -43,6 +45,34 @@ function PropertiesManager(_canvas) {
 
     };
 
+    /**
+         * Rehidrata el panel con los valores actuales tras Undo/Redo.
+         * Úsalo después de restaurar el estado del objeto/construcción.
+         */
+        me.refresh = function(_obj) {
+            
+            if (!propsPanel) return;
 
+            if (_obj) currentObj = _obj;
+
+            // Preferimos el último objeto conocido
+            if (currentObj) {
+                propsPanel.showProperties(currentObj);
+                return;
+            }
+
+            // Fallback: intenta encontrar el objeto en editMode=1
+            var Cn = canvas.getConstruction();
+            var v = Cn.elements();
+            for (var i = 0, len = v.length; i < len; i++) {
+                var o = v[i];
+                if (o && typeof o.getEditMode === "function" && o.getEditMode() === 1) {
+                    me.currentObj = o;
+                    propsPanel.showProperties(o);
+                    return;
+                }
+            }
+        
+    };
 
 };

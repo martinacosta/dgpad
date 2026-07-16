@@ -1,4 +1,5 @@
-function FrameWrapper(_canvas, _l, _t) {
+
+function FrameWrapper(_canvas, _l, _t, frameType) {
   var me = this;
   var canvas = _canvas;
   var _w = 250;
@@ -6,6 +7,7 @@ function FrameWrapper(_canvas, _l, _t) {
   var hidectrlpanel = true;
   var sel = -1;
   var JSZipReady = false;
+  me.frameType = frameType || "default"; // Añadimos un identificador opcional para el tipo de frame
   $U.extend(this, new GUIElement(_canvas.getDocObject(), "div"));
 
   me.show = function() {
@@ -13,8 +15,6 @@ function FrameWrapper(_canvas, _l, _t) {
   };
 
   me.setPosition("absolute");
-
-
   me.setBounds(_l, _t, _w, _h);
 
   var close = function() {
@@ -41,8 +41,7 @@ function FrameWrapper(_canvas, _l, _t) {
   footer.addContent(mensaje);
   me.addContent(footer);
 
-  var xx = 0,
-    yy = 0;
+  var xx = 0, yy = 0;
 
   var dragmove = function(ev) {
     _l += (ev.pageX - xx);
@@ -54,7 +53,6 @@ function FrameWrapper(_canvas, _l, _t) {
   }
 
   var dragdown = function(ev) {
-    //        me.removeContent(editBox);
     xx = ev.pageX;
     yy = ev.pageY;
     window.addEventListener('touchmove', dragmove, false);
@@ -70,9 +68,7 @@ function FrameWrapper(_canvas, _l, _t) {
     window.removeEventListener('mouseup', dragup, false);
   }
 
-  //MEAG esto hace al contenedor arrastable
   header.addDownEvent(dragdown);
-
 
   var wrapper = new GUIElement(me, "div");
   wrapper.setStyles("position:absolute;background-color:rgba(180,200,245,0.8);left:0px;top:25px;right:0px;bottom:0px;overflow:hidden;border-radius:0 0 15px 15px;padding:10px 10px 30px 10px;overflow:auto");
@@ -81,6 +77,7 @@ function FrameWrapper(_canvas, _l, _t) {
 
   me.setText = function(txt) {
     wrapper.getDocObject().innerHTML = txt;
+    attachClickEventsToText();
   };
 
   var growbox = new GUIElement(_canvas, "div");
@@ -93,12 +90,9 @@ function FrameWrapper(_canvas, _l, _t) {
     _h += (ev.pageY - yy);
     me.setStyle("width", _w + "px");
     me.setStyle("height", _h + "px");
-    // container.setStyle("width", (_w - 20) + "px");
-    // container.setStyle("height", (_h - 20) + "px");
     xx = ev.pageX;
     yy = ev.pageY;
-    if (closebox)
-      closebox.setStyle("left", (_w - 15) + "px");
+    if (closebox) closebox.setStyle("left", (_w - 15) + "px");
   }
 
   var sizedown = function(ev) {
@@ -130,6 +124,56 @@ function FrameWrapper(_canvas, _l, _t) {
     $U.alert($L.frame_copypaste);
   }
 
-  wrapper.addDblClickEvent(Select);
+  function attachClickEventsToText() {
+    var listItems = wrapper.getDocObject().querySelectorAll('li');
+    listItems.forEach(function(item) {
+        item.addEventListener('click', function() {
+            var objName = item.id;
+            selectObjectInConstruction(objName);
+        });
+    });
+  }
 
+  function selectObjectInConstruction(objName) {
+    var obj = parent.document.getElementById(objName);
+    if (obj) {
+      if (obj.isHidden){
+        obj.setHidden(0);
+        obj.setIndicated(true);
+        canvas.paint();
+      }else{
+        obj.setIndicated(true);
+        canvas.paint();
+      }
+    }
+  }
+
+  
+  me.highlightItemInText = function(objName) {
+    // console.log("Intentando resaltar:", objName);
+    var listItem = wrapper.getDocObject().querySelector('li#' + objName);
+    if (listItem) {
+        listItem.style.backgroundColor = '#f0f0f0';
+        // console.log("Resaltado:", listItem);
+    } else {
+        // console.log("No se encontró el elemento con ID:", objName);
+    }
+};
+
+
+  
+
+  me.clearHighlight = function(objName) {
+    // console.log("Intentando limpiar resaltado de:", objName);
+    var listItem = wrapper.getDocObject().querySelector('li#' + objName);
+    if (listItem) {
+        listItem.style.backgroundColor = '';
+        // console.log("Resaltado limpiado:", listItem);
+    } else {
+        // console.log("No se encontró el elemento con ID:", objName);
+    }
+};
+
+
+  wrapper.addDblClickEvent(Select);
 }

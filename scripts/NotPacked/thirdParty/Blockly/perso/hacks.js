@@ -323,3 +323,204 @@ Blockly.BlockSvg.prototype.renderDraw_ = function(iconWidth, inputRows) {
   this.svgPath_.setAttribute('stroke-width', "0.6");
 };
 
+// Combo box con autocompletado para Blockly
+// class FieldAutocomplete extends Blockly.FieldTextInput {
+//     constructor(text, getOptionsFn) {
+//         super(text);
+//         this.getOptionsFn = getOptionsFn;
+//         this.menuDiv = null;
+//     }
+
+    
+//     showEditor_() {
+//         super.showEditor_();
+    
+//         const waitForInputAndDropdownDiv = () => {
+//             const input = this.htmlInput_;
+//             if (!input || !Blockly.DropDownDiv || !Blockly.DropDownDiv.showPositionedByField) {
+//                 setTimeout(waitForInputAndDropdownDiv, 30);
+//                 return;
+//             }
+    
+//             console.log("[DEBUG] Input listo. Inicializando DropDown.");
+    
+//             Blockly.DropDownDiv.hideWithoutAnimation();
+//             const dropdownDiv = Blockly.DropDownDiv;
+//             const contentDiv = dropdownDiv.getContentDiv();
+//             contentDiv.innerHTML = '';
+    
+//             this.menuDiv = document.createElement('div');
+//             this.menuDiv.style.maxHeight = '150px';
+//             this.menuDiv.style.overflowY = 'auto';
+//             this.menuDiv.style.padding = '2px';
+//             this.menuDiv.style.borderTop = '1px solid #ccc';
+//             contentDiv.appendChild(this.menuDiv);
+    
+//             input.addEventListener('input', () => {
+//                 console.log("[DEBUG] input triggered:", input.value);
+//                 this.renderOptions(input.value);
+//             });
+    
+//             input.addEventListener('keydown', (e) => {
+//                 if (e.key === 'ArrowDown') {
+//                     const first = this.menuDiv.querySelector('div');
+//                     if (first) first.focus();
+//                 }
+//             });
+    
+//             this.renderOptions(input.value);
+//             dropdownDiv.setColour(this.sourceBlock_.getColour(), this.sourceBlock_.getColour());
+//             dropdownDiv.showPositionedByField(this, this.sourceBlock_);
+//         };
+    
+//         setTimeout(waitForInputAndDropdownDiv, 0);
+//     }
+    
+
+//     renderOptions(filter) {
+//         const options = this.getOptionsFn();
+//         const filtered = options.filter(([label]) => label.toLowerCase().includes(filter.toLowerCase()));
+
+//         this.menuDiv.innerHTML = '';
+
+//         for (const [label, value] of filtered) {
+//             const optionDiv = document.createElement('div');
+//             optionDiv.textContent = label;
+//             optionDiv.setAttribute('tabindex', 0);
+//             optionDiv.style.padding = '4px';
+//             optionDiv.style.cursor = 'pointer';
+//             optionDiv.onmousedown = () => {
+//                 this.setValue(value);
+//                 Blockly.DropDownDiv.hideIfOwner(this);
+//             };
+//             this.menuDiv.appendChild(optionDiv);
+//         }
+
+//         if (filtered.length === 0) {
+//             const noMatch = document.createElement('div');
+//             noMatch.textContent = '(sin coincidencias)';
+//             noMatch.style.padding = '4px';
+//             this.menuDiv.appendChild(noMatch);
+//         }
+//         console.log("Autocomplete filter:", filter);
+// console.log("Opciones:", this.getOptionsFn());
+
+//     }
+// }
+
+// (function ensureBlocklyDropDownDiv() {
+//     if (!document.querySelector('#blocklyDropDownDiv')) {
+//         const div = document.createElement('div');
+//         div.id = 'blocklyDropDownDiv';
+//         div.className = 'blocklyDropDownDiv';
+//         div.style.display = 'none';
+//         document.body.appendChild(div);
+//     }
+
+//     if (!document.getElementById('blocklyDropDownDivStyle')) {
+//         const style = document.createElement('style');
+//         style.id = 'blocklyDropDownDivStyle';
+//         style.innerHTML = `
+//             .blocklyDropDownDiv {
+//                 position: absolute;
+//                 z-index: 1000;
+//                 border-radius: 4px;
+//                 box-shadow: 0 0 5px #ccc;
+//                 background-color: white;
+//                 padding: 6px;
+//                 font-family: sans-serif;
+//                 font-size: 13px;
+//                 max-height: 200px;
+//                 overflow-y: auto;
+//             }
+//         `;
+//         document.head.appendChild(style);
+//     }
+// })();
+// Combo box con autocompletado para Blockly
+class FieldAutocomplete extends Blockly.FieldTextInput {
+    constructor(text, getOptionsFn) {
+        super(text);
+        this.getOptionsFn = getOptionsFn;
+        this.menuDiv = null;
+        this.clickTarget_ = null;
+        this.isDirty_ = true;
+        this.editable_ = true;
+    }
+
+    showEditor_() {
+        super.showEditor_();
+
+        setTimeout(() => {
+            const input = document.querySelector('.blocklyHtmlInput');
+            if (!input || !Blockly.DropDownDiv) return;
+
+            console.log("[DEBUG] Input ready:", input);
+
+            Blockly.DropDownDiv.hideWithoutAnimation();
+            const dropdownDiv = Blockly.DropDownDiv;
+            const contentDiv = dropdownDiv.getContentDiv();
+            contentDiv.innerHTML = '';
+
+            this.menuDiv = document.createElement('div');
+            this.menuDiv.style.maxHeight = '150px';
+            this.menuDiv.style.overflowY = 'auto';
+            this.menuDiv.style.padding = '2px';
+            this.menuDiv.style.borderTop = '1px solid #ccc';
+            contentDiv.appendChild(this.menuDiv);
+
+            input.addEventListener('input', () => {
+                console.log("[DEBUG] input event:", input.value);
+                this.renderOptions(input.value);
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowDown') {
+                    const first = this.menuDiv.querySelector('div');
+                    if (first) first.focus();
+                }
+            });
+
+            this.renderOptions(input.value);
+            dropdownDiv.setColour(this.sourceBlock_.getColour(), this.sourceBlock_.getColour());
+            dropdownDiv.showPositionedByField(this, this.sourceBlock_);
+        }, 1);
+    }
+
+    renderOptions(filter) {
+        console.log("[DEBUG] renderOptions ejecutado con filtro:", filter);
+        const options = this.getOptionsFn();
+        const filtered = options.filter(([label]) => label.toLowerCase().includes(filter.toLowerCase()));
+
+        this.menuDiv.innerHTML = '';
+
+        for (const [label, value] of filtered) {
+            const optionDiv = document.createElement('div');
+            optionDiv.textContent = label;
+            optionDiv.setAttribute('tabindex', 0);
+            optionDiv.style.padding = '4px';
+            optionDiv.style.cursor = 'pointer';
+            optionDiv.onmousedown = () => {
+                this.setValue(value);
+                Blockly.DropDownDiv.hideIfOwner(this);
+            };
+            this.menuDiv.appendChild(optionDiv);
+        }
+
+        if (filtered.length === 0) {
+            const noMatch = document.createElement('div');
+            noMatch.textContent = '(sin coincidencias)';
+            noMatch.style.padding = '4px';
+            this.menuDiv.appendChild(noMatch);
+        }
+    }
+}
+
+// Registrar la clase como campo personalizado global
+window.FieldAutocomplete = FieldAutocomplete;
+
+
+
+
+
+

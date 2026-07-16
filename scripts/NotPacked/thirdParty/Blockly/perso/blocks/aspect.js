@@ -19,6 +19,9 @@ Blockly.Blocks['dgpad_style_fix'] = {
     }
 };
 
+
+
+
 Blockly.Blocks['dgpad_object_style_fix'] = {
   init: function() {
     this.appendDummyInput()
@@ -143,7 +146,25 @@ Blockly.dgpad_style_block = function(_v) {
 }
 
 Blockly.Blocks['dgpad_style_opacity'] = Blockly.dgpad_style_block($L.blockly.turtle.opacity);
-Blockly.Blocks['dgpad_style_visibility'] = Blockly.dgpad_style_block($L.blockly.turtle.hidden);
+// Blockly.Blocks['dgpad_style_visibility'] = Blockly.dgpad_style_block($L.blockly.turtle.hidden);
+Blockly.Blocks['dgpad_style_visibility'] = {
+    init: function () {
+      this.appendDummyInput()
+          
+          .appendField(new Blockly.FieldDropdown([
+            [$L.blockly.turtle.hidden, "1"],
+            [$L.blockly.turtleInput_Display, "0"],
+            [$L.blockly.aspect_superHide, "2"]
+          ]), "VISIBILITY");
+      
+      this.setOutput(true, "style");
+      this.setColour(65);
+      this.setTooltip("Oculta o muestra el objeto");
+      this.setHelpUrl("");
+    }
+  };
+
+
 Blockly.Blocks['dgpad_style_size'] = Blockly.dgpad_style_block($L.blockly.turtle.size);
 Blockly.Blocks['dgpad_style_layer'] = Blockly.dgpad_style_block($L.blockly.turtle.layer);
 Blockly.Blocks['dgpad_style_font'] = Blockly.dgpad_style_block($L.blockly.turtle.font);
@@ -162,8 +183,7 @@ Blockly.Blocks['dgpad_style_arrow'] = {
     this.appendValueInput("h")
         .setCheck(null);
     this.setInputsInline(true);
-    this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
+    
     this.setOutput(true, "style");
     this.setColour(65);
     this.setTooltip('');
@@ -171,123 +191,273 @@ Blockly.Blocks['dgpad_style_arrow'] = {
   }
 };
 
-Blockly.Blocks['dgpad_inputs_deleteValue'] = {
-  init: function() {
-      this.appendDummyInput()
-          .appendField($L.blockly.aspect_deleteValue1)
-          .appendField(new Blockly.FieldDropdown(this.updateDropdownOptions.bind(this)), "NAME");
 
-      this.setInputsInline(true);
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-      this.setOutput(false);
-      this.setColour(47);
-      this.setTooltip('Borra el valor de una casilla disponible');
-      this.setHelpUrl('');
 
-      this.listaInputs = [];
-      this.listaIds = [];
-      this.listaNumerados = [];
-      this.updateDropdownOptions();
+Blockly.Blocks["dgpad_inputs_deleteValue"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField($L.blockly.aspect_deleteValue1)
+      .appendField(new Blockly.FieldDropdown(() => DG.aspect.buildInputOptions()), "ID");
+
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(47);
+    this.setTooltip("Borra el contenido de una casilla de entrada");
+    this.setHelpUrl("");
+
+    this.updateDropdownOptions();
   },
 
-  updateDropdownOptions: function() {
-      if (parent.$U.inputs && Object.keys(parent.$U.inputs).length > 0) {
-          let nombreInput = Object.keys(parent.$U.inputs);
-          this.listaInputs = [];
-          this.listaIds = [];
-          for (let i = 0; i < nombreInput.length; i++) {
-              let nom = nombreInput[i];
-              this.listaInputs.push(nom.split("-")[0]);
-              this.listaIds.push(nom.split("-")[1]);
-          }
-          
-          let listaInputsNumerados = this.listaInputs.map((item, index) => {
-              let count = this.listaInputs.slice(0, index).filter(x => x === item).length;
-              return count > 0 ? `${item}_${count}` : item;
-          });
-                      
-          this.listaNumerados=listaInputsNumerados;
-          return listaInputsNumerados.map(function(inputName) {
-              return [inputName, inputName];
-          });
-      } else {
-          return [[$L.blockly.aspect_deleteValue2, $L.blockly.aspect_deleteValue2]];
+  updateDropdownOptions: function () {
+    const inputs = window.$U?.inputs || {};
+    const ids = Object.keys(inputs);
+
+    if (!ids.length) return [[$L.blockly.aspect_deleteValue2, ""]];
+
+    const parseNew = (id) => {
+      const m = /^casilla(\d+)(P\d+)$/i.exec(String(id));
+      if (!m) return null;
+      return { n: Number(m[1]), point: m[2].toUpperCase() };
+    };
+
+    const items = ids.map((id) => {
+      const info = parseNew(id);
+      if (info) {
+        return { id, label: `casilla ${info.n} ${info.point}`, point: info.point, n: info.n };
       }
+      // fallback legacy/otros ids
+      return { id, label: id, point: "ZZZ", n: Number.POSITIVE_INFINITY };
+    });
+
+    items.sort((a, b) => {
+      if (a.point !== b.point) return a.point.localeCompare(b.point);
+      if (a.n !== b.n) return a.n - b.n;
+      return a.id.localeCompare(b.id);
+    });
+
+    return items.map((x) => [x.label, x.id]); // value = id real
   },
-  getSelectedId: function() {
-    let selectedValue = this.getFieldValue("NAME");
-    let index = this.listaNumerados.indexOf(selectedValue);
-    if (index !== -1) {
-        return this.listaIds[index];
-    } else {
-        return null;
-    }
-}
+
+  getSelectedId: function () {
+    return this.getFieldValue("ID");
+  },
 };
-  
+ 
 
-  
+window.DG = window.DG || {};
+DG.aspect = DG.aspect || {};
 
+DG.aspect.buildInputOptions = function buildInputOptions() {
+  const inputs = window.$U?.inputs || {};
+  const meta = window.$U?.inputMeta || {};
+  const ids = Object.keys(inputs);
 
+  if (!ids.length) return [[$L.blockly.aspect_deleteValue2, ""]];
 
-Blockly.Blocks['dgpad_inputs_showHide'] = {
-  init: function() {
-      this.appendDummyInput()
-          .appendField($L.blockly.aspect_ShowHide)
-          .appendField(new Blockly.FieldDropdown(this.updateDropdownOptions.bind(this)), "NAME");
+  const items = ids.map((id) => {
+    const m = meta[id];
+    const label = (m?.n && m?.pointName) ? `casilla ${m.n} ${m.pointName}` : id;
+    const point = m?.pointName || "ZZZ";
+    const n = Number(m?.n ?? Number.POSITIVE_INFINITY);
+    return { id, label, point, n };
+  });
 
-      this.appendValueInput("VISIBLE")
-          .setCheck(null);
+  items.sort((a, b) => {
+    if (a.point !== b.point) return a.point.localeCompare(b.point);
+    if (a.n !== b.n) return a.n - b.n;
+    return a.id.localeCompare(b.id);
+  });
 
-      this.setInputsInline(true);
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-      this.setOutput(false);
-      this.setColour(47);
-      this.setTooltip('');
-      this.setHelpUrl('');
-      this.listaInputs = [];
-      this.listaIds = [];
-      this.listaNumerados = [];
-      this.updateDropdownOptions();
+  return items.map((x) => [x.label, x.id]);
+};
+
+Blockly.Blocks["dgpad_inputs_showHide"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField(
+        new Blockly.FieldDropdown([
+          [$L.blockly.aspect_Show, "true"],
+          [$L.blockly.aspect_Hide, "false"],
+        ]),
+        "ACTION"
+      )
+      .appendField($L.blockly.aspect_input)
+      .appendField(new Blockly.FieldDropdown(() => DG.aspect.buildInputOptions()), "ID");
+
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(47);
+    this.setTooltip("Muestra u oculta una casilla de entrada");
+    this.setHelpUrl("");
+
+    this.updateDropdownOptions();
   },
-  updateDropdownOptions: function() {
-      if (parent.$U.inputs && Object.keys(parent.$U.inputs).length > 0) {
-          let nombreInput = Object.keys(parent.$U.inputs);
-          this.listaInputs = [];
-          this.listaIds = [];
-          for (let i = 0; i < nombreInput.length; i++) {
-              let nom = nombreInput[i];
-              this.listaInputs.push(nom.split("-")[0]);
-              this.listaIds.push(nom.split("-")[1]);
-          }
 
-          let listaInputsNumerados = this.listaInputs.map((item, index) => {
-              let count = this.listaInputs.slice(0, index).filter(x => x === item).length;
-              return count > 0 ? `${item}_${count}` : item;
-          });
+  updateDropdownOptions: function () {
+    const inputs = window.$U?.inputs || {};
+    const ids = Object.keys(inputs);
 
-          this.listaNumerados = listaInputsNumerados;
-          return listaInputsNumerados.map(function(inputName) {
-              return [inputName, inputName];
-          });
-      } else {
-          return [[$L.blockly.aspect_deleteValue2, $L.blockly.aspect_deleteValue2]];
+    if (!ids.length) return [["(sin casillas)", ""]];
+
+    const parseNew = (id) => {
+      const m = /^casilla(\d+)(P\d+)$/i.exec(String(id));
+      if (!m) return null;
+      return { n: Number(m[1]), point: m[2].toUpperCase() };
+    };
+
+    const items = ids.map((id) => {
+      const info = parseNew(id);
+      if (info) {
+        return { id, label: `casilla ${info.n} ${info.point}`, point: info.point, n: info.n };
       }
+      return { id, label: id, point: "ZZZ", n: Number.POSITIVE_INFINITY };
+    });
+
+    items.sort((a, b) => {
+      if (a.point !== b.point) return a.point.localeCompare(b.point);
+      if (a.n !== b.n) return a.n - b.n;
+      return a.id.localeCompare(b.id);
+    });
+
+    return items.map((x) => [x.label, x.id]);
   },
-  getSelectedId: function() {
-      let selectedValue = this.getFieldValue("NAME");
-      let index = this.listaNumerados.indexOf(selectedValue);
+
+  getSelectedId: function () {
+    return this.getFieldValue("ID");
+  },
+
+  getActionValue: function () {
+    return this.getFieldValue("ACTION");
+  },
+};
+
+Blockly.Blocks["dgpad_speakers_showHide"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField(
+        new Blockly.FieldDropdown([
+          [$L.blockly.aspect_Show, "true"],
+          [$L.blockly.aspect_Hide, "false"],
+        ]),
+        "ACTION"
+      )
       
-      if (index !== -1) {
-          return this.listaIds[index];
-      } else {
-          return null;
-      }
+      .appendField(new Blockly.FieldDropdown(() => DG.buildSpeakerOptions()), "ID");
+
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(47);
+    this.setTooltip("Muestra u oculta un altoparlante");
+    this.setHelpUrl("");
+  },
+
+  updateDropdownOptions: function () {
+    const meta = window.$U?.speakerMeta || {};
+    const ids = Object.keys(meta);
+
+    if (!ids.length) return [["(sin altoparlantes)", ""]];
+
+    const items = ids.map((id) => {
+      const m = meta[id] || {};
+      const point = String(m.pointName || "ZZZ").toUpperCase();
+      const n = Number(m.n);
+      const label = (Number.isFinite(n) && n > 0)
+        ? ` ${n} ${point}`
+        : ` ${id} ${point}`;
+      return { id, label, point, n: Number.isFinite(n) ? n : Number.POSITIVE_INFINITY };
+    });
+
+    items.sort((a, b) => {
+      if (a.point !== b.point) return a.point.localeCompare(b.point);
+      if (a.n !== b.n) return a.n - b.n;
+      return a.id.localeCompare(b.id);
+    });
+
+    return items.map((x) => [x.label, x.id]);
+  },
+
+  getSelectedId: function () {
+    return this.getFieldValue("ID");
+  },
+
+  getActionValue: function () {
+    return this.getFieldValue("ACTION");
+  },
+};
+
+
+DG.buildSpeakerOptions = function () {
+  // const U = window.parent?.$U || window.$U; // <- clave
+  const meta = window.$U?.speakerMeta || {};
+  // const meta = U?.speakerMeta || {};
+  const ids = Object.keys(meta);
+
+  if (!ids.length) return [["(sin altoparlantes)", ""]];
+
+  const items = ids.map((id) => {
+    const m = meta[id] || {};
+    const point = String(m.pointName || "ZZZ").toUpperCase();
+    const n = Number(m.n);
+
+    // etiqueta bonita:
+    const label =
+      Number.isFinite(n) && n > 0 ? `altoparlante ${n} ${point}` : `altoparlante ${point}`;
+
+    return { id, label, point, n: Number.isFinite(n) ? n : Number.POSITIVE_INFINITY };
+  });
+
+  items.sort((a, b) => {
+    if (a.point !== b.point) return a.point.localeCompare(b.point);
+    if (a.n !== b.n) return a.n - b.n;
+    return a.id.localeCompare(b.id);
+  });
+
+  return items.map((x) => [x.label, x.id]);
+};
+
+Blockly.Blocks["mathlive_clear"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("borrar casillas de MathLive")
+      .appendField(
+        new Blockly.FieldDropdown(() => DG.expressions.buildMathLiveOptions()),
+        "ID"
+      );
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(47);
+    this.setTooltip("Restaura las casillas de una fórmula MathLive a su contenido original.");
+    this.setHelpUrl("");
   }
 };
 
+Blockly.Blocks["mathlive_visibility"] = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField("fórmula MathLive")
+      .appendField(
+        new Blockly.FieldDropdown(() => DG.expressions.buildMathLiveOptions()),
+        "ID"
+      )
+      .appendField(
+        new Blockly.FieldDropdown([
+          ["mostrar", "show"],
+          ["ocultar", "hide"]
+        ]),
+        "ACTION"
+      );
+
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(47);
+    this.setTooltip("Muestra u oculta una fórmula MathLive.");
+    this.setHelpUrl("");
+  }
+};
 
 
 

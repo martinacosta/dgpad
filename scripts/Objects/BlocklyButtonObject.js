@@ -1,52 +1,32 @@
-//************************************************
-//************ BlocklyButton OBJECT ******************
-//************************************************
+
+/**
+ * BlocklyButtonObject
+ * - Unifica métricas (escala) para dibujo y hit-test.
+ * - Mantiene un GAP (px) entre el borde izquierdo del botón y el borde derecho del texto.
+ *   => Evita superposición independiente del tamaño de fuente.
+ */
 function BlocklyButtonObject(_construction, _name, _display_name, _x, _y) {
-  $U.extend(this, new ConstructionObject(_construction, _name)); // Héritage
+  $U.extend(this, new ConstructionObject(_construction, _name));
   var me = this;
   var Cn = _construction;
   var X = _x;
   var Y = _y;
-  var W = 0;
-  var BTN = {
-    x: 0,
-    y: 0,
-    w: 40,
-    h: 35,
-    mouseInside: false
-  };
+  var W = 0; // ancho del label medido en canvas
+  var BTN = { x: 0, y: 0, w: 40, h: 35, mouseInside: false };
   var LABEL = _display_name;
-
 
   this.blocks.setMode(["onprogram", "oninit"], "onprogram");
 
-  this.getAssociatedTools = function() {
-    s = "@callproperty,@dgscriptname,@blockly,@calltrash";
-    return s;
-  };
+  this.getAssociatedTools = function() { return "@callproperty,@dgscriptname,@blockly,@calltrash"; };
+  this.getCode = function() { return "blockly_button"; };
+  this.getFamilyCode = function() { return "blockly_button"; };
 
+  me.run = function() { this.blocks.evaluate("onprogram"); };
 
-  this.getCode = function() {
-    return "blockly_button";
-  };
-  this.getFamilyCode = function() {
-    return "blockly_button";
-  };
-
-  me.run = function() {
-    this.blocks.evaluate("onprogram");
-  };
-
-  me.setLabel = function(_m) {
-    LABEL = _m;
-  };
-  me.getLabel = function() {
-    return LABEL;
-  };
-
+  me.setLabel = function(_m) { LABEL = _m; };
+  me.getLabel = function() { return LABEL; };
 
   var drawButton = function(ctx, x, y, w, h, r) {
-	 
     ctx.beginPath();
     ctx.moveTo(x + r, y);
     ctx.lineTo(x + w - r, y);
@@ -59,6 +39,8 @@ function BlocklyButtonObject(_construction, _name, _display_name, _x, _y) {
     ctx.quadraticCurveTo(x, y, x + r, y);
     ctx.stroke();
     ctx.fill();
+
+    // triángulo "play"
     ctx.beginPath();
     ctx.fillStyle = ctx.strokeStyle;
     var d = 5;
@@ -69,46 +51,54 @@ function BlocklyButtonObject(_construction, _name, _display_name, _x, _y) {
     ctx.fill();
   };
 
+  // --- Métricas unificadas ---
+  var getScale = () => this.getFontSize() * 0.05;
+  var getGap = () => Math.max(8, 12 * getScale()); // por qué: asegura separación visual al escalar
+  var getBtnMetrics = () => {
+    var s = getScale();
+    var w = BTN.w * s;
+    var h = BTN.h * s;
+    var x = X - w;            // botón anclado a X por su borde derecho
+    var y = Y - (40 * s) / 2; // respeta offset vertical original
+    return { x, y, w, h };
+  };
 
   this.paintObject = function(ctx) {
     if (BTN.mouseInside) ctx.strokeStyle = this.getColor().getRGB();
+
     W = ctx.measureText(LABEL).width;
-    BTN.x = X - BTN.w;
-    BTN.y = Y - (40*this.getFontSize()*0.05) / 2;
+
+    var m = getBtnMetrics();
+    BTN.x = m.x; BTN.y = m.y;
+
     var fs = ctx.fillStyle;
     ctx.fillStyle = ctx.strokeStyle;
+
+    // Texto: anclado al borde izquierdo del botón menos GAP (right-aligned)
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
-    ctx.fillText(LABEL, X-60, Y);
+    var GAP = getGap();
+    ctx.fillText(LABEL, m.x - GAP, Y);
+
     ctx.strokeStyle = this.getColor().getRGB();
-    if (BTN.mouseInside) ctx.lineWidth = this.getSize() * 1.5;
-    else ctx.lineWidth = this.getSize();
+    ctx.lineWidth = BTN.mouseInside ? this.getSize() * 1.5 : this.getSize();
     ctx.fillStyle = fs;
-    drawButton(ctx, BTN.x, BTN.y, BTN.w*this.getFontSize()*0.05, BTN.h*this.getFontSize()*0.05, 10);
+
+    drawButton(ctx, m.x, m.y, m.w, m.h, 10);
+
     ctx.textBaseline = "alphabetic";
   };
 
-
-  me.setXY = function(x, y) {
-    X = x;
-    Y = y;
-  };
+  me.setXY = function(x, y) { X = x; Y = y; };
 
   var dragX, dragY, OldX, OldY;
-  this.startDrag = function(_x, _y) {
-    dragX = _x;
-    dragY = _y;
-    OldX = X;
-    OldY = Y;
-  };
-
+  this.startDrag = function(_x, _y) { dragX = _x; dragY = _y; OldX = X; OldY = Y; };
   this.dragTo = function(_x, _y) {
-    this.setXY(OldX + Math.round((_x - dragX) / 10) * 10, OldY + Math.round((_y - dragY) / 10) * 10);
+    this.setXY(OldX + Math.round((_x - dragX) / 10) * 10,
+               OldY + Math.round((_y - dragY) / 10) * 10);
   };
 
-  this.compute = function() {
-
-  };
+  this.compute = function() {};
 
   this.getSource = function(src) {
     var x = Cn.coordsSystem.x(X);
@@ -117,26 +107,32 @@ function BlocklyButtonObject(_construction, _name, _display_name, _x, _y) {
   };
 
   this.insideButton = function(ev) {
-    var mx = this.mouseX(ev),
-      my = this.mouseY(ev);
-    return ((mx > BTN.x) && (mx < BTN.x + BTN.w) && (my > BTN.y) && (my < BTN.y + BTN.h));
+    var mx = this.mouseX(ev), my = this.mouseY(ev);
+    var m = getBtnMetrics();
+    return (mx >= m.x) && (mx <= m.x + m.w) && (my >= m.y) && (my <= m.y + m.h);
   };
 
   this.mouseInside = function(ev) {
-    var mx = this.mouseX(ev),
-      my = this.mouseY(ev);
-    var x = X - BTN.w - 20 - W;
-    var inside = ((mx > x) && (mx < x + W) && (my < Y + this.getFontSize() / 2) && (my > Y - this.getFontSize() / 2));
+    var mx = this.mouseX(ev), my = this.mouseY(ev);
+    var m = getBtnMetrics();
+    var GAP = getGap();
+
+    // Rectángulo del texto basado en el mismo anclaje usado para pintar
+    var textRight = m.x - GAP;
+    var textLeft  = textRight - W;
+    var textTop   = Y - this.getFontSize() / 2;
+    var textBot   = Y + this.getFontSize() / 2;
+
+    var insideText = (mx >= textLeft) && (mx <= textRight) && (my >= textTop) && (my <= textBot);
+
     BTN.mouseInside = this.insideButton(ev);
-    return inside || BTN.mouseInside;
+    return insideText || BTN.mouseInside;
   };
 
   this.setDefaults("blockly_button");
 
   // MEAG start
-  this.getTextCons = function() {
-    return "";
-  }
+  this.getTextCons = function() { return ""; };
   // MEAG end
-
 }
+
